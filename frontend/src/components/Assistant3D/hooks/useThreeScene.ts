@@ -12,6 +12,7 @@ export function useThreeScene(canvasRef: RefObject<HTMLCanvasElement | null>) {
 
     // Scene setup
     const scene = new THREE.Scene()
+    scene.background = new THREE.Color(0x000000) // Black background
     const aspect = window.innerWidth / window.innerHeight
     const camera = new THREE.PerspectiveCamera(75, aspect, 0.1, 1000)
     camera.position.z = 3
