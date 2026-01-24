@@ -1,7 +1,8 @@
 import * as THREE from 'three'
 import { average } from '../utils/noiseUtils'
+import { ANIMATION_CONSTANTS } from '../constants/animationConstants'
 
-export class LiquidGlassEntity {
+export class ParticleSphereEntity {
   mesh: THREE.Points
   material: THREE.PointsMaterial
   geometry: THREE.BufferGeometry
@@ -10,14 +11,16 @@ export class LiquidGlassEntity {
   // Smoothing state for gradual transitions
   private smoothedAudioAmplitude: number = 0
   private smoothedFrequencies: Float32Array = new Float32Array(32)
-  private particleCount: number = 5000
+  private particleCount: number = ANIMATION_CONSTANTS.particles.count
   private basePositions: Float32Array
   private positions: Float32Array
   private spikeRotationTime: number = 0 // Time for spike pattern rotation
+  private autoRotationEnabled: boolean = true // Whether automatic rotation is enabled
+  private isInitialized: boolean = false // Track if geometry has been initialized
 
   constructor() {
     // Create particle positions in sphere formation
-    this.particleCount = 5000
+    this.particleCount = ANIMATION_CONSTANTS.particles.count
     this.positions = new Float32Array(this.particleCount * 3)
     this.basePositions = new Float32Array(this.particleCount * 3)
     
@@ -42,9 +45,12 @@ export class LiquidGlassEntity {
       this.positions[i3 + 2] = z
     }
 
-    // Geometry
+    // Geometry - use the positions array directly
     this.geometry = new THREE.BufferGeometry()
     this.geometry.setAttribute('position', new THREE.BufferAttribute(this.positions, 3))
+    // Ensure geometry is ready to render
+    this.geometry.attributes.position.needsUpdate = true
+    this.geometry.computeBoundingSphere()
 
     // Create circular texture for particles
     const canvas = document.createElement('canvas')
@@ -69,7 +75,7 @@ export class LiquidGlassEntity {
     // White particle material with circular texture
     this.material = new THREE.PointsMaterial({
       color: 0xffffff, // White
-      size: 0.02,
+      size: ANIMATION_CONSTANTS.particles.baseSize,
       transparent: true,
       opacity: 0.8,
       sizeAttenuation: true,
@@ -83,8 +89,12 @@ export class LiquidGlassEntity {
   }
 
   update(frequencyData: Uint8Array<ArrayBuffer> | null) {
-    // Smoothing factor (higher = faster response, lower = smoother)
-    const smoothingFactor = 0.30 // Smooth transitions
+    // Always update spike rotation time for continuous animation
+    if (!frequencyData) {
+      // Continue rotation at base speed when no audio
+      const baseRotationSpeed = ANIMATION_CONSTANTS.spikeRotation.baseSpeed
+      this.spikeRotationTime += baseRotationSpeed
+    }
 
     if (frequencyData) {
       // Extract audio features
@@ -95,7 +105,9 @@ export class LiquidGlassEntity {
 
       // Smooth audio amplitude
       const targetAmplitude = volume
-      this.smoothedAudioAmplitude += (targetAmplitude - this.smoothedAudioAmplitude) * smoothingFactor
+      this.smoothedAudioAmplitude +=
+        (targetAmplitude - this.smoothedAudioAmplitude) *
+        ANIMATION_CONSTANTS.audioSmoothing.factor
       
       // Update spike rotation time - speed increases with voice volume
       const baseRotationSpeed = 0.005 // Base rotation speed
@@ -105,15 +117,20 @@ export class LiquidGlassEntity {
       // Smooth frequency data array
       for (let i = 0; i < 32; i++) {
         const targetFreq = frequencyData[i] / 255.0
-        this.smoothedFrequencies[i] += (targetFreq - this.smoothedFrequencies[i]) * smoothingFactor
+        this.smoothedFrequencies[i] +=
+          (targetFreq - this.smoothedFrequencies[i]) *
+          ANIMATION_CONSTANTS.audioSmoothing.factor
       }
-      
+
       // Deformation intensity based on vocal range
-      const deformationIntensity = Math.max(midFreq * 1.5, volume * 0.8)
+      const deformationIntensity = Math.max(
+        midFreq * ANIMATION_CONSTANTS.deformation.intensityMultiplier,
+        volume * ANIMATION_CONSTANTS.deformation.volumeMultiplier,
+      )
       
       // Create spike centers distributed across the sphere based on frequency bands
       // Each frequency band creates a spike at a specific location
-      const numSpikes = 20 // Number of spike centers
+      const numSpikes = ANIMATION_CONSTANTS.spikes.count
       const spikeCenters: Array<{ pos: THREE.Vector3; intensity: number }> = []
       
       // Use Fibonacci sphere distribution for even spacing
@@ -170,7 +187,7 @@ export class LiquidGlassEntity {
           const angularDistance = Math.acos(Math.max(-1, Math.min(1, dot))) // Clamp to avoid NaN
           
           // Smooth falloff function for spike shape (smoothstep-like)
-          const spikeRadius = 0.6 // Angular radius of influence for each spike
+          const spikeRadius = ANIMATION_CONSTANTS.spikes.radius
           const normalizedDist = angularDistance / spikeRadius
           let falloff = 0
           if (normalizedDist < 1) {
@@ -192,8 +209,9 @@ export class LiquidGlassEntity {
         if (totalSpikeInfluence > 0) {
           // Normalize weighted direction and project onto normal
           weightedDirection.normalize()
-          const displacementAmount = totalSpikeInfluence * 0.35 // Spike height multiplier
-          const maxSpikeHeight = 0.4 // Maximum spike height
+          const displacementAmount =
+            totalSpikeInfluence * ANIMATION_CONSTANTS.spikes.heightMultiplier
+          const maxSpikeHeight = ANIMATION_CONSTANTS.spikes.maxHeight
           const displacement = Math.min(displacementAmount, maxSpikeHeight)
           
           // Displace along normal (outward)
@@ -211,37 +229,66 @@ export class LiquidGlassEntity {
       this.geometry.attributes.position.needsUpdate = true
 
       // Particle size based on high frequencies
-      this.material.size = 0.02 + highFreq * 0.03
+      this.material.size =
+        ANIMATION_CONSTANTS.particles.baseSize +
+        highFreq * ANIMATION_CONSTANTS.particles.sizeVariation
     } else {
       // Fade out audio effects when no input
-      const fadeFactor = 0.80
+      const fadeFactor = ANIMATION_CONSTANTS.audioSmoothing.fadeFactor
       this.smoothedAudioAmplitude *= fadeFactor
-      
-      // Continue rotation at base speed when no audio
-      const baseRotationSpeed = 0.02
-      this.spikeRotationTime += baseRotationSpeed
       
       for (let i = 0; i < 32; i++) {
         this.smoothedFrequencies[i] *= fadeFactor
       }
       
-      // Return particles to base positions
+      // Return particles to base positions (with smooth interpolation)
       const positions = this.geometry.attributes.position.array as Float32Array
-      for (let i = 0; i < this.particleCount; i++) {
-        const i3 = i * 3
-        positions[i3] += (this.basePositions[i3] - positions[i3]) * 0.1
-        positions[i3 + 1] += (this.basePositions[i3 + 1] - positions[i3 + 1]) * 0.1
-        positions[i3 + 2] += (this.basePositions[i3 + 2] - positions[i3 + 2]) * 0.1
+      
+      // On first update without audio, ensure positions are set to base
+      if (!this.isInitialized) {
+        for (let i = 0; i < this.particleCount; i++) {
+          const i3 = i * 3
+          positions[i3] = this.basePositions[i3]
+          positions[i3 + 1] = this.basePositions[i3 + 1]
+          positions[i3 + 2] = this.basePositions[i3 + 2]
+        }
+        this.isInitialized = true
+      } else {
+        for (let i = 0; i < this.particleCount; i++) {
+          const i3 = i * 3
+          const baseX = this.basePositions[i3]
+          const baseY = this.basePositions[i3 + 1]
+          const baseZ = this.basePositions[i3 + 2]
+          
+          // Smoothly return to base position
+          const lerpFactor = 0.1
+          positions[i3] += (baseX - positions[i3]) * lerpFactor
+          positions[i3 + 1] += (baseY - positions[i3 + 1]) * lerpFactor
+          positions[i3 + 2] += (baseZ - positions[i3 + 2]) * lerpFactor
+        }
       }
+      
+      // Always mark as needing update to ensure rendering continues
       this.geometry.attributes.position.needsUpdate = true
       
       this.mesh.scale.lerp(new THREE.Vector3(1, 1, 1), 0.05)
-      this.material.size = 0.02
+      this.material.size = ANIMATION_CONSTANTS.particles.baseSize
+    }
+    
+    // Mark as initialized after first update
+    if (!this.isInitialized) {
+      this.isInitialized = true
     }
 
-    // Much slower rotation
-    this.mesh.rotation.y += 0.0003
-    this.mesh.rotation.x += 0.00015
+    // Much slower rotation (only if auto-rotation is enabled)
+    if (this.autoRotationEnabled) {
+      this.mesh.rotation.y += ANIMATION_CONSTANTS.autoRotation.ySpeed
+      this.mesh.rotation.x += ANIMATION_CONSTANTS.autoRotation.xSpeed
+    }
+  }
+
+  setAutoRotation(enabled: boolean) {
+    this.autoRotationEnabled = enabled
   }
 
   dispose() {

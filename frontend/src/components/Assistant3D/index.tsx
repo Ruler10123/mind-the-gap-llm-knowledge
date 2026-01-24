@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react'
 import AssistantCanvas from './AssistantCanvas'
-import AssistantControls from './AssistantControls'
+import AssistantInterface from './AssistantInterface'
 import { useAudioAnalyzer } from './hooks/useAudioAnalyzer'
 
 export default function Assistant3D() {
   const { isActive, error, initAudio, stopAudio, getFrequencyData } =
     useAudioAnalyzer()
   const [webGLSupported, setWebGLSupported] = useState(true)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   // Check WebGL support
   useEffect(() => {
@@ -26,6 +27,16 @@ export default function Assistant3D() {
     }
   }
 
+  const handleSubmitPrompt = async (text: string) => {
+    if (!text.trim()) return
+    setIsSubmitting(true)
+    // TODO: Connect to backend API
+    console.log('Prompt submitted:', text)
+    // Simulate API call
+    await new Promise((resolve) => setTimeout(resolve, 1000))
+    setIsSubmitting(false)
+  }
+
   if (!webGLSupported) {
     return (
       <div className="w-full h-full flex items-center justify-center bg-gray-900 text-white">
@@ -42,10 +53,12 @@ export default function Assistant3D() {
   return (
     <div className="relative w-full h-full">
       <AssistantCanvas getFrequencyData={getFrequencyData} />
-      <AssistantControls
+      <AssistantInterface
         isAudioActive={isActive}
         onToggleAudio={handleToggleAudio}
         error={error}
+        onSubmitPrompt={handleSubmitPrompt}
+        isSubmitting={isSubmitting}
       />
     </div>
   )
