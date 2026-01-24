@@ -7,7 +7,8 @@ import {
 } from './entities/ParticleSphereEntity'
 import { PostProcessingManager } from './entities/PostProcessing'
 import { ANIMATION_CONSTANTS } from './constants/animationConstants'
-import type {SphereMode} from './entities/ParticleSphereEntity';
+// DEPRECATED: Mode system removed - only uniform white sphere mode now
+// import type {SphereMode} from './entities/ParticleSphereEntity';
 
 interface AssistantCanvasProps {
   getFrequencyData: () => Uint8Array<ArrayBuffer> | null
@@ -21,7 +22,9 @@ export default function AssistantCanvas({
   const [postProcessing, setPostProcessing] =
     useState<PostProcessingManager | null>(null)
   const [isReady, setIsReady] = useState(false)
-  const [mode, setMode] = useState<SphereMode>('earth')
+  const [passiveMode, setPassiveMode] = useState(false)
+  // DEPRECATED: Mode system removed
+  // const [mode, setMode] = useState<SphereMode>('earth')
 
   // Mouse drag rotation state
   const isDraggingRef = useRef(false)
@@ -92,15 +95,15 @@ export default function AssistantCanvas({
     return () => clearInterval(interval)
   }, [entity])
 
-  // Handle mode changes
-  useEffect(() => {
-    if (!entity) return
-    entity.setMode(mode)
-  }, [entity, mode])
+  // DEPRECATED: Mode switching removed - only uniform white sphere mode
+  // useEffect(() => {
+  //   if (!entity) return
+  //   entity.setMode(mode)
+  // }, [entity, mode])
 
-  const handleToggleMode = () => {
-    setMode((prev) => (prev === 'earth' ? 'default' : 'earth'))
-  }
+  // const handleToggleMode = () => {
+  //   setMode((prev) => (prev === 'earth' ? 'default' : 'earth'))
+  // }
 
   // Mouse drag handlers for rotation
   useEffect(() => {
@@ -216,6 +219,7 @@ export default function AssistantCanvas({
     manualRotationRef,
     targetRotationRef,
     isDraggingRef,
+    passiveMode,
   )
 
   return (
@@ -226,13 +230,13 @@ export default function AssistantCanvas({
           <div className="text-white text-lg">Loading 3D Assistant...</div>
         </div>
       )}
-      {/* Dev UI for mode toggle */}
+      {/* Passive mode toggle */}
       <div className="absolute bottom-4 left-4 flex gap-2">
         <button
-          onClick={handleToggleMode}
+          onClick={() => setPassiveMode((prev) => !prev)}
           className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg backdrop-blur-sm transition-colors border border-white/20"
         >
-          Mode: {mode === 'earth' ? 'Earth' : 'Default'}
+          Mode: {passiveMode ? 'Passive' : 'Normal'}
         </button>
       </div>
     </>

@@ -63,4 +63,9 @@ export const ANIMATION_CONSTANTS = {
   nearestNeighbor: {
     gridResolution: 20, // Spatial hash grid resolution (20×20)
   },
+
+  // Passive mode transitions
+  passiveMode: {
+    transitionSpeed: 0.05, // Lerp factor for smooth transitions (0-1, higher = faster)
+  },
 } as const
