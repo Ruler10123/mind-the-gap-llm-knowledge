@@ -1,4 +1,9 @@
-import { BloomEffect, EffectComposer, EffectPass, RenderPass  } from 'postprocessing'
+import {
+  BloomEffect,
+  EffectComposer,
+  EffectPass,
+  RenderPass,
+} from 'postprocessing'
 import type * as THREE from 'three'
 
 export class PostProcessingManager {

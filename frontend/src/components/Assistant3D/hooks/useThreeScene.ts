@@ -1,6 +1,6 @@
-import {  useEffect, useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import * as THREE from 'three'
-import type {RefObject} from 'react';
+import type { RefObject } from 'react'
 
 export function useThreeScene(canvasRef: RefObject<HTMLCanvasElement | null>) {
   const sceneRef = useRef<THREE.Scene | undefined>(undefined)

@@ -1,8 +1,8 @@
 import { useEffect } from 'react'
 import * as THREE from 'three'
+import { ANIMATION_CONSTANTS } from '../constants/animationConstants'
 import type { ParticleSphereEntity } from '../entities/ParticleSphereEntity'
 import type { PostProcessingManager } from '../entities/PostProcessing'
-import { ANIMATION_CONSTANTS } from '../constants/animationConstants'
 
 export function useAssistantAnimation(
   scene: THREE.Scene | undefined,

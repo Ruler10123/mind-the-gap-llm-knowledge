@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from '@tanstack/react-router'
-import { Menu, X, Home, Orbit, Settings } from 'lucide-react'
+import { Home, Menu, Orbit, Settings, X } from 'lucide-react'
 
 export default function AssistantMenu() {
   const [isOpen, setIsOpen] = useState(false)
@@ -65,7 +65,10 @@ export default function AssistantMenu() {
                 'flex items-center gap-3 p-3 rounded-xl bg-cyan-500/20 border border-cyan-500/30 transition-all group',
             }}
           >
-            <Home size={20} className="text-white/70 group-hover:text-white transition-colors" />
+            <Home
+              size={20}
+              className="text-white/70 group-hover:text-white transition-colors"
+            />
             <span className="font-medium text-white/90 group-hover:text-white transition-colors">
               Home
             </span>
@@ -80,7 +83,10 @@ export default function AssistantMenu() {
                 'flex items-center gap-3 p-3 rounded-xl bg-cyan-500/20 border border-cyan-500/30 transition-all group',
             }}
           >
-            <Orbit size={20} className="text-white/70 group-hover:text-white transition-colors" />
+            <Orbit
+              size={20}
+              className="text-white/70 group-hover:text-white transition-colors"
+            />
             <span className="font-medium text-white/90 group-hover:text-white transition-colors">
               Assistant
             </span>
@@ -94,7 +100,10 @@ export default function AssistantMenu() {
             }}
             className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/10 transition-all group w-full text-left"
           >
-            <Settings size={20} className="text-white/70 group-hover:text-white transition-colors" />
+            <Settings
+              size={20}
+              className="text-white/70 group-hover:text-white transition-colors"
+            />
             <span className="font-medium text-white/90 group-hover:text-white transition-colors">
               Settings
             </span>

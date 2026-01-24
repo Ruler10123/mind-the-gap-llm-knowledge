@@ -1,9 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
 import { useThreeScene } from './hooks/useThreeScene'
 import { useAssistantAnimation } from './hooks/useAssistantAnimation'
-import { ParticleSphereEntity } from './entities/ParticleSphereEntity'
+import {
+  ParticleSphereEntity
+  
+} from './entities/ParticleSphereEntity'
 import { PostProcessingManager } from './entities/PostProcessing'
 import { ANIMATION_CONSTANTS } from './constants/animationConstants'
+import type {SphereMode} from './entities/ParticleSphereEntity';
 
 interface AssistantCanvasProps {
   getFrequencyData: () => Uint8Array<ArrayBuffer> | null
@@ -17,7 +21,8 @@ export default function AssistantCanvas({
   const [postProcessing, setPostProcessing] =
     useState<PostProcessingManager | null>(null)
   const [isReady, setIsReady] = useState(false)
-  
+  const [mode, setMode] = useState<SphereMode>('earth')
+
   // Mouse drag rotation state
   const isDraggingRef = useRef(false)
   const lastMousePosRef = useRef({ x: 0, y: 0 })
@@ -25,7 +30,9 @@ export default function AssistantCanvas({
   const manualRotationRef = useRef({ x: 0, y: 0 })
   const velocityRef = useRef({ x: 0, y: 0 })
   const targetRotationRef = useRef({ x: 0, y: 0 })
-  const velocityHistoryRef = useRef<Array<{ x: number; y: number; time: number }>>([])
+  const velocityHistoryRef = useRef<
+    Array<{ x: number; y: number; time: number }>
+  >([])
 
   const { scene, camera, renderer } = useThreeScene(canvasRef)
 
@@ -71,7 +78,7 @@ export default function AssistantCanvas({
   // Sync manual rotation with entity rotation when auto-rotation is active
   useEffect(() => {
     if (!entity) return
-    
+
     const interval = setInterval(() => {
       if (!isDraggingRef.current) {
         // Sync manual rotation with entity rotation when not dragging
@@ -81,9 +88,19 @@ export default function AssistantCanvas({
         }
       }
     }, 16) // ~60fps sync
-    
+
     return () => clearInterval(interval)
   }, [entity])
+
+  // Handle mode changes
+  useEffect(() => {
+    if (!entity) return
+    entity.setMode(mode)
+  }, [entity, mode])
+
+  const handleToggleMode = () => {
+    setMode((prev) => (prev === 'earth' ? 'default' : 'earth'))
+  }
 
   // Mouse drag handlers for rotation
   useEffect(() => {
@@ -117,13 +134,15 @@ export default function AssistantCanvas({
       const deltaY = e.clientY - lastMousePosRef.current.y
 
       // Update target rotation (smooth accumulation) - only horizontal (y-axis)
-      targetRotationRef.current.y += deltaX * ANIMATION_CONSTANTS.dragRotation.speed
+      targetRotationRef.current.y +=
+        deltaX * ANIMATION_CONSTANTS.dragRotation.speed
       // X-axis rotation is not affected by mouse drag
 
       // Calculate instantaneous velocity for momentum (only horizontal)
       if (deltaTime > 0 && deltaTime < 0.1) {
         // Only use recent, valid time deltas
-        const instantVelocityY = (deltaX * ANIMATION_CONSTANTS.dragRotation.speed) / deltaTime
+        const instantVelocityY =
+          (deltaX * ANIMATION_CONSTANTS.dragRotation.speed) / deltaTime
         const instantVelocityX = 0 // No vertical rotation from mouse
 
         // Store velocity history (keep last 5 samples for smoothing)
@@ -207,6 +226,15 @@ export default function AssistantCanvas({
           <div className="text-white text-lg">Loading 3D Assistant...</div>
         </div>
       )}
+      {/* Dev UI for mode toggle */}
+      <div className="absolute bottom-4 left-4 flex gap-2">
+        <button
+          onClick={handleToggleMode}
+          className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg backdrop-blur-sm transition-colors border border-white/20"
+        >
+          Mode: {mode === 'earth' ? 'Earth' : 'Default'}
+        </button>
+      </div>
     </>
   )
 }
