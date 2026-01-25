@@ -20,6 +20,7 @@
     "@tanstack/react-router-devtools": "^1.132.0",
     "@tanstack/router-plugin": "^1.132.0",
     "@types/three": "^0.182.0",
+    "framer-motion": "^11.15.0",
     "lucide-react": "^0.545.0",
     "postprocessing": "^6.38.2",
     "react": "^19.2.0",

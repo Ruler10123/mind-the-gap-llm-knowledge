@@ -23,7 +23,11 @@
       "Bash(findstr:*)",
       "Bash(test:*)",
       "Bash(pnpm:*)",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(/c/Users/lucas/AppData/Roaming/npm/pnpm install)",
+      "Bash(cmd.exe /c \"pnpm install\")",
+      "Bash(pnpm.cmd install:*)",
+      "Bash(ls:*)"
     ]
   }
 }
