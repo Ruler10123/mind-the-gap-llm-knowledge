@@ -75,3 +75,12 @@ class DoneEvent(BaseEvent):
     """Processing complete."""
 
     type: Literal["done"] = "done"
+
+
+class UIActionEvent(BaseEvent):
+    """UI action to be handled by frontend."""
+
+    type: Literal["ui_action"] = "ui_action"
+    action: str  # e.g. "OPEN_MODAL"
+    modal_id: str
+    payload: dict[str, Any]

@@ -1,13 +1,23 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import AssistantCanvas from './AssistantCanvas'
 import AssistantInterface from './AssistantInterface'
+import { MapModal } from '@/components/MapModal'
 import { useAudioAnalyzer } from './hooks/useAudioAnalyzer'
+
+export interface MapModalPayload {
+  title: string
+  imageSrc: string
+  altText: string
+  notes?: string[]
+}
 
 export default function Assistant3D() {
   const { isActive, error, initAudio, stopAudio, getFrequencyData } =
     useAudioAnalyzer()
   const [webGLSupported, setWebGLSupported] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [modalData, setModalData] = useState<MapModalPayload | null>(null)
+  const wsRef = useRef<WebSocket | null>(null)
 
   // Check WebGL support
   useEffect(() => {
@@ -27,14 +37,58 @@ export default function Assistant3D() {
     }
   }
 
-  const handleSubmitPrompt = async (text: string) => {
+  const handleSubmitPrompt = (text: string) => {
     if (!text.trim()) return
     setIsSubmitting(true)
-    // TODO: Connect to backend API
-    console.log('Prompt submitted:', text)
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-    setIsSubmitting(false)
+
+    // Close existing connection if any
+    if (wsRef.current) {
+      wsRef.current.close()
+    }
+
+    const ws = new WebSocket('ws://localhost:8000/ws')
+    wsRef.current = ws
+
+    ws.onopen = () => {
+      ws.send(JSON.stringify({ message: text }))
+    }
+
+    ws.onmessage = (event) => {
+      try {
+        const msg = JSON.parse(event.data)
+
+        // Handle UI action events (modal)
+        if (msg.type === 'ui_action' && msg.action === 'OPEN_MODAL') {
+          setModalData(msg.payload)
+        }
+
+        // Handle done event
+        if (msg.type === 'done') {
+          setIsSubmitting(false)
+        }
+
+        // Handle error event
+        if (msg.type === 'error') {
+          console.error('WebSocket error:', msg.message)
+          setIsSubmitting(false)
+        }
+      } catch (e) {
+        console.error('Failed to parse message:', e)
+      }
+    }
+
+    ws.onerror = () => {
+      console.error('WebSocket connection error')
+      setIsSubmitting(false)
+    }
+
+    ws.onclose = () => {
+      wsRef.current = null
+    }
+  }
+
+  const handleCloseModal = () => {
+    setModalData(null)
   }
 
   if (!webGLSupported) {
@@ -59,6 +113,14 @@ export default function Assistant3D() {
         error={error}
         onSubmitPrompt={handleSubmitPrompt}
         isSubmitting={isSubmitting}
+      />
+      <MapModal
+        isOpen={modalData !== null}
+        onClose={handleCloseModal}
+        title={modalData?.title ?? ''}
+        imageSrc={modalData?.imageSrc ?? ''}
+        altText={modalData?.altText ?? ''}
+        notes={modalData?.notes}
       />
     </div>
   )
