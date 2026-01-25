@@ -15,6 +15,12 @@ type ModalState = {
   notes?: string[];
   flightData?: any; // For flight details modal
   destinationData?: any; // For destination info modal
+  rebookingData?: {
+    currentFlight: any;
+    isRefundable: boolean;
+    alternatives: any[];
+  };
+  overbookingOffer?: any;
 };
 
 export function useNavigationHandler() {
@@ -80,6 +86,20 @@ export function useNavigationHandler() {
               isOpen: true,
               modalId: "DESTINATION_INFO",
               destinationData: payload?.destinationData,
+            });
+          } else if (modalId === "REBOOKING") {
+            console.log("[NavigationHandler] Opening rebooking modal");
+            setModalState({
+              isOpen: true,
+              modalId: "REBOOKING",
+              rebookingData: payload?.rebookingData,
+            });
+          } else if (modalId === "OVERBOOKING") {
+            console.log("[NavigationHandler] Opening overbooking modal");
+            setModalState({
+              isOpen: true,
+              modalId: "OVERBOOKING",
+              overbookingOffer: payload?.overbookingOffer,
             });
           } else {
             console.warn(`[NavigationHandler] Unknown modal ID: ${modalId}`);

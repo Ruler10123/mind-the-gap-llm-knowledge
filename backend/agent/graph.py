@@ -500,6 +500,175 @@ def show_destination_info(destination: str) -> dict:
 
 
 @tool
+def show_flight_delay(
+    flight_number: str = "AA 2847",
+    delay_minutes: int = 90,
+    reason: str = "Weather conditions",
+    original_time: str = "3:00 PM",
+    new_time: str = "4:30 PM"
+) -> dict:
+    """Show flight delay info when user asks about delays.
+    IMPORTANT: Provide brief spoken response acknowledging the delay."""
+
+    # Determine options based on delay duration
+    options = [{"id": "wait", "label": "Wait for flight", "description": "Stay at gate"}]
+    if delay_minutes >= 60:
+        options.append({"id": "rebook", "label": "View rebooking options", "description": "Find alternative flight"})
+    if delay_minutes >= 180:
+        options.append({"id": "compensation", "label": "Request compensation", "description": "File claim"})
+
+    return {
+        "component_type": "flight_delay",
+        "data": {
+            "flightNumber": flight_number,
+            "delayMinutes": delay_minutes,
+            "reason": reason,
+            "originalTime": original_time,
+            "newTime": new_time,
+            "resolutionOptions": options,
+        }
+    }
+
+
+@tool
+def show_flight_cancellation(
+    flight_number: str = "AA 2847",
+    reason: str = "Aircraft mechanical issue",
+    automatic_rebooking: bool = True
+) -> dict:
+    """Show cancellation notice when user asks or flight is cancelled.
+    IMPORTANT: Provide spoken explanation and next steps."""
+
+    return {
+        "component_type": "flight_cancellation",
+        "data": {
+            "flightNumber": flight_number,
+            "reason": reason,
+            "automaticRebooking": automatic_rebooking,
+            "nextSteps": [
+                "We're automatically rebooking you on the next available flight",
+                "You can view alternatives and select your preferred option",
+                "Compensation may be available based on circumstances"
+            ]
+        }
+    }
+
+
+@tool
+def show_overbooking_offer(
+    reason: str = "Flight Overbooked",
+    compensation_type: str = "choice",  # "both", "choice", "cash", "credits"
+    cash_amount: int = 400,
+    credits_amount: int = 600
+) -> dict:
+    """Show overbooking offer modal when volunteers needed.
+    IMPORTANT: Explain the offer and compensation options."""
+
+    import time
+
+    # Mock flight data (in production, fetch from DB)
+    original = {
+        "flightNumber": "AA 2847",
+        "date": "Jan 25, 2026",
+        "departureTime": "3:00 PM",
+        "arrivalTime": "4:30 PM",
+        "origin": {"code": "DFW", "city": "Dallas"},
+        "destination": {"code": "LAX", "city": "Los Angeles"},
+        "gate": "D24",
+    }
+    new = {
+        "flightNumber": "AA 2849",
+        "date": "Jan 25, 2026",
+        "departureTime": "5:30 PM",
+        "arrivalTime": "7:00 PM",
+        "origin": {"code": "DFW", "city": "Dallas"},
+        "destination": {"code": "LAX", "city": "Los Angeles"},
+        "gate": "D26",
+    }
+
+    return {
+        "component_type": "overbooking_offer",
+        "data": {
+            "id": f"ob_{int(time.time())}",
+            "reason": reason,
+            "reasonDetail": "More passengers checked in than available seats",
+            "originalFlight": original,
+            "newFlight": new,
+            "compensation": {
+                "type": compensation_type,
+                "cashAmount": cash_amount,
+                "creditsAmount": credits_amount,
+                "creditsExpiryMonths": 12,
+            },
+            "expiresAt": "5 minutes",
+        }
+    }
+
+
+@tool
+def show_rebooking_options(
+    flight_number: str = "AA 2847",
+    is_refundable: bool = False,
+    reason: str = "passenger_request"
+) -> dict:
+    """Show rebooking modal when user wants to reschedule.
+    IMPORTANT: Introduce the rebooking options available."""
+
+    # Mock current flight
+    current = {
+        "flightNumber": flight_number,
+        "departureTime": "3:00 PM",
+        "arrivalTime": "4:30 PM",
+        "origin": {"code": "DFW", "city": "Dallas"},
+        "destination": {"code": "LAX", "city": "Los Angeles"},
+    }
+
+    # Mock alternatives (in production, call flight search API)
+    alternatives = [
+        {
+            "id": "alt_1",
+            "flightNumber": "AA 2849",
+            "departureDate": "Jan 25, 2026",
+            "departureTime": "5:30 PM",
+            "arrivalTime": "7:00 PM",
+            "duration": "3h 30m",
+            "status": "On Time",
+            "origin": {"code": "DFW", "city": "Dallas"},
+            "destination": {"code": "LAX", "city": "Los Angeles"},
+            "price": 0,
+            "seats": 12,
+            "stops": 0,
+            "aircraft": "Boeing 737",
+        },
+        {
+            "id": "alt_2",
+            "flightNumber": "AA 2851",
+            "departureDate": "Jan 25, 2026",
+            "departureTime": "8:00 PM",
+            "arrivalTime": "9:30 PM",
+            "duration": "3h 30m",
+            "status": "On Time",
+            "origin": {"code": "DFW", "city": "Dallas"},
+            "destination": {"code": "LAX", "city": "Los Angeles"},
+            "price": 0,
+            "seats": 8,
+            "stops": 0,
+            "aircraft": "Airbus A321",
+        },
+    ]
+
+    return {
+        "component_type": "rebooking_options",
+        "data": {
+            "currentFlight": current,
+            "isRefundable": is_refundable,
+            "reason": reason,
+            "alternatives": alternatives,
+        }
+    }
+
+
+@tool
 def search_knowledge_base(query: str) -> str:
     """Search airport knowledge base for policies, procedures, services, and facilities information.
     Use this when the user asks about airport rules, baggage policies, security procedures, available services, or facility information."""
@@ -524,7 +693,12 @@ def search_knowledge_base(query: str) -> str:
         return f"Unable to search knowledge base: {str(e)}"
 
 
-tools = [get_current_time, add, multiply, divide, show_flight_details, show_weather, show_map, show_destination_info, search_knowledge_base]
+tools = [
+    get_current_time, add, multiply, divide,
+    show_flight_details, show_weather, show_map, show_destination_info,
+    show_flight_delay, show_flight_cancellation, show_overbooking_offer, show_rebooking_options,
+    search_knowledge_base
+]
 tools_by_name = {t.name: t for t in tools}
 
 
@@ -542,10 +716,14 @@ You have access to callable tools (nodes):
 - show_weather: use when the user asks about weather, temperature, or conditions. Location can be "destination"/"LAX"/"Los Angeles" for destination, "here"/"Dallas"/"DFW" for current location, "both" for both, or any city name. When showing destination weather, advice is automatically included.
 - show_map: use when the user asks for directions or where to find gates (A28, B9, C43, D12), restrooms, or customer service. Valid destinations: RESTROOM, CUSTOMER_SERVICE, A28, B9, C43, D12
 - show_destination_info: use when the user asks about specific airport destinations, lounges, restaurants, shops, or terminal information. Valid destinations: ADMIRALS_CLUB, CENTURION_LOUNGE, FOOD_COURT, DUTY_FREE, BAGGAGE_CLAIM, TERMINAL_A, TERMINAL_B, TERMINAL_C
+- show_flight_delay: when user asks about delays or flight timing changes
+- show_flight_cancellation: when user asks about cancellations or their flight is cancelled
+- show_overbooking_offer: when airline needs volunteers due to overbooking
+- show_rebooking_options: when user wants to reschedule, change flights, or rebook
 - search_knowledge_base: use when the user asks about airport policies, procedures, baggage rules, security guidelines, available services, or facility information
 
-CRITICAL: After calling show_flight_details, show_weather, show_map, or show_destination_info, you MUST provide a brief spoken response (1-2 sentences) to accompany the visual component.
-For example: "Here are your flight details" or "Here's the weather in Dallas." or "Here are directions to Gate A28. Follow the highlighted path." or "Here's information about the Admirals Club lounge."
+CRITICAL: After calling show_flight_details, show_weather, show_map, show_destination_info, show_flight_delay, show_flight_cancellation, show_overbooking_offer, or show_rebooking_options, you MUST provide a brief spoken response (1-2 sentences) to accompany the visual component.
+For example: "Here are your flight details" or "Here's the weather in Dallas." or "Here are directions to Gate A28. Follow the highlighted path." or "Here's information about the Admirals Club lounge." or "Your flight is delayed by 90 minutes" or "I'm showing you alternative flights."
 
 Call the appropriate tool when it helps answer the user. Otherwise reply directly. Keep replies clear and concise and do not use markdown formatting."""
 

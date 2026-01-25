@@ -4,6 +4,8 @@ import { Send, Mic, MapPin, Info, Clock, Navigation } from 'lucide-react'
 import { StreamingText } from '../StreamingText'
 import { FlightDetailsCard } from '../FlightDetailsCard'
 import { WeatherWidget } from '../WeatherWidget'
+import FlightDelayInfo from './FlightDelayInfo'
+import FlightCancellationInfo from './FlightCancellationInfo'
 import { renderMarkdown } from '@/utils/markdown'
 
 interface InlineChatProps {
@@ -342,6 +344,22 @@ export function InlineChat({
                           )}
                         </div>
                       </motion.div>
+                    )}
+                    {message.componentType === 'flight_delay' && message.componentData && (
+                      <div className="w-full max-w-2xl">
+                        <FlightDelayInfo
+                          {...message.componentData}
+                          sendMessage={sendMessage}
+                        />
+                      </div>
+                    )}
+                    {message.componentType === 'flight_cancellation' && message.componentData && (
+                      <div className="w-full max-w-2xl">
+                        <FlightCancellationInfo
+                          {...message.componentData}
+                          sendMessage={sendMessage}
+                        />
+                      </div>
                     )}
                   </div>
                 )

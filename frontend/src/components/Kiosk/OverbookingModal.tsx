@@ -15,8 +15,8 @@ import type { OverbookingOffer, FlightDetails } from './types'
 interface OverbookingModalProps {
   isOpen: boolean
   offer: OverbookingOffer | null
-  onAccept: (offerId: string, selectedCompensation?: 'cash' | 'credits') => void
-  onDecline: (offerId: string) => void
+  onAccept: (offerId?: string, selectedCompensation?: 'cash' | 'credits') => void
+  onDecline: (offerId?: string) => void
   onClose: () => void
 }
 
