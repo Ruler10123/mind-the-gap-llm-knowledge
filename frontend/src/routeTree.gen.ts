@@ -10,11 +10,19 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as KioskRouteImport } from './routes/kiosk'
+import { Route as FlightsRouteImport } from './routes/flights'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as RebookingIndexRouteImport } from './routes/rebooking/index'
+import { Route as PathfindingIndexRouteImport } from './routes/pathfinding/index'
 
 const KioskRoute = KioskRouteImport.update({
   id: '/kiosk',
   path: '/kiosk',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FlightsRoute = FlightsRouteImport.update({
+  id: '/flights',
+  path: '/flights',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -22,31 +30,53 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RebookingIndexRoute = RebookingIndexRouteImport.update({
+  id: '/rebooking/',
+  path: '/rebooking/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PathfindingIndexRoute = PathfindingIndexRouteImport.update({
+  id: '/pathfinding/',
+  path: '/pathfinding/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/flights': typeof FlightsRoute
   '/kiosk': typeof KioskRoute
+  '/pathfinding/': typeof PathfindingIndexRoute
+  '/rebooking/': typeof RebookingIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/flights': typeof FlightsRoute
   '/kiosk': typeof KioskRoute
+  '/pathfinding': typeof PathfindingIndexRoute
+  '/rebooking': typeof RebookingIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/flights': typeof FlightsRoute
   '/kiosk': typeof KioskRoute
+  '/pathfinding/': typeof PathfindingIndexRoute
+  '/rebooking/': typeof RebookingIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/kiosk'
+  fullPaths: '/' | '/flights' | '/kiosk' | '/pathfinding/' | '/rebooking/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/kiosk'
-  id: '__root__' | '/' | '/kiosk'
+  to: '/' | '/flights' | '/kiosk' | '/pathfinding' | '/rebooking'
+  id: '__root__' | '/' | '/flights' | '/kiosk' | '/pathfinding/' | '/rebooking/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  FlightsRoute: typeof FlightsRoute
   KioskRoute: typeof KioskRoute
+  PathfindingIndexRoute: typeof PathfindingIndexRoute
+  RebookingIndexRoute: typeof RebookingIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -58,6 +88,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof KioskRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/flights': {
+      id: '/flights'
+      path: '/flights'
+      fullPath: '/flights'
+      preLoaderRoute: typeof FlightsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -65,12 +102,29 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/rebooking/': {
+      id: '/rebooking/'
+      path: '/rebooking'
+      fullPath: '/rebooking/'
+      preLoaderRoute: typeof RebookingIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pathfinding/': {
+      id: '/pathfinding/'
+      path: '/pathfinding'
+      fullPath: '/pathfinding/'
+      preLoaderRoute: typeof PathfindingIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  FlightsRoute: FlightsRoute,
   KioskRoute: KioskRoute,
+  PathfindingIndexRoute: PathfindingIndexRoute,
+  RebookingIndexRoute: RebookingIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
