@@ -132,6 +132,158 @@ def set_rag_service(rag_service):
 
 
 @tool
+def show_destination_info(destination: str) -> dict:
+    """Show detailed information about airport destinations, facilities, or services.
+    Use when user asks about specific places like restaurants, lounges, shops, gates, services, or amenities.
+    Valid destinations include: ADMIRALS_CLUB, CENTURION_LOUNGE, FOOD_COURT, DUTY_FREE, BAGGAGE_CLAIM, TERMINAL_A, TERMINAL_B, TERMINAL_C.
+    IMPORTANT: After calling this tool, you MUST provide a brief spoken response (1-2 sentences)
+    acknowledging what you're showing them. For example: 'Here's information about the Admirals Club lounge.'"""
+    destinations = {
+        "ADMIRALS_CLUB": {
+            "name": "American Airlines Admirals Club",
+            "description": "Premium lounge offering complimentary refreshments, Wi-Fi, and comfortable seating for eligible passengers.",
+            "location": "Terminal D",
+            "terminal": "D",
+            "gate": "D20",
+            "estimatedWalkTime": "8-12 minutes from security",
+            "hours": "5:00 AM - 10:00 PM daily",
+            "amenities": [
+                "Complimentary snacks and beverages",
+                "High-speed Wi-Fi",
+                "Comfortable seating areas",
+                "Business center with printing",
+                "Shower facilities",
+                "Television and reading materials"
+            ],
+            "directions": [
+                "Clear security checkpoint",
+                "Turn left and proceed down main concourse",
+                "Pass gates D15-D19",
+                "Look for Admirals Club entrance near gate D20 on your right"
+            ]
+        },
+        "CENTURION_LOUNGE": {
+            "name": "American Express Centurion Lounge",
+            "description": "Exclusive lounge for American Express Platinum and Centurion cardholders featuring premium dining and amenities.",
+            "location": "Terminal D",
+            "terminal": "D",
+            "gate": "D15",
+            "estimatedWalkTime": "5-8 minutes from security",
+            "hours": "5:00 AM - 11:00 PM daily",
+            "amenities": [
+                "Premium food and cocktails",
+                "Spa services",
+                "High-speed Wi-Fi and charging stations",
+                "Quiet rooms",
+                "Shower suites",
+                "Family room"
+            ],
+            "directions": [
+                "Clear security checkpoint",
+                "Turn left into Terminal D concourse",
+                "Walk approximately 300 feet",
+                "Lounge entrance is near gate D15 on your left"
+            ]
+        },
+        "FOOD_COURT": {
+            "name": "Central Food Court",
+            "description": "Main dining area with multiple restaurant options and cuisines.",
+            "location": "Terminal C, Central Area",
+            "terminal": "C",
+            "estimatedWalkTime": "3-5 minutes from most gates",
+            "hours": "4:30 AM - 11:00 PM daily",
+            "amenities": [
+                "10+ restaurant options",
+                "Quick service and sit-down dining",
+                "Grab-and-go options",
+                "Charging stations at tables",
+                "Family seating areas"
+            ]
+        },
+        "DUTY_FREE": {
+            "name": "Duty Free Americas",
+            "description": "Tax-free shopping for international travelers offering luxury goods, spirits, and travel essentials.",
+            "location": "Terminal D, International Gates",
+            "terminal": "D",
+            "gate": "D30",
+            "estimatedWalkTime": "10-15 minutes from security",
+            "hours": "Variable based on international flight schedules",
+            "amenities": [
+                "Designer fragrances and cosmetics",
+                "Premium spirits and wine",
+                "Luxury watches and accessories",
+                "Travel essentials",
+                "Gift items"
+            ]
+        },
+        "BAGGAGE_CLAIM": {
+            "name": "Baggage Claim Area",
+            "description": "Baggage carousel area for arriving passengers.",
+            "location": "Lower Level",
+            "estimatedWalkTime": "5-10 minutes via escalator/elevator",
+            "amenities": [
+                "Multiple baggage carousels",
+                "Baggage services desk",
+                "Lost and found",
+                "Ground transportation information"
+            ],
+            "directions": [
+                "Follow 'Baggage Claim' signs from gate",
+                "Take escalator or elevator to lower level",
+                "Check flight information monitors for carousel number"
+            ]
+        },
+        "TERMINAL_A": {
+            "name": "Terminal A",
+            "description": "Main terminal serving domestic flights with gates A1-A39.",
+            "terminal": "A",
+            "amenities": [
+                "Multiple dining options",
+                "Retail shops",
+                "Restrooms throughout",
+                "Charging stations",
+                "Customer service desks"
+            ]
+        },
+        "TERMINAL_B": {
+            "name": "Terminal B",
+            "description": "Secondary terminal serving domestic flights with gates B1-B49.",
+            "terminal": "B",
+            "amenities": [
+                "Food court and restaurants",
+                "Convenience stores",
+                "Restrooms throughout",
+                "Charging stations",
+                "Family restrooms"
+            ]
+        },
+        "TERMINAL_C": {
+            "name": "Terminal C",
+            "description": "Main concourse terminal with central food court and gates C1-C39.",
+            "terminal": "C",
+            "amenities": [
+                "Central food court",
+                "Multiple shops and services",
+                "Restrooms throughout",
+                "Business center",
+                "Children's play area"
+            ]
+        }
+    }
+
+    key = destination.upper().replace(" ", "_")
+    entry = destinations.get(key)
+    if not entry:
+        return {"ok": False, "error": f"Unknown destination: {destination}"}
+
+    return {
+        "ok": True,
+        "component_type": "destination_info",
+        "data": entry
+    }
+
+
+@tool
 def search_knowledge_base(query: str) -> str:
     """Search airport knowledge base for policies, procedures, services, and facilities information.
     Use this when the user asks about airport rules, baggage policies, security procedures, available services, or facility information."""
@@ -157,7 +309,7 @@ def search_knowledge_base(query: str) -> str:
         return f"Unable to search knowledge base: {str(e)}"
 
 
-tools = [get_current_time, add, multiply, divide, show_flight_details, show_map, search_knowledge_base]
+tools = [get_current_time, add, multiply, divide, show_flight_details, show_map, show_destination_info, search_knowledge_base]
 tools_by_name = {t.name: t for t in tools}
 
 
@@ -172,11 +324,12 @@ You have access to callable tools (nodes):
 - get_current_time: use when the user asks about the current time, date, or "today"
 - add, multiply, divide: use for basic arithmetic when the user asks for calculations
 - show_flight_details: use when the user asks about their flight, gate, boarding status, or flight information
-- show_map: use when the user asks for directions or where to find gates (A28, B9, C43, D12), restrooms, or customer service. Valid destinations: RESTROOM, CUSTOMER_SERVICE, A28, B9, C43, D12
+- show_map: use when the user asks for directions or where to find gates (A28, B9), restrooms, or customer service. Valid destinations: RESTROOM, CUSTOMER_SERVICE, A28, B9
+- show_destination_info: use when the user asks about specific airport destinations, lounges, restaurants, shops, or terminal information. Valid destinations: ADMIRALS_CLUB, CENTURION_LOUNGE, FOOD_COURT, DUTY_FREE, BAGGAGE_CLAIM, TERMINAL_A, TERMINAL_B, TERMINAL_C
 - search_knowledge_base: use when the user asks about airport policies, procedures, baggage rules, security guidelines, available services, or facility information
 
-CRITICAL: After calling show_flight_details or show_map, you MUST provide a brief spoken response (1-2 sentences) to accompany the visual component.
-For example: "Here are your flight details" or "Here are directions to Gate A28. Follow the highlighted path."
+CRITICAL: After calling show_flight_details, show_map, or show_destination_info, you MUST provide a brief spoken response (1-2 sentences) to accompany the visual component.
+For example: "Here are your flight details" or "Here are directions to Gate A28. Follow the highlighted path." or "Here's information about the Admirals Club lounge."
 
 Call the appropriate tool when it helps answer the user. Otherwise reply directly. Keep replies clear and concise and do not use markdown formatting."""
 
