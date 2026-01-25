@@ -190,6 +190,8 @@ export function useVoiceAssistantState() {
   }, [input, voiceAssistant.connected, voiceAssistant.sendMessage])
 
   const handleClose = useCallback(() => {
+    console.log('[VoiceAssistantState] handleClose called - resetting all state')
+    
     // Set closing flag to prevent adding messages
     isClosingRef.current = true
 
@@ -204,12 +206,26 @@ export function useVoiceAssistantState() {
 
     // Stop recording if active (this will stop mic and Assistant3D audio analyzer)
     if (voiceAssistant.isRecording) {
+      console.log('[VoiceAssistantState] Stopping recording')
       voiceAssistant.toggleMic()
     }
 
     // Clear all buffers and state - this stops audio, clears queue, resets processing
+    // This handles:
+    // - Stopping any currently playing audio
+    // - Clearing revealed text (streamingText)
+    // - Clearing audio queue and alignment
+    // - Resetting isProcessing to false
+    // - Clearing component messages
     if (voiceAssistant.clearAllBuffers) {
+      console.log('[VoiceAssistantState] Clearing all buffers')
       voiceAssistant.clearAllBuffers()
+    }
+
+    // Close any open modals
+    if (voiceAssistant.modalState?.isOpen) {
+      console.log('[VoiceAssistantState] Closing open modal')
+      voiceAssistant.closeModal()
     }
 
     // Clear UI state
@@ -224,6 +240,7 @@ export function useVoiceAssistantState() {
     // Reset closing flag after a brief delay to allow any pending operations to complete
     setTimeout(() => {
       isClosingRef.current = false
+      console.log('[VoiceAssistantState] Reset complete')
     }, 500)
   }, [voiceAssistant])
 
