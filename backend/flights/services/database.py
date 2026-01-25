@@ -75,6 +75,8 @@ class DatabaseService:
             doc["departure_time"] = doc["departure_time"].isoformat()
         if isinstance(doc.get("arrival_time"), datetime):
             doc["arrival_time"] = doc["arrival_time"].isoformat()
+        if isinstance(doc.get("boarding_time"), datetime):
+            doc["boarding_time"] = doc["boarding_time"].isoformat()
 
         return doc
 

@@ -101,7 +101,7 @@ export function InlineChat({
   return (
     <div className="h-full flex flex-col overflow-hidden">
       {/* Messages Area */}
-      <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-6 space-y-4">
+      <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-6 space-y-4 kiosk-chat-scrollbar">
         {messages.length === 0 && !streamingText && !isRecording ? (
           <div className="h-full flex flex-col items-center justify-center text-center">
             {!isRecording && (
@@ -359,7 +359,7 @@ export function InlineChat({
                             </div>
                           )}
                         </div>
-                      </div>
+                      </motion.div>
                     )}
                     {message.componentType === 'flight_delay' && message.componentData && (
                       <motion.div

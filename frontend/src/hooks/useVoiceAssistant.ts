@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import { useSpeechRecognition } from "./useSpeechRecognition";
 import { useVoiceWebSocket } from "./useVoiceWebSocket";
 import { useAudioReveal } from "./useAudioReveal";
@@ -15,6 +15,8 @@ export function useVoiceAssistant() {
   const { audioElRef, revealedText, isRevealing, playWithReveal, clearText, stopAudio } =
     useAudioReveal();
   const { handleUIAction, modalState, closeModal, openPendingModal, clearPendingModal } = useNavigationHandler();
+  // Track if we're closing to prevent mic completion from sending messages
+  const isClosingRef = useRef(false);
 
   const handleDone = useCallback(() => {
     console.log("[VoiceAssistant] Done message received, playing all chunks");
@@ -53,12 +55,19 @@ export function useVoiceAssistant() {
   // Expose clear methods for external use - stops audio and clears all buffers
   const clearAllBuffers = useCallback(() => {
     console.log("[VoiceAssistant] clearAllBuffers called - stopping all audio and clearing state");
+    // Set closing flag to prevent mic completion from sending messages
+    isClosingRef.current = true;
     stopAudio(); // Stop any currently playing audio (this also revokes blob URLs)
-    clearText(); // Clear revealed text
+    clearText(); // Clear revealed text (streamingText) - this ensures assistant mode resets to passive
     clearQueue(); // Clear audio queue and alignment
-    setIsProcessing(false); // Reset processing state
+    setIsProcessing(false); // Reset processing state - this ensures assistant mode resets to passive
     setComponentMessages([]); // Clear component messages
-  }, [stopAudio, clearText, clearQueue]);
+    clearPendingModal(); // Clear any pending modals
+    // Reset closing flag after a delay to allow mic stop to complete
+    setTimeout(() => {
+      isClosingRef.current = false;
+    }, 1000);
+  }, [stopAudio, clearText, clearQueue, clearPendingModal]);
 
   const {
     connected,
@@ -111,6 +120,11 @@ export function useVoiceAssistant() {
         "[VoiceAssistant] handleMicComplete called with transcript:",
         finalTranscript
       );
+      // Skip sending if we're closing (to prevent sending messages when chat is closed)
+      if (isClosingRef.current) {
+        console.log("[VoiceAssistant] Skipping send - chat is closing");
+        return;
+      }
       if (finalTranscript) {
         console.log(
           "[VoiceAssistant] Sending transcript to backend:",
