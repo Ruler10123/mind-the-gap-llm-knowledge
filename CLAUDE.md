@@ -5,24 +5,19 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Project Structure
 
 Monorepo with two main workspaces:
-- `frontend/` - React app with TanStack Router, Query, and Tailwind
-- `backend/` - Python app (minimal setup currently)
+- `frontend/` - React + TanStack Router/Query + Tailwind + Three.js
+- `backend/` - FastAPI + LangGraph + WebSocket API with layered architecture
 
-## Frontend (React + TanStack)
+## Frontend (React + TanStack + Three.js)
 
 ### Commands
 
 ```bash
-# Development
 cd frontend
 pnpm install
-pnpm dev          # Start dev server on port 3000
-
-# Production
+pnpm dev          # Dev server on port 3000
 pnpm build        # Build and type check
-
-# Quality
-pnpm test         # Run Vitest tests
+pnpm test         # Vitest tests
 pnpm lint         # ESLint
 pnpm format       # Prettier
 pnpm check        # Format and fix
@@ -35,70 +30,152 @@ pnpm check        # Format and fix
 - Layout in `__root.tsx` wraps all routes with `<Outlet />`
 - Router context includes QueryClient for data fetching integration
 
-**TanStack Query** - Data fetching setup:
-- Provider configured in `src/integrations/tanstack-query/root-provider.tsx`
+**TanStack Query** - Data fetching:
+- Provider in `src/integrations/tanstack-query/root-provider.tsx`
 - QueryClient passed to router context in `main.tsx`
 - Use loaders in routes or `useQuery` in components
 
 **Path Alias**: `@/` maps to `src/`
 
-**Devtools**: Unified TanStack devtools panel includes Router and Query panels
+### 3D Assistant Component (`src/components/Assistant3D/`)
 
-### 3D Assistant Component Architecture
+**Performance Pattern**: Refs instead of React state for 60fps animations without re-renders.
 
-**Core Pattern**: Performance-optimized animation using refs instead of React state to avoid re-render overhead during 60fps rendering.
-
-**Component Structure** (`src/components/Assistant3D/`):
-- `AssistantCanvas.tsx` - Main render component, manages Three.js scene and mouse interaction
-- `index.tsx` - Entry point with WebGL detection and audio initialization
-- `entities/LiquidGlassEntity.ts` - Particle system class (5,000 particles with audio-reactive deformation)
-- `hooks/useAssistantAnimation.ts` - Core animation loop with three rotation states: dragging, momentum, auto-rotation
+**Component Structure**:
+- `index.tsx` - Entry point, WebGL detection, WebSocket integration (TODO: implement backend connection at line 33)
+- `AssistantInterface.tsx` - UI layer: mic toggle (top-left), prompt input (bottom), error toast (top-center)
+- `AssistantCanvas.tsx` - Three.js scene, mouse interaction
+- `entities/ParticleSphereEntity.ts` - Particle system with audio-reactive deformation
+- `hooks/useAudioAnalyzer.ts` - Web Audio API with FFT analysis (bass, mid, high bands)
+- `hooks/useAssistantAnimation.ts` - Animation loop: dragging → momentum → auto-rotation
 - `hooks/useThreeScene.ts` - Three.js scene initialization
-- `hooks/useAudioAnalyzer.ts` - Web Audio API integration with frequency band analysis
-- `PostProcessing.ts` - Bloom effects using EffectComposer
-- `constants/animationConstants.ts` - Centralized tuning parameters
+- `entities/PostProcessing.ts` - Bloom effects via EffectComposer
+- `constants/animationConstants.ts` - Tunable parameters
 
 **Animation State Machine**:
-1. **Dragging**: Manual mouse rotation with velocity tracking (100ms window, 5-sample averaging)
-2. **Momentum**: Post-drag inertia with exponential damping (0.95 factor)
-3. **Auto-rotation**: Subtle rotation when idle (velocity < 0.0001 threshold)
+1. **Dragging**: Mouse rotation with velocity tracking (100ms window, 5-sample averaging)
+2. **Momentum**: Post-drag inertia with exponential damping (0.95)
+3. **Auto-rotation**: Idle rotation (velocity < 0.0001 threshold)
 
-**Audio-Reactive System**:
-- FFT analysis (128 size, 64 frequency bins)
-- Three frequency bands: bass (0-10), mid/vocal (10-20), high (30-64)
-- 20 dynamic spike centers distributed via Fibonacci sphere
-- Smooth morphing using normalized distance falloff
-- Aggressive smoothing (0.30 factor) prevents jittery animations
+**Audio-Reactive**:
+- FFT: 128 size, 64 frequency bins
+- 3 bands: bass (0-10), mid/vocal (10-20), high (30-64)
+- 20 spike centers (Fibonacci sphere distribution)
+- Smoothing: 0.30 factor prevents jitter
 
-**Performance Optimizations**:
-- Animation state isolated in refs, not React state
+**Performance**:
+- Refs for animation state (not React state)
 - Pixel ratio capped at 2x
-- No shadows in Three.js scene
-- Delta-time aware for frame-rate independence
-- requestAnimationFrame pattern instead of React lifecycle
+- No shadows
+- Delta-time aware
+- requestAnimationFrame pattern
 
-**Key Files for Tweaking**:
-- `animationConstants.ts` - All tunable values (rotation speeds, damping, spike parameters, particle counts)
-- `LiquidGlassEntity.ts:updateAudioInfluence()` - Audio-to-geometry mapping logic
-- `useAssistantAnimation.ts` - State transition thresholds and velocity calculations
-
-## Backend (Python)
+## Backend (Python FastAPI + LangGraph)
 
 ### Commands
 
 ```bash
 cd backend
-uv run main.py    # Run basic app
+uv run main.py              # FastAPI server on port 8000 with reload
+uv run python verify_refactor.py  # Verify refactoring
+uv run pytest tests/        # Run tests
 ```
 
 ### Setup
 
-- Requires Python >=3.13
-- Uses uv as the package manager
-- Minimal setup - no framework yet
+- Python >=3.13
+- Package manager: uv
+- Dependencies: fastapi, uvicorn, websockets, langchain, langgraph, elevenlabs, motor, pymongo
+- Configuration: Uses `config.py` (loads from `.env`)
+
+### Architecture (Layered)
+
+```
+Transport (WebSocket) → Session Manager → Agent Orchestrator
+                                            ↓
+                        LLM Client | Tool Registry | RAG Service | TTS Service
+```
+
+**Key Directories**:
+
+- `core/` - Abstractions, contracts
+  - `interfaces.py` - Protocols: Agent, Tool, RAGService, SessionStore
+  - `events.py` - Event types for streaming (ReasoningEvent, ToolCallEvent, AudioEvent, etc.)
+  - `exceptions.py` - Exception hierarchy with natural language translation
+  - `schemas.py` - Shared Pydantic models
+
+- `transport/` - WebSocket layer
+  - `websocket_handler.py` - `/ws` endpoint, maintains WebSocket contract
+  - `serializers.py` - Event → JSON conversion
+
+- `session/` - Session management
+  - `session_manager.py` - Lifecycle, interruption handling
+  - `session_store.py` - In-memory store (future: DB persistence)
+  - `models.py` - Session, ConversationTurn schemas
+
+- `agent/` - Orchestration
+  - `orchestrator.py` - Self-correcting loop, retry logic, event emission
+  - `graph.py` - LangGraph (existing, unchanged)
+  - `state.py` - AgentState schema
+  - `strategies.py` - RetryStrategy
+
+- `tools/` - Tool layer
+  - `registry.py` - Tool discovery, registration
+  - `executor.py` - Resilient wrapper: timeout, error translation
+  - `base.py` - BaseTool with `is_read_only` flag
+  - `implementations/` - time_tool.py, arithmetic_tools.py, rag_tool.py (stub)
+
+- `rag/` - RAG service (stub)
+  - `service.py` - Retrieval orchestration (stub)
+
+- `tts/` - TTS
+  - `service.py` - TTS abstraction
+  - `elevenlabs_client.py` - ElevenLabs implementation
+
+- `observability/` - Structured logging
+  - `logger.py`
+
+### WebSocket Contract
+
+**Client Sends**: `{"message": "user text"}`
+
+**Server Sends**:
+- `{"type": "audio", "chunk": "base64..."}`
+- `{"type": "alignment", "characters": [...], "character_start_times_seconds": [...], ...}`
+- `{"type": "done"}`
+- `{"type": "error", "message": "..."}`
+- `{"type": "retry", "attempt": N, "reason": "..."}` (optional)
+
+### Error Handling
+
+- `AgentException` base with `to_natural_language()` method
+- Tool execution errors auto-translate to user-friendly messages
+- Resilient tool execution: timeout enforcement (30s default), schema validation
+- Never crashes app - all errors caught and translated
+
+### Configuration (`config.py`)
+
+Environment variables (`.env` file):
+- `vultr_api_key`, `vultr_model` - LLM
+- `elevenlabs_api_key`, `elevenlabs_voice_id` - TTS
+- `mongodb_uri`, `mongodb_database`, `mongodb_collection` - RAG
+- Timeouts: `tool_execution_timeout_seconds` (30), `llm_call_timeout_seconds` (60), `agent_max_execution_time_seconds` (300)
+- Retries: `agent_max_retries` (3), `tool_max_retries` (1)
+- RAG: `rag_top_k` (5), `embedding_model` (all-MiniLM-L6-v2)
+
+### Key Design Decisions
+
+1. **Session Management**: In-memory store, conversation history persists across turns
+2. **Event Streaming**: All agent events stream to frontend for observability
+3. **Self-Correction**: Orchestrator prepared for retry logic (partially implemented)
+4. **Tool Resilience**: Timeout, validation, never crashes
+5. **RAG**: Stubbed for MongoDB Atlas Vector Search integration
+
+See `backend/REFACTORING_SUMMARY.md` for detailed refactoring notes.
 
 ## Development Notes
 
-- Frontend uses pnpm for package management
-- Git repo initialized, no main branch configured yet
-- Do not start any dev servers yourself
+- Frontend uses pnpm
+- Backend uses uv
+- No main branch configured
+- Do not start dev servers yourself

@@ -3,7 +3,12 @@ import AssistantCanvas from './AssistantCanvas'
 import AssistantInterface from './AssistantInterface'
 import { useAudioAnalyzer } from './hooks/useAudioAnalyzer'
 
-export default function Assistant3D() {
+interface Assistant3DProps {
+  passiveMode?: boolean
+  hideInterface?: boolean
+}
+
+export default function Assistant3D({ passiveMode = false, hideInterface = false }: Assistant3DProps) {
   const { isActive, error, initAudio, stopAudio, getFrequencyData } =
     useAudioAnalyzer()
   const [webGLSupported, setWebGLSupported] = useState(true)
@@ -52,14 +57,16 @@ export default function Assistant3D() {
 
   return (
     <div className="relative w-full h-full">
-      <AssistantCanvas getFrequencyData={getFrequencyData} />
-      <AssistantInterface
-        isAudioActive={isActive}
-        onToggleAudio={handleToggleAudio}
-        error={error}
-        onSubmitPrompt={handleSubmitPrompt}
-        isSubmitting={isSubmitting}
-      />
+      <AssistantCanvas getFrequencyData={getFrequencyData} passiveMode={passiveMode} />
+      {!hideInterface && (
+        <AssistantInterface
+          isAudioActive={isActive}
+          onToggleAudio={handleToggleAudio}
+          error={error}
+          onSubmitPrompt={handleSubmitPrompt}
+          isSubmitting={isSubmitting}
+        />
+      )}
     </div>
   )
 }

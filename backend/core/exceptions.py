@@ -59,3 +59,10 @@ class SessionError(AgentException):
 
     def to_natural_language(self) -> str:
         return f"Session error: {str(self)}"
+
+
+class PageFilterError(AgentException):
+    """Page filtering failed."""
+
+    def to_natural_language(self) -> str:
+        return f"Unable to determine the right page for your request: {str(self)}"

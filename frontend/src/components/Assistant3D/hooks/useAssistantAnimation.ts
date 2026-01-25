@@ -122,8 +122,8 @@ export function useAssistantAnimation(
         }
       }
 
-      // Update entity
-      entity.update(frequencyData)
+      // Update entity with passive mode flag
+      entity.update(frequencyData, passiveMode)
 
       // Render with post-processing
       postProcessing.render(delta)
