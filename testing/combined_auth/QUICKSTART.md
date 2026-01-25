@@ -23,7 +23,7 @@ uv sync
 
 3. **Verify Vector Index** in MongoDB Atlas:
    - Database: `access_control`
-   - Collection: `passengers`
+   - Collection: `users`
    - Index name: `face_vector_index`
    - Field: `security.face_embedding`
    - Dimensions: 512
@@ -52,7 +52,7 @@ uv run uvicorn main:app --reload --port 8000
 ```
 
 Wait for:
-- "Connected to MongoDB: access_control.passengers"
+- "Connected to MongoDB: access_control.users"
 - "All services initialized successfully"
 
 ## Step 4: Test the System

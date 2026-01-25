@@ -13,7 +13,7 @@ class Settings(BaseSettings):
 
     # Database Configuration
     DATABASE_NAME: str = Field(default="access_control", description="MongoDB database name")
-    COLLECTION_NAME: str = Field(default="passengers", description="MongoDB collection name")
+    COLLECTION_NAME: str = Field(default="users", description="MongoDB collection name")
     VECTOR_INDEX_NAME: str = Field(default="face_vector_index", description="Vector search index name")
 
     # Face Recognition Configuration

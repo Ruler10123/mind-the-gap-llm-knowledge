@@ -22,11 +22,11 @@ Self-contained FastAPI module for smart kiosk authentication using facial recogn
 
 In MongoDB Atlas, create:
 - Database: `access_control`
-- Collection: `passengers`
+- Collection: `users`
 
 ### 2. Create Vector Search Index
 
-**CRITICAL**: Create a vector search index named `face_vector_index` on the `passengers` collection:
+**CRITICAL**: Create a vector search index named `face_vector_index` on the `users` collection:
 
 1. Go to Atlas → Your Cluster → Search
 2. Click "Create Search Index"
@@ -93,7 +93,7 @@ Optional configuration:
 ```env
 SIMILARITY_THRESHOLD=0.6  # Face match threshold (0.0-1.0)
 DATABASE_NAME=access_control
-COLLECTION_NAME=passengers
+COLLECTION_NAME=users
 ```
 
 ## Running the Server
