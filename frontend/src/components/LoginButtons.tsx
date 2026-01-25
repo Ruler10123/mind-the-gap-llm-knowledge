@@ -20,16 +20,15 @@ export default function LoginButtons() {
             {/* Face Login Button */}
             <button
               onClick={() => handleOpenModal('face')}
-              className="group relative flex flex-col items-center gap-2 px-6 py-4 bg-gray-900/80 hover:bg-gray-800/90 backdrop-blur-md border border-gray-700 hover:border-blue-500 rounded-2xl transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-blue-500/20"
+              className="group relative flex flex-col items-center gap-2 px-6 py-4 bg-white/10 hover:bg-white/25 backdrop-blur-xl border border-white/20 hover:border-blue-500/30 rounded-full shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-110 hover:-translate-y-1 active:scale-95 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
             >
               <div className="relative">
                 <ScanFace
                   size={32}
-                  className="text-blue-400 group-hover:text-blue-300 transition-colors"
+                  className="text-[#0E1F34] group-hover:text-blue-600 transition-colors duration-300 group-hover:scale-125 group-hover:rotate-12"
                 />
-                <div className="absolute inset-0 bg-blue-400/20 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity" />
               </div>
-              <span className="text-sm font-medium text-gray-300 group-hover:text-white transition-colors">
+              <span className="text-base font-semibold text-[#0E1F34] group-hover:tracking-wide transition-all duration-300">
                 Face Login
               </span>
             </button>
@@ -37,16 +36,15 @@ export default function LoginButtons() {
             {/* QR Login Button */}
             <button
               onClick={() => handleOpenModal('qr')}
-              className="group relative flex flex-col items-center gap-2 px-6 py-4 bg-gray-900/80 hover:bg-gray-800/90 backdrop-blur-md border border-gray-700 hover:border-purple-500 rounded-2xl transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-purple-500/20"
+              className="group relative flex flex-col items-center gap-2 px-6 py-4 bg-white/10 hover:bg-white/25 backdrop-blur-xl border border-white/20 hover:border-[#C8102E]/30 rounded-full shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-110 hover:-translate-y-1 active:scale-95 focus:outline-none focus:ring-2 focus:ring-[#C8102E]/50"
             >
               <div className="relative">
                 <QrCode
                   size={32}
-                  className="text-purple-400 group-hover:text-purple-300 transition-colors"
+                  className="text-[#0E1F34] group-hover:text-[#C8102E] transition-colors duration-300 group-hover:scale-125 group-hover:rotate-12"
                 />
-                <div className="absolute inset-0 bg-purple-400/20 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity" />
               </div>
-              <span className="text-sm font-medium text-gray-300 group-hover:text-white transition-colors">
+              <span className="text-base font-semibold text-[#0E1F34] group-hover:tracking-wide transition-all duration-300">
                 QR Login
               </span>
             </button>

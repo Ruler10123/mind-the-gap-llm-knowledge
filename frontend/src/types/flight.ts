@@ -25,6 +25,13 @@ export interface Flight {
   arrival_time: string    // ISO datetime
   departure_location: string
   destination: string
+  origin_city?: string
+  origin_gate?: string
+  destination_city?: string
+  boarding_group?: string
+  boarding_time?: string  // ISO datetime
+  seat?: string
+  bags_checked: number
   luggage_state: LuggageState
   flight_status: FlightStatus
 }
@@ -35,6 +42,13 @@ export interface FlightCreatePayload {
   arrival_time: string
   departure_location: string
   destination: string
+  origin_city?: string
+  origin_gate?: string
+  destination_city?: string
+  boarding_group?: string
+  boarding_time?: string
+  seat?: string
+  bags_checked?: number
   luggage_state?: LuggageState
   flight_status?: FlightStatus
 }
@@ -45,6 +59,13 @@ export interface FlightUpdatePayload {
   arrival_time?: string
   departure_location?: string
   destination?: string
+  origin_city?: string
+  origin_gate?: string
+  destination_city?: string
+  boarding_group?: string
+  boarding_time?: string
+  seat?: string
+  bags_checked?: number
   luggage_state?: LuggageState
   flight_status?: FlightStatus
 }

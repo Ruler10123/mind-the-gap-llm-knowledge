@@ -73,13 +73,29 @@ export function FlightCard({ flight }: FlightCardProps) {
     }
   }
 
-  const handleTimeChange = (field: 'departure_time' | 'arrival_time', value: string) => {
+  const handleTimeChange = (field: 'departure_time' | 'arrival_time' | 'boarding_time', value: string) => {
     if (value) {
       updateFlight.mutate({
         id: flight.id,
         data: { [field]: new Date(value).toISOString() },
       })
     }
+  }
+
+  const handleTextChange = (field: string, value: string) => {
+    const trimmedValue = value.trim()
+    updateFlight.mutate({
+      id: flight.id,
+      data: { [field]: trimmedValue || undefined },
+    })
+  }
+
+  const handleNumberChange = (field: string, value: string) => {
+    const numValue = parseInt(value) || 0
+    updateFlight.mutate({
+      id: flight.id,
+      data: { [field]: numValue },
+    })
   }
 
   const handleDelete = async () => {
@@ -164,7 +180,102 @@ export function FlightCard({ flight }: FlightCardProps) {
                 className="w-full px-3 py-2 rounded-lg bg-white/10 border border-white/20 text-white text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 disabled:opacity-50"
               />
             </div>
+            <div>
+              <div className="text-xs text-white/40 mb-1">Boarding</div>
+              <input
+                type="datetime-local"
+                value={flight.boarding_time ? toDateTimeLocalValue(flight.boarding_time) : ''}
+                onChange={(e) => handleTimeChange('boarding_time', e.target.value)}
+                disabled={updateFlight.isPending}
+                className="w-full px-3 py-2 rounded-lg bg-white/10 border border-white/20 text-white text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 disabled:opacity-50"
+              />
+            </div>
           </div>
+        </div>
+
+        {/* Origin Details */}
+        <div>
+          <label className="text-xs text-white/60 uppercase tracking-wide mb-2 block">
+            Origin Details
+          </label>
+          <div className="grid grid-cols-2 gap-2">
+            <input
+              type="text"
+              value={flight.origin_city || ''}
+              onChange={(e) => handleTextChange('origin_city', e.target.value)}
+              onBlur={(e) => handleTextChange('origin_city', e.target.value)}
+              disabled={updateFlight.isPending}
+              placeholder="City"
+              className="px-3 py-2 rounded-lg bg-white/10 border border-white/20 text-white text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 disabled:opacity-50 placeholder-white/40"
+            />
+            <input
+              type="text"
+              value={flight.origin_gate || ''}
+              onChange={(e) => handleTextChange('origin_gate', e.target.value)}
+              onBlur={(e) => handleTextChange('origin_gate', e.target.value)}
+              disabled={updateFlight.isPending}
+              placeholder="Gate"
+              className="px-3 py-2 rounded-lg bg-white/10 border border-white/20 text-white text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 disabled:opacity-50 placeholder-white/40"
+            />
+          </div>
+        </div>
+
+        {/* Destination City */}
+        <div>
+          <label className="text-xs text-white/60 uppercase tracking-wide mb-2 block">
+            Destination City
+          </label>
+          <input
+            type="text"
+            value={flight.destination_city || ''}
+            onChange={(e) => handleTextChange('destination_city', e.target.value)}
+            onBlur={(e) => handleTextChange('destination_city', e.target.value)}
+            disabled={updateFlight.isPending}
+            placeholder="City"
+            className="w-full px-3 py-2 rounded-lg bg-white/10 border border-white/20 text-white text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 disabled:opacity-50 placeholder-white/40"
+          />
+        </div>
+
+        {/* Boarding & Seat Info */}
+        <div>
+          <label className="text-xs text-white/60 uppercase tracking-wide mb-2 block">
+            Boarding & Seat
+          </label>
+          <div className="grid grid-cols-2 gap-2">
+            <input
+              type="text"
+              value={flight.boarding_group || ''}
+              onChange={(e) => handleTextChange('boarding_group', e.target.value)}
+              onBlur={(e) => handleTextChange('boarding_group', e.target.value)}
+              disabled={updateFlight.isPending}
+              placeholder="Group"
+              className="px-3 py-2 rounded-lg bg-white/10 border border-white/20 text-white text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 disabled:opacity-50 placeholder-white/40"
+            />
+            <input
+              type="text"
+              value={flight.seat || ''}
+              onChange={(e) => handleTextChange('seat', e.target.value)}
+              onBlur={(e) => handleTextChange('seat', e.target.value)}
+              disabled={updateFlight.isPending}
+              placeholder="Seat"
+              className="px-3 py-2 rounded-lg bg-white/10 border border-white/20 text-white text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 disabled:opacity-50 placeholder-white/40"
+            />
+          </div>
+        </div>
+
+        {/* Bags Checked */}
+        <div>
+          <label className="text-xs text-white/60 uppercase tracking-wide mb-2 block">
+            Bags Checked
+          </label>
+          <input
+            type="number"
+            min="0"
+            value={flight.bags_checked || 0}
+            onChange={(e) => handleNumberChange('bags_checked', e.target.value)}
+            disabled={updateFlight.isPending}
+            className="w-full px-3 py-2 rounded-lg bg-white/10 border border-white/20 text-white text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 disabled:opacity-50"
+          />
         </div>
       </div>
 
