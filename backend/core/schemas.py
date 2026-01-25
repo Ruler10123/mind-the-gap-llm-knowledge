@@ -1,16 +1,6 @@
 """Shared Pydantic models."""
 
-from typing import Any
 from pydantic import BaseModel, Field
-
-
-class ToolResult(BaseModel):
-    """Result from tool execution."""
-
-    success: bool
-    output: Any | None = None
-    error_message: str | None = None
-    tool_name: str = ""
 
 
 class AgentInput(BaseModel):

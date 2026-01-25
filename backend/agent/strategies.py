@@ -1,7 +1,6 @@
 """Retry strategies and timeout enforcement."""
 
 from core.exceptions import ToolExecutionError, LLMParseError, AgentException
-from tools.base import BaseTool
 
 
 class RetryStrategy:
@@ -14,7 +13,6 @@ class RetryStrategy:
         self,
         error: AgentException,
         attempt: int,
-        tool: BaseTool | None = None,
     ) -> bool:
         """Determine if error warrants retry."""
         if attempt >= self.max_retries:
@@ -24,9 +22,9 @@ class RetryStrategy:
         if isinstance(error, LLMParseError):
             return True
 
-        # Tool errors: only retry if read-only
-        if isinstance(error, ToolExecutionError) and tool:
-            return tool.is_read_only
+        # Tool errors: don't retry (tools in graph.py are simple)
+        if isinstance(error, ToolExecutionError):
+            return False
 
         # Default: no retry
         return False

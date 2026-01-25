@@ -1,59 +1,15 @@
 import { motion } from "framer-motion";
-import { useEffect, useState, useRef } from "react";
 
 type Props = {
   text: string;
   isStreaming: boolean;
 };
 
+/**
+ * Displays text with a blinking cursor when streaming.
+ * Text reveal is handled by useAudioReveal hook, this component just displays.
+ */
 export function StreamingText({ text, isStreaming }: Props) {
-  const [displayedText, setDisplayedText] = useState("");
-  const prevTextRef = useRef("");
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-  useEffect(() => {
-    if (text === prevTextRef.current) return;
-
-    // Clear any pending timeout
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-
-    const prevText = prevTextRef.current;
-    const newText = text;
-
-    // If text is longer and starts with previous text, it's new content being added
-    if (newText.length > prevText.length && newText.startsWith(prevText)) {
-      const newChars = newText.slice(prevText.length);
-      let charIndex = 0;
-      
-      const revealNextChar = () => {
-        if (charIndex < newChars.length) {
-          setDisplayedText(prevText + newChars.slice(0, charIndex + 1));
-          charIndex++;
-          // Smooth reveal: reveal characters at ~30ms intervals (adjustable)
-          timeoutRef.current = setTimeout(revealNextChar, 30);
-        } else {
-          setDisplayedText(newText);
-          prevTextRef.current = newText;
-        }
-      };
-
-      // Start revealing characters
-      revealNextChar();
-    } else {
-      // Text was replaced entirely or shortened - update immediately
-      setDisplayedText(newText);
-      prevTextRef.current = newText;
-    }
-
-    return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-    };
-  }, [text]);
-
   return (
     <div
       className="streaming-text"
@@ -73,7 +29,7 @@ export function StreamingText({ text, isStreaming }: Props) {
         transition={{ duration: 0.2, ease: "easeOut" }}
         style={{ display: "inline" }}
       >
-        {displayedText}
+        {text}
       </motion.span>
       {isStreaming && (
         <motion.span
