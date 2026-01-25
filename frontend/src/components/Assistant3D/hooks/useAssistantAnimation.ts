@@ -14,18 +14,65 @@ export function useAssistantAnimation(
   manualRotationRef: { current: { x: number; y: number } },
   targetRotationRef: { current: { x: number; y: number } },
   isDraggingRef: { current: boolean },
+  passiveMode: boolean,
 ) {
   useEffect(() => {
     if (!scene || !camera || !entity || !postProcessing) return
 
     let animationId: number
     const clock = new THREE.Clock()
+    
+    // Current scale and position for smooth transitions
+    const currentScale = new THREE.Vector3(1, 1, 1)
+    const currentPosition = new THREE.Vector3(0, 0, 0)
+    
+    // Calculate passive mode transformations
+    const calculatePassiveModeTransform = () => {
+      if (!(camera instanceof THREE.PerspectiveCamera)) return { scale: 1, y: 0 }
+      
+      const cameraDistance = camera.position.z
+      const fovRad = (camera.fov * Math.PI) / 180
+      // Visible width accounts for aspect ratio (FOV is vertical, width = height * aspect)
+      const visibleWidth = 2 * cameraDistance * Math.tan(fovRad / 2) * camera.aspect
+      
+      // Top 30% of sphere (y from 0.7 to 1.0)
+      // At y=0.7, the horizontal radius is sqrt(1 - 0.7²) = sqrt(0.51) ≈ 0.714
+      const sphereTop30Width = 2 * Math.sqrt(1 - 0.4 * 0.4)
+      
+      // Scale to make top 30% width match screen width
+      const scale = visibleWidth / sphereTop30Width
+      
+      // Move sphere down so only top 30% is visible
+      // Position so that y=0.7*scale aligns with bottom of visible area
+      const y = -scale * 1.3
+      
+      return { scale, y }
+    }
 
     const animate = () => {
       animationId = requestAnimationFrame(animate)
 
       const delta = clock.getDelta()
       const frequencyData = getFrequencyData()
+      
+      // Calculate target transform based on mode
+      const targetScale = new THREE.Vector3(1, 1, 1)
+      const targetPosition = new THREE.Vector3(0, 0, 0)
+      
+      if (passiveMode) {
+        const transform = calculatePassiveModeTransform()
+        targetScale.set(transform.scale, transform.scale, transform.scale)
+        targetPosition.y = transform.y
+      }
+      
+      // Smoothly interpolate scale and position
+      const lerpFactor = ANIMATION_CONSTANTS.passiveMode.transitionSpeed
+      currentScale.lerp(targetScale, lerpFactor)
+      currentPosition.lerp(targetPosition, lerpFactor)
+      
+      // Apply transformations to entity mesh
+      entity.mesh.scale.copy(currentScale)
+      entity.mesh.position.copy(currentPosition)
 
       // Handle rotation updates
       if (isDraggingRef.current) {
@@ -95,5 +142,6 @@ export function useAssistantAnimation(
     manualRotationRef,
     targetRotationRef,
     isDraggingRef,
+    passiveMode,
   ])
 }

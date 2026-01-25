@@ -20,24 +20,25 @@ export class ParticleSphereEntity {
   private autoRotationEnabled = true // Whether automatic rotation is enabled
   private isInitialized = false // Track if geometry has been initialized
 
-  // Mode system
-  private currentMode: SphereMode = 'earth'
+  // Mode system - DEPRECATED: Only uniform white sphere mode now
+  // private currentMode: SphereMode = 'earth'
   private targetColors: Float32Array // Target colors for smooth transitions
-  private uniformPositions: Float32Array // Uniformly distributed positions for default mode
-  private continentPositions: Float32Array // Continent-biased positions for earth mode
+  private uniformPositions: Float32Array // Uniformly distributed positions (only mode now)
+  // DEPRECATED: Earth mode disabled
+  // private continentPositions: Float32Array // Continent-biased positions for earth mode
 
-  // Heightmap data (continents mask: black=continents, white=oceans)
-  private heightmapCanvas: HTMLCanvasElement | null = null
-  private heightmapContext: CanvasRenderingContext2D | null = null
-  private heightmapLoaded = false
-  private sphericalCoords: Array<{ theta: number; phi: number }> = [] // Store spherical coords for UV mapping
+  // DEPRECATED: Heightmap data (continents mask: black=continents, white=oceans)
+  // private heightmapCanvas: HTMLCanvasElement | null = null
+  // private heightmapContext: CanvasRenderingContext2D | null = null
+  // private heightmapLoaded = false
+  // private sphericalCoords: Array<{ theta: number; phi: number }> = [] // Store spherical coords for UV mapping
 
-  // Precalculated color lookup tables
-  private earthColors: {
-    rotationBuckets: Array<Float32Array> // Precomputed colors at rotation intervals
-    bucketAngleStep: number // Radians between buckets (e.g., π/18 = 10°)
-  }
-  private defaultColors: Float32Array // Precalculated white colors for default mode
+  // DEPRECATED: Precalculated color lookup tables
+  // private earthColors: {
+  //   rotationBuckets: Array<Float32Array> // Precomputed colors at rotation intervals
+  //   bucketAngleStep: number // Radians between buckets (e.g., π/18 = 10°)
+  // }
+  private defaultColors: Float32Array // Precalculated white colors (only mode now)
 
   // Reusable Vector3 objects (reduce GC pressure)
   private tempVector1: THREE.Vector3
@@ -51,15 +52,15 @@ export class ParticleSphereEntity {
     this.basePositions = new Float32Array(this.particleCount * 3)
     this.targetColors = new Float32Array(this.particleCount * 3)
     this.uniformPositions = new Float32Array(this.particleCount * 3)
+    
+    // DEPRECATED: Earth mode disabled - initialized but never used
     this.continentPositions = new Float32Array(this.particleCount * 3)
-
-    // Initialize earth colors lookup
     this.earthColors = {
       rotationBuckets: [],
       bucketAngleStep: 0,
     }
 
-    // Initialize default colors (all white)
+    // Initialize default colors (all white) - only mode now
     this.defaultColors = new Float32Array(this.particleCount * 3)
     for (let i = 0; i < this.particleCount * 3; i += 3) {
       this.defaultColors[i] = 1.0 // R
@@ -72,7 +73,7 @@ export class ParticleSphereEntity {
     this.tempVector2 = new THREE.Vector3()
     this.tempVector3 = new THREE.Vector3()
 
-    // Generate uniform random sphere positions first (for default mode)
+    // Generate uniform random sphere positions (only mode now)
     for (let i = 0; i < this.particleCount; i++) {
       const radius = 1.0
       const theta = Math.random() * Math.PI * 2
@@ -87,89 +88,8 @@ export class ParticleSphereEntity {
       this.uniformPositions[i3] = x
       this.uniformPositions[i3 + 1] = y
       this.uniformPositions[i3 + 2] = z
-    }
 
-    // Load continents mask (will trigger continent-biased generation)
-    this.loadHeightmap()
-
-    // Generate initial particles with bias toward continents
-    // We'll use rejection sampling: generate positions and accept them with higher probability if on continents
-    let particlesGenerated = 0
-    const maxAttempts = this.particleCount * 10 // Safety limit
-
-    for (
-      let attempt = 0;
-      attempt < maxAttempts && particlesGenerated < this.particleCount;
-      attempt++
-    ) {
-      // Generate random spherical coordinates
-      const radius = 1.0
-      const theta = Math.random() * Math.PI * 2 // Azimuth (longitude)
-      const phi = Math.acos(2 * Math.random() - 1) // Inclination (latitude: 0=north, π=south)
-
-      // Check if this position is on a continent (if heightmap is loaded)
-      let isContinent = false
-      if (
-        this.heightmapLoaded &&
-        this.heightmapContext &&
-        this.heightmapCanvas
-      ) {
-        const { u, v } = this.sphericalToUV(theta, phi)
-        const maskValue = this.sampleHeightmap(u, v)
-        // In mask: black (0) = continent, white (255) = ocean
-        // So low values = continent
-        isContinent = maskValue < 0.5 // Threshold for continent vs ocean
-      }
-
-      // Acceptance probability: higher for continents
-      const acceptProbability = isContinent
-        ? 1.0
-        : 1.0 / ANIMATION_CONSTANTS.continentSampling.bias
-
-      if (Math.random() < acceptProbability) {
-        // Store spherical coordinates for UV mapping
-        this.sphericalCoords.push({ theta, phi })
-
-        // Y-up spherical to cartesian (phi=0 is north pole at +Y)
-        // Apply elevation for continents
-        const elevatedRadius = isContinent
-          ? radius + ANIMATION_CONSTANTS.continentSampling.elevation
-          : radius
-        const x = elevatedRadius * Math.sin(phi) * Math.cos(theta)
-        const y = elevatedRadius * Math.cos(phi)
-        const z = elevatedRadius * Math.sin(phi) * Math.sin(theta)
-
-        const i3 = particlesGenerated * 3
-        this.continentPositions[i3] = x
-        this.continentPositions[i3 + 1] = y
-        this.continentPositions[i3 + 2] = z
-
-        this.basePositions[i3] = x
-        this.basePositions[i3 + 1] = y
-        this.basePositions[i3 + 2] = z
-
-        this.positions[i3] = x
-        this.positions[i3 + 1] = y
-        this.positions[i3 + 2] = z
-
-        particlesGenerated++
-      }
-    }
-
-    // If heightmap wasn't loaded yet or we didn't generate enough particles, fill remaining with uniform distribution
-    while (particlesGenerated < this.particleCount) {
-      const radius = 1.0
-      const theta = Math.random() * Math.PI * 2
-      const phi = Math.acos(2 * Math.random() - 1)
-
-      this.sphericalCoords.push({ theta, phi })
-
-      // Y-up spherical to cartesian (phi=0 is north pole at +Y)
-      const x = radius * Math.sin(phi) * Math.cos(theta)
-      const y = radius * Math.cos(phi)
-      const z = radius * Math.sin(phi) * Math.sin(theta)
-
-      const i3 = particlesGenerated * 3
+      // Set base and current positions to uniform positions
       this.basePositions[i3] = x
       this.basePositions[i3 + 1] = y
       this.basePositions[i3 + 2] = z
@@ -177,9 +97,11 @@ export class ParticleSphereEntity {
       this.positions[i3] = x
       this.positions[i3 + 1] = y
       this.positions[i3 + 2] = z
-
-      particlesGenerated++
     }
+
+    // DEPRECATED: Earth mode disabled - continent-biased generation removed
+    // this.loadHeightmap()
+    // ... (earth generation code commented out)
 
     // Geometry - use the positions array directly
     this.geometry = new THREE.BufferGeometry()
@@ -241,8 +163,10 @@ export class ParticleSphereEntity {
   }
 
   /**
-   * Load continents mask texture (black=continents, white=oceans)
+   * DEPRECATED: Load continents mask texture (black=continents, white=oceans)
+   * Earth mode disabled - this method is kept but not called
    */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   private loadHeightmap() {
     const img = new Image()
 
@@ -389,10 +313,10 @@ export class ParticleSphereEntity {
   }
 
   /**
-   * Convert spherical coordinates to UV coordinates for EPSG:4326 mapping
-   * theta: azimuth (0 to 2π) -> U (0 to 1, wraps around)
-   * phi: inclination (0 to π, 0=north, π=south) -> V (0 to 1, 0=north, 1=south)
+   * DEPRECATED: Convert spherical coordinates to UV coordinates for EPSG:4326 mapping
+   * Earth mode disabled - this method is kept but not called
    */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   private sphericalToUV(theta: number, phi: number): { u: number; v: number } {
     // U: longitude mapping (theta wraps around)
     const u = (theta / (Math.PI * 2)) % 1.0
@@ -403,10 +327,10 @@ export class ParticleSphereEntity {
   }
 
   /**
-   * Convert 3D position to spherical coordinates for earth mapping
-   * Expects earth coordinates where Y is vertical (poles), X/Z is horizontal (longitude)
-   * Note: This is called with already-transformed coordinates from getUVWithRotation
+   * DEPRECATED: Convert 3D position to spherical coordinates for earth mapping
+   * Earth mode disabled - this method is kept but not called
    */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   private positionToSpherical(
     x: number,
     y: number,
@@ -432,10 +356,10 @@ export class ParticleSphereEntity {
   }
 
   /**
-   * Get UV coordinates accounting for mesh rotation
-   * This ensures the texture rotates correctly with the earth
-   * For earth: rotate around Y axis (vertical) to spin horizontally
+   * DEPRECATED: Get UV coordinates accounting for mesh rotation
+   * Earth mode disabled - this method is kept but not called
    */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   private getUVWithRotation(
     x: number,
     y: number,
@@ -487,9 +411,10 @@ export class ParticleSphereEntity {
 
 
   /**
-   * Precalculate earth colors for all rotation angles
-   * Generates color lookup tables for fast runtime interpolation
+   * DEPRECATED: Precalculate earth colors for all rotation angles
+   * Earth mode disabled - this method is kept but not called
    */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   private precalculateEarthColors(): void {
     const numBuckets = ANIMATION_CONSTANTS.colorPrecalculation.rotationBuckets
     this.earthColors.bucketAngleStep = (Math.PI * 2) / numBuckets
@@ -538,9 +463,10 @@ export class ParticleSphereEntity {
   }
 
   /**
-   * Get interpolated earth colors for current rotation angle
-   * Interpolates between two closest rotation buckets
+   * DEPRECATED: Get interpolated earth colors for current rotation angle
+   * Earth mode disabled - this method is kept but not called
    */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   private getEarthColorsForRotation(rotationY: number): Float32Array | null {
     // Check if rotation buckets are populated
     if (
@@ -576,68 +502,28 @@ export class ParticleSphereEntity {
   }
 
   /**
-   * Update base positions by lerping between mode-specific targets
-   * Uses direct index-to-index mapping with surface-constrained interpolation
+   * Update base positions - simplified to always use uniform positions
+   * DEPRECATED: Mode switching removed, always uses uniform positions
    */
   private updateBasePositions(): void {
-    const lerpFactor = 0.02
-    const targetPositions =
-      this.currentMode === 'earth' ? this.continentPositions : this.uniformPositions
-
-    // Lerp along sphere surface (not through interior)
-    for (let i = 0; i < this.particleCount; i++) {
-      const i3 = i * 3
-
-      // Get current and target positions
-      const currX = this.basePositions[i3]
-      const currY = this.basePositions[i3 + 1]
-      const currZ = this.basePositions[i3 + 2]
-
-      const targetX = targetPositions[i3]
-      const targetY = targetPositions[i3 + 1]
-      const targetZ = targetPositions[i3 + 2]
-
-      // Standard lerp
-      const lerpedX = currX + (targetX - currX) * lerpFactor
-      const lerpedY = currY + (targetY - currY) * lerpFactor
-      const lerpedZ = currZ + (targetZ - currZ) * lerpFactor
-
-      // Normalize back to sphere surface (project onto sphere)
-      const length = Math.sqrt(
-        lerpedX * lerpedX + lerpedY * lerpedY + lerpedZ * lerpedZ,
-      )
-      if (length > 0.0001) {
-        // Preserve the target radius (with continent elevation)
-        const targetRadius = Math.sqrt(
-          targetX * targetX + targetY * targetY + targetZ * targetZ,
-        )
-        this.basePositions[i3] = (lerpedX / length) * targetRadius
-        this.basePositions[i3 + 1] = (lerpedY / length) * targetRadius
-        this.basePositions[i3 + 2] = (lerpedZ / length) * targetRadius
-      }
-    }
+    // No-op: base positions are already set to uniform positions in constructor
+    // This method kept for compatibility but does nothing
   }
 
   /**
-   * Apply colors with smooth lerping toward target colors
-   * Uses precalculated color lookup for both modes
+   * Apply colors - simplified to always use white colors
+   * DEPRECATED: Mode switching removed, always uses white
    */
   private applyColors(): void {
     const colors = this.geometry.attributes.color.array as Float32Array
     const lerpFactor = 0.05
 
-    // Get target colors based on mode
-    const targetColors =
-      this.currentMode === 'earth'
-        ? this.getEarthColorsForRotation(this.mesh.rotation.y)
-        : this.defaultColors
+    // Always use white colors (only mode now)
+    const targetColors = this.defaultColors
 
-    // Only apply if target colors are available
-    if (targetColors) {
-      // Simple lerp (same logic for both modes)
-      for (let i = 0; i < this.particleCount * 3; i++) {
-        colors[i] += (targetColors[i] - colors[i]) * lerpFactor
-      }
+    // Lerp toward white
+    for (let i = 0; i < this.particleCount * 3; i++) {
+      colors[i] += (targetColors[i] - colors[i]) * lerpFactor
     }
 
     this.geometry.attributes.color.needsUpdate = true
@@ -855,19 +741,30 @@ export class ParticleSphereEntity {
     this.autoRotationEnabled = enabled
   }
 
+  /**
+   * DEPRECATED: Mode switching removed - only uniform white sphere mode now
+   * This method is kept for compatibility but does nothing
+   */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   setMode(mode: SphereMode) {
-    this.currentMode = mode
+    // No-op: mode switching disabled
+    // this.currentMode = mode
   }
 
+  /**
+   * DEPRECATED: Mode switching removed - only uniform white sphere mode now
+   * Always returns 'default' for compatibility
+   */
   getMode(): SphereMode {
-    return this.currentMode
+    return 'default' // Always default mode now
+    // return this.currentMode
   }
 
   dispose() {
     this.geometry.dispose()
     this.material.dispose()
     this.texture.dispose()
-    // Clean up heightmap resources
+    // DEPRECATED: Clean up heightmap resources (earth mode disabled, but kept for compatibility)
     if (this.heightmapCanvas) {
       this.heightmapCanvas.width = 0
       this.heightmapCanvas.height = 0
