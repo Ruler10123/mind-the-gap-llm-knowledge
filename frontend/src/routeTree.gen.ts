@@ -16,7 +16,6 @@ import { Route as FlightsRouteImport } from './routes/flights'
 import { Route as FlightPreviewRouteImport } from './routes/flight-preview'
 import { Route as FlightManagementRouteImport } from './routes/flight-management'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as RebookingIndexRouteImport } from './routes/rebooking/index'
 import { Route as PathfindingIndexRouteImport } from './routes/pathfinding/index'
 
 const RegistrationRoute = RegistrationRouteImport.update({
@@ -54,11 +53,6 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const RebookingIndexRoute = RebookingIndexRouteImport.update({
-  id: '/rebooking/',
-  path: '/rebooking/',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const PathfindingIndexRoute = PathfindingIndexRouteImport.update({
   id: '/pathfinding/',
   path: '/pathfinding/',
@@ -74,7 +68,6 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/registration': typeof RegistrationRoute
   '/pathfinding/': typeof PathfindingIndexRoute
-  '/rebooking/': typeof RebookingIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -85,7 +78,6 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/registration': typeof RegistrationRoute
   '/pathfinding': typeof PathfindingIndexRoute
-  '/rebooking': typeof RebookingIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -97,7 +89,6 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/registration': typeof RegistrationRoute
   '/pathfinding/': typeof PathfindingIndexRoute
-  '/rebooking/': typeof RebookingIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -110,7 +101,6 @@ export interface FileRouteTypes {
     | '/login'
     | '/registration'
     | '/pathfinding/'
-    | '/rebooking/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -121,7 +111,6 @@ export interface FileRouteTypes {
     | '/login'
     | '/registration'
     | '/pathfinding'
-    | '/rebooking'
   id:
     | '__root__'
     | '/'
@@ -132,7 +121,6 @@ export interface FileRouteTypes {
     | '/login'
     | '/registration'
     | '/pathfinding/'
-    | '/rebooking/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -144,7 +132,6 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   RegistrationRoute: typeof RegistrationRoute
   PathfindingIndexRoute: typeof PathfindingIndexRoute
-  RebookingIndexRoute: typeof RebookingIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -198,13 +185,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/rebooking/': {
-      id: '/rebooking/'
-      path: '/rebooking'
-      fullPath: '/rebooking/'
-      preLoaderRoute: typeof RebookingIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/pathfinding/': {
       id: '/pathfinding/'
       path: '/pathfinding'
@@ -224,7 +204,6 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   RegistrationRoute: RegistrationRoute,
   PathfindingIndexRoute: PathfindingIndexRoute,
-  RebookingIndexRoute: RebookingIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

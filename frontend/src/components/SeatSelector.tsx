@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { X } from 'lucide-react'
 
 interface Seat {
@@ -19,10 +19,17 @@ interface SeatSelectorProps {
 export function SeatSelector({ currentSeat, onSelect, onClose }: SeatSelectorProps) {
   const [selectedSeat, setSelectedSeat] = useState<string | null>(currentSeat || null)
 
-  // Generate dummy seat map (rows 1-30, columns A-F)
-  const generateSeats = (): Seat[] => {
-    const seats: Seat[] = []
+  // Generate seat map once using useMemo to prevent regeneration
+  const seats = useMemo(() => {
+    const seatList: Seat[] = []
     const letters = ['A', 'B', 'C', 'D', 'E', 'F']
+
+    // Pre-determined occupied seats for consistency
+    const occupiedSeats = new Set([
+      '3B', '3E', '5A', '5F', '7C', '7D', '9B', '10E', '11A', '11F',
+      '15C', '15D', '17B', '17E', '18A', '19F', '20C', '20D', '22B',
+      '23E', '24A', '24F', '25C', '26D', '27B', '28E', '29A', '30F'
+    ])
 
     for (let row = 1; row <= 30; row++) {
       letters.forEach((letter) => {
@@ -46,8 +53,8 @@ export function SeatSelector({ currentSeat, onSelect, onClose }: SeatSelectorPro
           price = 45
         }
 
-        // Random occupied seats
-        if (Math.random() > 0.7 && seatId !== currentSeat) {
+        // Pre-determined occupied seats
+        if (occupiedSeats.has(seatId) && seatId !== currentSeat) {
           status = 'occupied'
         }
 
@@ -56,15 +63,17 @@ export function SeatSelector({ currentSeat, onSelect, onClose }: SeatSelectorPro
           status = 'selected'
         }
 
-        seats.push({ id: seatId, row, letter, type, status, price })
+        seatList.push({ id: seatId, row, letter, type, status, price })
       })
     }
 
-    return seats
-  }
+    return seatList
+  }, [currentSeat]) // Only regenerate if currentSeat changes
 
-  const seats = generateSeats()
-  const rows = Array.from(new Set(seats.map(s => s.row))).sort((a, b) => a - b)
+  const rows = useMemo(() =>
+    Array.from(new Set(seats.map(s => s.row))).sort((a, b) => a - b),
+    [seats]
+  )
 
   const getSeatColor = (seat: Seat) => {
     if (seat.id === selectedSeat) {

@@ -70,10 +70,13 @@ class WeatherService:
                 # Extract city name from response (more reliable than query parameter)
                 city_name = data.get("name", city.split(",")[0] if "," in city else city)
 
+                temp_f = int(round(main.get("temp", 70)))
+                condition = weather.get("main", "Clear")
+
                 return {
                     "location": city_name,
-                    "temp": int(round(main.get("temp", 70))),
-                    "condition": weather.get("main", "Clear"),
+                    "temp": temp_f,
+                    "condition": condition,
                     "high": int(round(main.get("temp_max", main.get("temp", 75)))),
                     "low": int(round(main.get("temp_min", main.get("temp", 65)))),
                     "humidity": int(round(main.get("humidity", 50))),
@@ -81,7 +84,8 @@ class WeatherService:
                     "visibility": round(visibility_miles, 1),
                     "uvIndex": uv_index,
                     "icon": weather.get("icon", "01d"),
-                    "description": weather.get("description", "clear sky"),
+                    "description": weather.get("description", "clear sky").capitalize(),
+                    "advice": self._get_weather_advice(condition, temp_f),
                 }
         except httpx.HTTPStatusError as e:
             error_detail = ""
@@ -168,10 +172,13 @@ class WeatherService:
                 # Extract city name from response (more reliable than query parameter)
                 city_name = data.get("name", city.split(",")[0] if "," in city else city)
 
+                temp_f = int(round(main.get("temp", 70)))
+                condition = weather.get("main", "Clear")
+
                 return {
                     "location": city_name,
-                    "temp": int(round(main.get("temp", 70))),
-                    "condition": weather.get("main", "Clear"),
+                    "temp": temp_f,
+                    "condition": condition,
                     "high": int(round(main.get("temp_max", main.get("temp", 75)))),
                     "low": int(round(main.get("temp_min", main.get("temp", 65)))),
                     "humidity": int(round(main.get("humidity", 50))),
@@ -179,7 +186,8 @@ class WeatherService:
                     "visibility": round(visibility_miles, 1),
                     "uvIndex": uv_index,
                     "icon": weather.get("icon", "01d"),
-                    "description": weather.get("description", "clear sky"),
+                    "description": weather.get("description", "clear sky").capitalize(),
+                    "advice": self._get_weather_advice(condition, temp_f),
                 }
         except httpx.HTTPStatusError as e:
             error_detail = ""
@@ -206,7 +214,7 @@ class WeatherService:
         In production, use One Call API 3.0 for accurate UV data.
         """
         condition_lower = condition.lower()
-        
+
         # Cloudy/rainy conditions reduce UV
         if "cloud" in condition_lower or "rain" in condition_lower or "storm" in condition_lower:
             return 2
@@ -215,6 +223,34 @@ class WeatherService:
             return 6
         else:
             return 4
+
+    def _get_weather_advice(self, condition: str, temp: int) -> str:
+        """Generate weather advice based on condition and temperature."""
+        condition_lower = condition.lower()
+
+        # Condition-based advice takes priority
+        if "rain" in condition_lower or "drizzle" in condition_lower:
+            return "Bring an umbrella and wear a waterproof jacket"
+        if "snow" in condition_lower:
+            return "Bundle up! Wear warm layers and waterproof boots"
+        if "thunderstorm" in condition_lower or "storm" in condition_lower:
+            return "Severe weather alert. Stay indoors if possible"
+        if "cloud" in condition_lower:
+            return "Overcast skies. Light jacket recommended"
+        if "mist" in condition_lower or "fog" in condition_lower:
+            return "Low visibility. Allow extra travel time"
+
+        # Temperature-based advice
+        if temp > 85:
+            return "Hot weather. Stay hydrated and wear light clothing"
+        if temp > 70:
+            return "Pleasant weather. Dress comfortably"
+        if temp > 50:
+            return "Mild weather. Light jacket recommended"
+        if temp > 32:
+            return "Cool weather. Dress in layers"
+
+        return "Cold weather. Wear warm clothing"
 
 
 # Global instance

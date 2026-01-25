@@ -6,6 +6,7 @@ import { FlightDetailsCard } from '../FlightDetailsCard'
 import { WeatherWidget } from '../WeatherWidget'
 import FlightDelayInfo from './FlightDelayInfo'
 import FlightCancellationInfo from './FlightCancellationInfo'
+import OverbookingInfo from './OverbookingInfo'
 import { renderMarkdown } from '@/utils/markdown'
 
 interface InlineChatProps {
@@ -385,6 +386,146 @@ export function InlineChat({
                           {...message.componentData}
                           sendMessage={sendMessage}
                         />
+                      </motion.div>
+                    )}
+                    {message.componentType === 'overbooking_offer' && message.componentData && (
+                      <motion.div
+                        initial={{ scale: 0.95 }}
+                        animate={{ scale: 1 }}
+                        transition={{ type: 'spring', damping: 20, stiffness: 300, delay: 0.05 }}
+                        className="w-full max-w-2xl"
+                      >
+                        <OverbookingInfo
+                          offer={message.componentData}
+                          sendMessage={sendMessage}
+                        />
+                      </motion.div>
+                    )}
+                    {message.componentType === 'seat_management' && message.componentData && (
+                      <motion.div
+                        initial={{ scale: 0.95 }}
+                        animate={{ scale: 1 }}
+                        transition={{ type: 'spring', damping: 20, stiffness: 300, delay: 0.05 }}
+                        className="w-full max-w-2xl backdrop-blur-xl bg-white/20 border border-white/30 rounded-2xl p-6 shadow-xl"
+                      >
+                        <h3 className="text-lg font-semibold text-[#0E1F34] mb-4">Seat Management</h3>
+                        <div className="space-y-3">
+                          <p className="text-sm text-gray-700">
+                            <span className="font-medium">Current Seat:</span> {message.componentData.currentSeat}
+                          </p>
+                          <p className="text-sm text-gray-700">
+                            <span className="font-medium">Class:</span> {message.componentData.seatClass}
+                          </p>
+                          {message.componentData.features && (
+                            <p className="text-sm text-gray-700">
+                              <span className="font-medium">Features:</span> {message.componentData.features.join(', ')}
+                            </p>
+                          )}
+                        </div>
+                      </motion.div>
+                    )}
+                    {message.componentType === 'meal_preference' && message.componentData && (
+                      <motion.div
+                        initial={{ scale: 0.95 }}
+                        animate={{ scale: 1 }}
+                        transition={{ type: 'spring', damping: 20, stiffness: 300, delay: 0.05 }}
+                        className="w-full max-w-2xl backdrop-blur-xl bg-white/20 border border-white/30 rounded-2xl p-6 shadow-xl"
+                      >
+                        <h3 className="text-lg font-semibold text-[#0E1F34] mb-4">Meal Preferences</h3>
+                        <div className="space-y-4">
+                          <p className="text-sm text-gray-700">
+                            <span className="font-medium">Current Meal:</span> {message.componentData.currentMeal}
+                          </p>
+                          {message.componentData.mealService && (
+                            <p className="text-xs text-gray-600">{message.componentData.mealService}</p>
+                          )}
+                          {message.componentData.availableMeals && (
+                            <div className="space-y-2 mt-4">
+                              <p className="text-sm font-medium text-gray-700">Available Options:</p>
+                              {message.componentData.availableMeals.map((meal: any) => (
+                                <div key={meal.id} className="p-3 rounded-lg bg-white/30 border border-white/40">
+                                  <p className="font-medium text-sm text-[#0E1F34]">{meal.name}</p>
+                                  <p className="text-xs text-gray-600 mt-1">{meal.description}</p>
+                                  {meal.dietary && (
+                                    <p className="text-xs text-gray-500 mt-1">{meal.dietary.join(', ')}</p>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </motion.div>
+                    )}
+                    {message.componentType === 'checked_bags' && message.componentData && (
+                      <motion.div
+                        initial={{ scale: 0.95 }}
+                        animate={{ scale: 1 }}
+                        transition={{ type: 'spring', damping: 20, stiffness: 300, delay: 0.05 }}
+                        className="w-full max-w-2xl backdrop-blur-xl bg-white/20 border border-white/30 rounded-2xl p-6 shadow-xl"
+                      >
+                        <h3 className="text-lg font-semibold text-[#0E1F34] mb-4">Checked Baggage</h3>
+                        <div className="space-y-3">
+                          <p className="text-sm text-gray-700">
+                            <span className="font-medium">Bags Checked:</span> {message.componentData.checkedBags} / {message.componentData.allowance}
+                          </p>
+                          <p className="text-sm text-gray-700">
+                            <span className="font-medium">Weight Limit:</span> {message.componentData.weight}
+                          </p>
+                          {message.componentData.bags && message.componentData.bags.map((bag: any) => (
+                            <div key={bag.id} className="p-3 rounded-lg bg-white/30 border border-white/40">
+                              <p className="text-sm font-medium text-[#0E1F34]">Tag: {bag.tagNumber}</p>
+                              <p className="text-xs text-gray-600 mt-1">Weight: {bag.weight}</p>
+                              <p className="text-xs text-gray-600">Status: {bag.status}</p>
+                              <p className="text-xs text-gray-600">Destination: {bag.destination}</p>
+                            </div>
+                          ))}
+                          <div className="text-xs text-gray-600 mt-3">
+                            <p>Additional bag: {message.componentData.additionalBagFee}</p>
+                            <p>Oversize fee: {message.componentData.oversizeFee}</p>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                    {message.componentType === 'wifi' && message.componentData && (
+                      <motion.div
+                        initial={{ scale: 0.95 }}
+                        animate={{ scale: 1 }}
+                        transition={{ type: 'spring', damping: 20, stiffness: 300, delay: 0.05 }}
+                        className="w-full max-w-2xl backdrop-blur-xl bg-white/20 border border-white/30 rounded-2xl p-6 shadow-xl"
+                      >
+                        <h3 className="text-lg font-semibold text-[#0E1F34] mb-4">WiFi Connection</h3>
+                        <div className="space-y-4">
+                          <p className="text-sm text-gray-700">
+                            <span className="font-medium">Network:</span> {message.componentData.network}
+                          </p>
+                          {message.componentData.plans && (
+                            <div className="space-y-2">
+                              <p className="text-sm font-medium text-gray-700">Available Plans:</p>
+                              {message.componentData.plans.map((plan: any) => (
+                                <div key={plan.id} className="p-3 rounded-lg bg-white/30 border border-white/40">
+                                  <div className="flex justify-between items-start">
+                                    <div>
+                                      <p className="font-medium text-sm text-[#0E1F34]">{plan.name}</p>
+                                      <p className="text-xs text-gray-600 mt-1">{plan.description}</p>
+                                      <p className="text-xs text-gray-500 mt-1">Speed: {plan.speed}</p>
+                                    </div>
+                                    <p className="font-bold text-[#C8102E]">${plan.price}</p>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                          {message.componentData.instructions && (
+                            <div className="mt-4">
+                              <p className="text-sm font-medium text-gray-700 mb-2">How to Connect:</p>
+                              <ol className="list-decimal list-inside space-y-1 text-sm text-gray-600">
+                                {message.componentData.instructions.map((instruction: string, i: number) => (
+                                  <li key={i}>{instruction}</li>
+                                ))}
+                              </ol>
+                            </div>
+                          )}
+                        </div>
                       </motion.div>
                     )}
                   </motion.div>
