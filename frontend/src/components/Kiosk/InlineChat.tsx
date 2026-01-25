@@ -1,5 +1,4 @@
 import { useRef, useEffect } from 'react'
-import { motion } from 'framer-motion'
 import { Send, Mic, MapPin } from 'lucide-react'
 import { StreamingText } from '../StreamingText'
 import { FlightDetailsCard } from '../FlightDetailsCard'
@@ -157,12 +156,7 @@ export function InlineChat({
                       </div>
                     )}
                     {message.componentType === 'map' && message.componentData && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 20, scale: 0.95 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        transition={{ duration: 0.4, ease: "easeOut" }}
-                        className="w-full max-w-2xl mx-auto"
-                      >
+                      <div className="w-full max-w-2xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-400">
                         <div className="backdrop-blur-xl bg-white/95 rounded-2xl shadow-2xl border border-white/40 overflow-hidden">
                           <div className="bg-gradient-to-r from-[#0E1F34] to-[#1a3350] p-4 text-white">
                             <div className="flex items-center gap-2">
@@ -188,7 +182,7 @@ export function InlineChat({
                             )}
                           </div>
                         </div>
-                      </motion.div>
+                      </div>
                     )}
                   </div>
                 )
