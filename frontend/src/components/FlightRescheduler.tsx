@@ -192,13 +192,13 @@ export function FlightRescheduler({
 
           {/* Auto-Optimize Toggle */}
           {selectedFlightId && (
-            <div className="relative overflow-hidden rounded-2xl backdrop-blur-3xl bg-white/30 border border-white/40 shadow-xl p-4">
+            <div className="relative overflow-hidden rounded-2xl backdrop-blur-3xl bg-purple-50/40 border border-purple-200/60 shadow-xl p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-start gap-3 flex-1">
-                  <Wand2 className="w-5 h-5 text-[#C8102E] flex-shrink-0 mt-0.5" />
+                  <Wand2 className="w-5 h-5 text-purple-600 flex-shrink-0 mt-0.5" />
                   <div>
-                    <p className="text-sm font-medium text-[#0E1F34]">AI Auto-Optimize</p>
-                    <p className="text-xs font-light text-gray-600 mt-1">
+                    <p className="text-sm font-medium text-purple-900">AI Auto-Optimize</p>
+                    <p className="text-xs font-light text-purple-700 mt-1">
                       Let AI pick the best seat, meal, and options based on your preferences
                     </p>
                   </div>
@@ -207,7 +207,7 @@ export function FlightRescheduler({
                   onClick={() => setUseAutoOptimize(!useAutoOptimize)}
                   className={`
                     relative w-12 h-6 rounded-full transition-all
-                    ${useAutoOptimize ? 'bg-[#C8102E]' : 'bg-gray-300'}
+                    ${useAutoOptimize ? 'bg-purple-600' : 'bg-gray-300'}
                   `}
                 >
                   <div className={`
@@ -221,7 +221,7 @@ export function FlightRescheduler({
 
           {/* Confirm/Cancel Actions */}
           {selectedFlightId && (
-            <div className="pt-6">
+            <div className="sticky bottom-0 pt-6">
               <div className="relative overflow-hidden rounded-3xl backdrop-blur-3xl bg-white/40 border border-white/50 shadow-2xl p-6">
                 <div className="flex items-center justify-between">
                   <div>
@@ -300,7 +300,7 @@ export function FlightRescheduler({
             </div>
 
             {/* Action Buttons */}
-            <div className="pt-6">
+            <div className="sticky bottom-0 pt-6">
               <div className="relative overflow-hidden rounded-3xl backdrop-blur-3xl bg-white/40 border border-white/50 shadow-2xl p-6">
                 <div className="flex items-center justify-between">
                   <p className="text-sm font-light text-gray-600">
@@ -338,9 +338,9 @@ export function FlightRescheduler({
       <div className="w-full max-w-4xl mx-auto">
         <div className="space-y-6">
           {/* Header */}
-          <div className="relative overflow-hidden rounded-3xl backdrop-blur-3xl bg-white/30 border border-white/40 shadow-xl p-8">
+          <div className="relative overflow-hidden rounded-3xl backdrop-blur-3xl bg-purple-50/40 border border-purple-200/60 shadow-xl p-8">
             <div className="flex items-start gap-4">
-              <Wand2 className="w-8 h-8 text-[#C8102E] flex-shrink-0 mt-1" />
+              <Wand2 className="w-8 h-8 text-purple-600 flex-shrink-0 mt-1" />
               <div className="flex-1">
                 <h2 className="text-2xl font-light text-[#0E1F34] mb-2">
                   AI-Optimized Preferences
@@ -358,57 +358,57 @@ export function FlightRescheduler({
 
             <div className="space-y-4">
               {/* Seat */}
-              <div className="flex items-center justify-between py-3 px-4 rounded-xl bg-white/20 border border-white/30">
+              <div className="flex items-center justify-between py-3 px-4 rounded-xl bg-purple-50/40 border border-purple-200/60">
                 <div className="flex items-center gap-3">
-                  <Armchair className="w-5 h-5 text-[#C8102E]" />
+                  <Armchair className="w-5 h-5 text-purple-600" />
                   <div>
                     <p className="text-sm font-light text-gray-700">Seat Assignment</p>
-                    <p className="text-xs font-light text-gray-600 mt-0.5">
+                    <p className="text-xs font-light text-purple-600 mt-0.5">
                       Exit row, window seat for extra legroom
                     </p>
                   </div>
                 </div>
                 <div className="text-right">
                   <p className="text-sm font-light text-gray-500 line-through">{preferences.seat}</p>
-                  <p className="text-lg font-light text-[#0E1F34]">14A</p>
+                  <p className="text-lg font-light text-purple-700">14A</p>
                 </div>
               </div>
 
               {/* Meal */}
-              <div className="flex items-center justify-between py-3 px-4 rounded-xl bg-white/20 border border-white/30">
+              <div className="flex items-center justify-between py-3 px-4 rounded-xl bg-purple-50/40 border border-purple-200/60">
                 <div className="flex items-center gap-3">
-                  <UtensilsCrossed className="w-5 h-5 text-[#C8102E]" />
+                  <UtensilsCrossed className="w-5 h-5 text-purple-600" />
                   <div>
                     <p className="text-sm font-light text-gray-700">Meal Preference</p>
-                    <p className="text-xs font-light text-gray-600 mt-0.5">
+                    <p className="text-xs font-light text-purple-600 mt-0.5">
                       Based on your dietary profile
                     </p>
                   </div>
                 </div>
                 <div className="text-right">
                   <p className="text-sm font-light text-gray-500 line-through">{preferences.meal}</p>
-                  <p className="text-lg font-light text-[#0E1F34]">Grilled Chicken</p>
+                  <p className="text-lg font-light text-purple-700">Grilled Chicken</p>
                 </div>
               </div>
 
               {/* Bags */}
-              <div className="flex items-center justify-between py-3 px-4 rounded-xl bg-white/20 border border-white/30">
+              <div className="flex items-center justify-between py-3 px-4 rounded-xl bg-purple-50/40 border border-purple-200/60">
                 <div className="flex items-center gap-3">
-                  <Luggage className="w-5 h-5 text-[#C8102E]" />
+                  <Luggage className="w-5 h-5 text-purple-600" />
                   <div>
                     <p className="text-sm font-light text-gray-700">Checked Bags</p>
-                    <p className="text-xs font-light text-gray-600 mt-0.5">
+                    <p className="text-xs font-light text-purple-600 mt-0.5">
                       Optimal for your trip duration
                     </p>
                   </div>
                 </div>
-                <p className="text-lg font-light text-[#0E1F34]">{preferences.bags} bag</p>
+                <p className="text-lg font-light text-purple-700">{preferences.bags} bag</p>
               </div>
             </div>
           </div>
 
           {/* Action Buttons */}
-          <div className="pt-6">
+          <div className="sticky bottom-0 pt-6">
             <div className="relative overflow-hidden rounded-3xl backdrop-blur-3xl bg-white/40 border border-white/50 shadow-2xl p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -426,7 +426,7 @@ export function FlightRescheduler({
                   </button>
                   <button
                     onClick={handleAutoOptimizeConfirm}
-                    className="px-8 py-4 rounded-full bg-[#C8102E] hover:bg-[#a00d26] text-white font-light transition-all shadow-lg flex items-center gap-2"
+                    className="px-8 py-4 rounded-full bg-purple-600 hover:bg-purple-700 text-white font-light transition-all shadow-lg flex items-center gap-2"
                   >
                     <Wand2 className="w-4 h-4" />
                     Confirm AI Selection
@@ -565,7 +565,7 @@ export function FlightRescheduler({
           )}
 
           {/* Confirm Button */}
-          <div className="pt-6">
+          <div className="sticky bottom-0 pt-6">
             <div className="relative overflow-hidden rounded-3xl backdrop-blur-3xl bg-white/40 border border-white/50 shadow-2xl p-6">
               <div className="flex items-center justify-between">
                 <div>

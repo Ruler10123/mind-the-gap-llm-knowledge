@@ -622,14 +622,17 @@ def show_rebooking_options(
     is_refundable: bool = False,
     reason: str = "passenger_request"
 ) -> dict:
-    """Show rebooking modal when user wants to reschedule.
-    IMPORTANT: Introduce the rebooking options available."""
+    """Show flight rescheduling options when user wants to reschedule, change, or rebook their flight.
+    Use this when the user asks to reschedule, change their flight, or see alternative flights.
+    IMPORTANT: After calling this tool, you MUST provide a brief spoken response (1-2 sentences)
+    introducing the rebooking options. For example: 'Here are alternative flights you can choose from.'"""
 
     # Mock current flight
     current = {
         "flightNumber": flight_number,
         "departureTime": "3:00 PM",
         "arrivalTime": "4:30 PM",
+        "departureDate": "Jan 25, 2026",
         "origin": {"code": "DFW", "city": "Dallas"},
         "destination": {"code": "LAX", "city": "Los Angeles"},
     }
@@ -704,137 +707,10 @@ def search_knowledge_base(query: str) -> str:
         return f"Unable to search knowledge base: {str(e)}"
 
 
-@tool
-def show_seat_management() -> dict:
-    """Show seat selection interface when user asks about their seat, changing seats, or viewing seat map.
-    IMPORTANT: After calling this tool, provide a brief spoken response acknowledging what you're showing."""
-    return {
-        "component_type": "seat_management",
-        "data": {
-            "currentSeat": "12C",
-            "seatClass": "Main Cabin",
-            "features": ["Window", "Extra Legroom"],
-            "availableSeats": [
-                {"id": "12A", "type": "window", "available": True, "price": 0},
-                {"id": "12B", "type": "middle", "available": True, "price": 0},
-                {"id": "12C", "type": "aisle", "available": False, "price": 0, "current": True},
-                {"id": "14A", "type": "window", "available": True, "price": 35, "extra": "Exit Row"},
-                {"id": "14F", "type": "aisle", "available": True, "price": 35, "extra": "Exit Row"},
-                {"id": "16C", "type": "aisle", "available": True, "price": 15},
-            ]
-        }
-    }
-
-
-@tool
-def show_meal_preference() -> dict:
-    """Show meal selection interface when user asks about meals, food preferences, or in-flight dining.
-    IMPORTANT: After calling this tool, provide a brief spoken response acknowledging what you're showing."""
-    return {
-        "component_type": "meal_preference",
-        "data": {
-            "currentMeal": "Vegetarian Pasta",
-            "mealService": "Complimentary meal service on this flight",
-            "availableMeals": [
-                {
-                    "id": "chicken",
-                    "name": "Grilled Chicken",
-                    "description": "Herb-seasoned grilled chicken breast with roasted vegetables",
-                    "dietary": ["Gluten-Free"],
-                    "available": True
-                },
-                {
-                    "id": "pasta",
-                    "name": "Vegetarian Pasta",
-                    "description": "Penne pasta with marinara sauce and seasonal vegetables",
-                    "dietary": ["Vegetarian"],
-                    "available": True,
-                    "selected": True
-                },
-                {
-                    "id": "salad",
-                    "name": "Mediterranean Salad",
-                    "description": "Fresh greens with feta, olives, and balsamic vinaigrette",
-                    "dietary": ["Vegetarian", "Vegan Option"],
-                    "available": True
-                }
-            ]
-        }
-    }
-
-
-@tool
-def show_checked_bags() -> dict:
-    """Show checked baggage information when user asks about bags, luggage, or baggage allowance.
-    IMPORTANT: After calling this tool, provide a brief spoken response acknowledging what you're showing."""
-    return {
-        "component_type": "checked_bags",
-        "data": {
-            "checkedBags": 1,
-            "allowance": 2,
-            "weight": "23 kg (50 lbs) per bag",
-            "bags": [
-                {
-                    "id": "bag-1",
-                    "tagNumber": "AA 1234567890",
-                    "weight": "18 kg (40 lbs)",
-                    "status": "Checked in",
-                    "destination": "LAX"
-                }
-            ],
-            "additionalBagFee": "$35 per bag",
-            "oversizeFee": "$200 per bag"
-        }
-    }
-
-
-@tool
-def show_wifi() -> dict:
-    """Show WiFi connection information when user asks about internet, WiFi, or in-flight connectivity.
-    IMPORTANT: After calling this tool, provide a brief spoken response acknowledging what you're showing."""
-    return {
-        "component_type": "wifi",
-        "data": {
-            "available": True,
-            "network": "AA-Inflight",
-            "plans": [
-                {
-                    "id": "free",
-                    "name": "Free Messaging",
-                    "price": 0,
-                    "description": "iMessage, WhatsApp, and Facebook Messenger",
-                    "speed": "Basic"
-                },
-                {
-                    "id": "full",
-                    "name": "Full Flight WiFi",
-                    "price": 12,
-                    "description": "Unlimited high-speed internet for the entire flight",
-                    "speed": "High Speed"
-                },
-                {
-                    "id": "streaming",
-                    "name": "Streaming Pass",
-                    "price": 18,
-                    "description": "Stream video and music without buffering",
-                    "speed": "Maximum Speed"
-                }
-            ],
-            "instructions": [
-                "Connect to 'AA-Inflight' WiFi network",
-                "Open your browser",
-                "Select a plan and complete payment",
-                "Start browsing!"
-            ]
-        }
-    }
-
-
 tools = [
     get_current_time, add, multiply, divide,
     show_flight_details, show_weather, show_map, show_destination_info,
     show_flight_delay, show_flight_cancellation, show_overbooking_offer, show_rebooking_options,
-    show_seat_management, show_meal_preference, show_checked_bags, show_wifi,
     search_knowledge_base
 ]
 tools_by_name = {t.name: t for t in tools}
@@ -858,14 +734,10 @@ You have access to callable tools (nodes):
 - show_flight_cancellation: when user asks about cancellations or their flight is cancelled
 - show_overbooking_offer: when airline needs volunteers due to overbooking
 - show_rebooking_options: when user wants to reschedule, change flights, or rebook
-- show_seat_management: when user asks about their seat, changing seats, or viewing seat map
-- show_meal_preference: when user asks about meals, food preferences, or in-flight dining
-- show_checked_bags: when user asks about bags, luggage, or baggage allowance
-- show_wifi: when user asks about internet, WiFi, or in-flight connectivity
 - search_knowledge_base: use when the user asks about airport policies, procedures, baggage rules, security guidelines, available services, or facility information
 
-CRITICAL: After calling show_flight_details, show_weather, show_map, show_destination_info, show_flight_delay, show_flight_cancellation, show_overbooking_offer, show_rebooking_options, show_seat_management, show_meal_preference, show_checked_bags, or show_wifi, you MUST provide a brief spoken response (1-2 sentences) to accompany the visual component.
-For example: "Here are your flight details" or "Here's the weather in Dallas." or "Here are directions to Gate A28. Follow the highlighted path." or "Here's information about the Admirals Club lounge." or "Your flight is delayed by 90 minutes" or "I'm showing you alternative flights." or "Here's your current seat." or "Here are your meal options." or "Here's your baggage info." or "Here's how to connect to WiFi."
+CRITICAL: After calling show_flight_details, show_weather, show_map, show_destination_info, show_flight_delay, show_flight_cancellation, show_overbooking_offer, or show_rebooking_options, you MUST provide a brief spoken response (1-2 sentences) to accompany the visual component.
+For example: "Here are your flight details" or "Here's the weather in Dallas." or "Here are directions to Gate A28. Follow the highlighted path." or "Here's information about the Admirals Club lounge." or "Your flight is delayed by 90 minutes" or "I'm showing you alternative flights."
 
 Call the appropriate tool when it helps answer the user. Otherwise reply directly. Keep replies clear and concise and do not use markdown formatting."""
 

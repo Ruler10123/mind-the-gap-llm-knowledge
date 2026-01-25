@@ -7,6 +7,7 @@ import { WeatherWidget } from '../WeatherWidget'
 import FlightDelayInfo from './FlightDelayInfo'
 import FlightCancellationInfo from './FlightCancellationInfo'
 import OverbookingInfo from './OverbookingInfo'
+import { FlightRescheduler } from '../FlightRescheduler'
 import { renderMarkdown } from '@/utils/markdown'
 
 interface InlineChatProps {
@@ -398,6 +399,26 @@ export function InlineChat({
                         <OverbookingInfo
                           offer={message.componentData}
                           sendMessage={sendMessage}
+                        />
+                      </motion.div>
+                    )}
+                    {(message.componentType === 'flight_rescheduler' || message.componentType === 'rebooking_options') && message.componentData && (
+                      <motion.div
+                        initial={{ scale: 0.95 }}
+                        animate={{ scale: 1 }}
+                        transition={{ type: 'spring', damping: 20, stiffness: 300, delay: 0.05 }}
+                        className="w-full max-w-2xl"
+                      >
+                        <FlightRescheduler
+                          isRefundable={message.componentData.isRefundable ?? true}
+                          currentFlight={message.componentData.currentFlight}
+                          alternatives={message.componentData.alternatives ?? []}
+                          onConfirm={(selectedFlight) => {
+                            sendMessage(`Confirm rebooking to flight ${selectedFlight.flightNumber} departing ${selectedFlight.departureTime} on ${selectedFlight.departureDate}`)
+                          }}
+                          onCancel={() => {
+                            sendMessage('I want to cancel the rebooking')
+                          }}
                         />
                       </motion.div>
                     )}
