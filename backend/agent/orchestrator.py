@@ -46,7 +46,8 @@ class AgentOrchestrator:
                             content = msg_chunk.content
                             if isinstance(content, str) and content.startswith("{"):
                                 data = json.loads(content)
-                                if data.get("ui_action") == "OPEN_MODAL":
+                                ui_action = data.get("ui_action")
+                                if ui_action in ("OPEN_MODAL", "NAVIGATE"):
                                     yield UIActionEvent(
                                         action=data["ui_action"],
                                         modal_id=data.get("modal_id", ""),

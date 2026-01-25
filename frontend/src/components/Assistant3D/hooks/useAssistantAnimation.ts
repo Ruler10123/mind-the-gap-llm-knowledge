@@ -64,27 +64,29 @@ export function useAssistantAnimation(
       currentScaleRef.current.copy(entity.mesh.scale)
       currentPositionRef.current.copy(entity.mesh.position)
     }
-    
+
     // Calculate passive mode transformations
     const calculatePassiveModeTransform = () => {
-      if (!(camera instanceof THREE.PerspectiveCamera)) return { scale: 1, y: 0 }
-      
+      if (!(camera instanceof THREE.PerspectiveCamera))
+        return { scale: 1, y: 0 }
+
       const cameraDistance = camera.position.z
       const fovRad = (camera.fov * Math.PI) / 180
       // Visible width accounts for aspect ratio (FOV is vertical, width = height * aspect)
-      const visibleWidth = 2 * cameraDistance * Math.tan(fovRad / 2) * camera.aspect
-      
+      const visibleWidth =
+        2 * cameraDistance * Math.tan(fovRad / 2) * camera.aspect
+
       // Top 30% of sphere (y from 0.7 to 1.0)
       // At y=0.7, the horizontal radius is sqrt(1 - 0.7²) = sqrt(0.51) ≈ 0.714
       const sphereTop30Width = 2 * Math.sqrt(1 - 0.4 * 0.4)
-      
+
       // Scale to make top 30% width match screen width
       const scale = visibleWidth / sphereTop30Width
-      
+
       // Move sphere down so only top 30% is visible
       // Position so that y=0.7*scale aligns with bottom of visible area
       const y = -scale * 1.3
-      
+
       return { scale, y }
     }
 
@@ -93,23 +95,23 @@ export function useAssistantAnimation(
 
       const delta = clock.getDelta()
       const frequencyData = getFrequencyData()
-      
+
       // Calculate target transform based on mode
       const targetScale = new THREE.Vector3(1, 1, 1)
       const targetPosition = new THREE.Vector3(0, 0, 0)
-      
+
       const usePassiveLayout = mode === 'passive'
       if (usePassiveLayout) {
         const transform = calculatePassiveModeTransform()
         targetScale.set(transform.scale, transform.scale, transform.scale)
         targetPosition.y = transform.y
       }
-      
+
       // Smoothly interpolate scale and position
       const lerpFactor = ANIMATION_CONSTANTS.passiveMode.transitionSpeed
       currentScaleRef.current.lerp(targetScale, lerpFactor)
       currentPositionRef.current.lerp(targetPosition, lerpFactor)
-      
+
       // Apply transformations to entity mesh
       entity.mesh.scale.copy(currentScaleRef.current)
       entity.mesh.position.copy(currentPositionRef.current)

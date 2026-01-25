@@ -9,6 +9,9 @@ type WebSocketMessage = {
   characters?: string[];
   character_start_times_seconds?: number[];
   character_end_times_seconds?: number[];
+  action?: string;
+  modal_id?: string;
+  payload?: Record<string, any>;
 };
 
 type MessageHandlers = {
@@ -16,6 +19,7 @@ type MessageHandlers = {
   onAlignment?: (alignment: CharacterAlignment) => void;
   onDone?: () => void;
   onError?: (message: string) => void;
+  onUIAction?: (event: { action: string; payload: Record<string, any> }) => void;
 };
 
 /**
@@ -70,6 +74,17 @@ export function useWebSocketMessages(handlers: MessageHandlers) {
             );
             handlers.onError?.(msg.message ?? "Unknown error");
             break;
+          case "ui_action": {
+            const action = msg.action ?? "";
+            const payload = msg.payload ?? {};
+            console.log(
+              "[useWebSocketMessages] UI action received:",
+              action,
+              payload
+            );
+            handlers.onUIAction?.({ action, payload });
+            break;
+          }
           default:
             console.log("[useWebSocketMessages] Unknown message type:", msg.type);
         }

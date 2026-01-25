@@ -96,7 +96,7 @@ export default function LoginModal({ isOpen, onClose, type }: LoginModalProps) {
         console.log('Authentication successful:', data.user)
         // Store user data in localStorage or state management
         localStorage.setItem('user', JSON.stringify(data.user))
-        
+
         // Dispatch custom event to notify other components
         window.dispatchEvent(new Event('userAuthenticated'))
 
@@ -109,7 +109,9 @@ export default function LoginModal({ isOpen, onClose, type }: LoginModalProps) {
       }
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : 'Authentication failed. Please try again.'
+        err instanceof Error
+          ? err.message
+          : 'Authentication failed. Please try again.',
       )
       console.error('Login error:', err)
     } finally {
@@ -161,7 +163,9 @@ export default function LoginModal({ isOpen, onClose, type }: LoginModalProps) {
                 <div className="absolute inset-0 flex items-center justify-center bg-green-500/20 backdrop-blur-sm">
                   <div className="text-center">
                     <div className="text-6xl mb-2">✓</div>
-                    <p className="text-white font-semibold">Login Successful!</p>
+                    <p className="text-white font-semibold">
+                      Login Successful!
+                    </p>
                   </div>
                 </div>
               )}

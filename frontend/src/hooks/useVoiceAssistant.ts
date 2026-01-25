@@ -3,11 +3,13 @@ import { useSpeechRecognition } from "./useSpeechRecognition";
 import { useVoiceWebSocket } from "./useVoiceWebSocket";
 import { useAudioReveal } from "./useAudioReveal";
 import { useWebSocketMessages } from "./useWebSocketMessages";
+import { useNavigationHandler } from "./useNavigationHandler";
 
 export function useVoiceAssistant() {
   const [isProcessing, setIsProcessing] = useState(false);
   const { audioElRef, revealedText, isRevealing, playWithReveal, clearText } =
     useAudioReveal();
+  const { handleUIAction } = useNavigationHandler();
 
   const handleDone = useCallback(() => {
     console.log("[VoiceAssistant] Done message received, playing all chunks");
@@ -30,6 +32,7 @@ export function useVoiceAssistant() {
     useWebSocketMessages({
       onDone: handleDone,
       onError: handleError,
+      onUIAction: handleUIAction,
     });
 
   const {
