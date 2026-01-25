@@ -1,5 +1,7 @@
 """Configuration from environment variables."""
 
+from pathlib import Path
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -33,6 +35,16 @@ class Settings(BaseSettings):
     # RAG
     rag_top_k: int = 5
     embedding_model: str = "all-MiniLM-L6-v2"
+
+    # Authentication Settings
+    auth_mongo_uri: str = Field(default="", description="MongoDB Atlas connection string for auth")
+    auth_database_name: str = Field(default="access_control", description="Auth database name")
+    auth_collection_name: str = Field(default="users", description="Auth collection name")
+    auth_vector_index_name: str = Field(default="face_vector_index", description="Vector index name")
+    face_similarity_threshold: float = Field(default=0.6, ge=0.0, le=1.0, description="Face match threshold")
+    face_embedding_dimensions: int = Field(default=512, description="Facenet512 dimensions")
+    auth_temp_dir: Path = Field(default=Path("temp"), description="Temp files for auth")
+    auth_qr_dir: Path = Field(default=Path("qr_codes"), description="QR code storage")
 
     def api_key_elevenlabs(self) -> str:
         return self.elevenlabs_api_key

@@ -1,2 +1,9 @@
 __pycache__/
 .env
+
+# Auth runtime directories
+temp/
+qr_codes/
+*.png
+*.jpg
+*.jpeg
