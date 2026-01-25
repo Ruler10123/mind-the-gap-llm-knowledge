@@ -213,20 +213,38 @@ async def authenticate_face(
 
 
 @router.post("/qr", response_model=AuthResponse)
-async def authenticate_qr(request: QRAuthRequest):
-    """Authenticate passenger using QR code.
+async def authenticate_qr(
+    file: UploadFile = File(..., description="Image containing QR code")
+):
+    """Authenticate passenger using QR code from camera image."""
+    temp_file_path: Optional[Path] = None
 
-    Args:
-        request: QR authentication request with token
-
-    Returns:
-        Authentication result with user data if successful
-    """
     try:
-        # Query database by QR secret
-        user_doc = db_service.find_by_qr_secret(request.qr_token)
+        # Save uploaded file temporarily
+        file_extension = Path(file.filename).suffix if file.filename else ".jpg"
+        temp_filename = f"{uuid.uuid4()}{file_extension}"
+        temp_file_path = settings.auth_temp_dir / temp_filename
 
-        # Check if found
+        with open(temp_file_path, "wb") as buffer:
+            content = await file.read()
+            buffer.write(content)
+
+        # Decode QR code from image
+        try:
+            qr_secret = qr_service.decode_qr_from_image(temp_file_path)
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Failed to process image: {str(e)}")
+
+        # Check if QR code was found
+        if not qr_secret:
+            raise HTTPException(
+                status_code=400,
+                detail="No QR code detected in image. Please ensure QR code is clearly visible."
+            )
+
+        # Query database by QR secret
+        user_doc = db_service.find_by_qr_secret(qr_secret)
+
         if not user_doc:
             return AuthResponse(
                 status="failure",
@@ -247,5 +265,12 @@ async def authenticate_qr(request: QRAuthRequest):
             message="QR code verified successfully"
         )
 
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"QR authentication failed: {str(e)}")
+
+    finally:
+        # Cleanup temporary file
+        if temp_file_path and temp_file_path.exists():
+            temp_file_path.unlink()

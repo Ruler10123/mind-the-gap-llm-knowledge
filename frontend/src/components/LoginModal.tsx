@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { X } from 'lucide-react'
+import { useNavigate } from '@tanstack/react-router'
 
 interface LoginModalProps {
   isOpen: boolean
@@ -8,6 +9,7 @@ interface LoginModalProps {
 }
 
 export default function LoginModal({ isOpen, onClose, type }: LoginModalProps) {
+  const navigate = useNavigate()
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [stream, setStream] = useState<MediaStream | null>(null)
@@ -83,25 +85,35 @@ export default function LoginModal({ isOpen, onClose, type }: LoginModalProps) {
       const formData = new FormData()
       formData.append('file', imageBlob, 'capture.jpg')
 
-      const endpoint = type === 'face' ? '/api/auth/face' : '/api/auth/qr'
-      const response = await fetch(`http://localhost:8000${endpoint}`, {
+      const endpoint = type === 'face' ? '/auth/face' : '/auth/qr'
+      const response = await fetch(`/api${endpoint}`, {
         method: 'POST',
         body: formData,
       })
+
+      // Check HTTP status before parsing JSON
+      if (!response.ok) {
+        const errorText = await response.text()
+        let errorMessage = 'Authentication failed'
+        try {
+          const errorData = JSON.parse(errorText)
+          errorMessage = errorData.detail || errorMessage
+        } catch {
+          errorMessage = errorText || errorMessage
+        }
+        throw new Error(errorMessage)
+      }
 
       const data = await response.json()
 
       if (data.status === 'success') {
         setSuccess(true)
         console.log('Authentication successful:', data.user)
-        // Store user data in localStorage or state management
         localStorage.setItem('user', JSON.stringify(data.user))
-
-        // Dispatch custom event to notify other components
         window.dispatchEvent(new Event('userAuthenticated'))
 
-        // Close modal after short delay
         setTimeout(() => {
+          navigate({ to: '/kiosk' })
           onClose()
         }, 1500)
       } else {
