@@ -18,6 +18,7 @@ export function useVoiceAssistantState() {
     content?: string;
     componentType?: string;
     componentData?: Record<string, any>;
+    timestamp?: Date;
   }>>([])
 
   // Derive voice state from voice assistant
@@ -27,6 +28,26 @@ export function useVoiceAssistantState() {
     if (voiceAssistant.streamingText) return 'speaking'
     return 'idle'
   }, [voiceAssistant.isRecording, voiceAssistant.isProcessing, voiceAssistant.streamingText])
+
+  // Convert completed streaming text to message
+  const lastStreamingTextRef = useRef<string>('')
+  useEffect(() => {
+    // When streaming completes (text exists but no longer streaming), add as message
+    if (
+      voiceAssistant.streamingText &&
+      !voiceAssistant.isStreaming &&
+      voiceAssistant.streamingText !== lastStreamingTextRef.current &&
+      !isClosingRef.current
+    ) {
+      lastStreamingTextRef.current = voiceAssistant.streamingText
+      setMessages(prev => [...prev, {
+        id: Date.now().toString(),
+        type: 'assistant',
+        content: voiceAssistant.streamingText,
+        timestamp: new Date(),
+      }])
+    }
+  }, [voiceAssistant.streamingText, voiceAssistant.isStreaming])
 
   // Merge component messages into messages array
   const lastComponentIdRef = useRef<string>('')
@@ -41,6 +62,7 @@ export function useVoiceAssistantState() {
           type: 'component',
           componentType: newComponentMsg.componentType,
           componentData: newComponentMsg.data,
+          timestamp: new Date(),
         }])
       }
     }
@@ -70,7 +92,8 @@ export function useVoiceAssistantState() {
       setMessages(prev => [...prev, {
         id: Date.now().toString(),
         type: 'user',
-        content: voiceAssistant.micTranscript
+        content: voiceAssistant.micTranscript,
+        timestamp: new Date(),
       }])
       setInput('')
     }
@@ -99,7 +122,8 @@ export function useVoiceAssistantState() {
     setMessages(prev => [...prev, {
       id: Date.now().toString(),
       type: 'user',
-      content: textToSend
+      content: textToSend,
+      timestamp: new Date(),
     }])
     setInput('')
     voiceAssistant.sendMessage(textToSend)
@@ -125,6 +149,7 @@ export function useVoiceAssistantState() {
     setMessages([])
     lastSentTranscriptRef.current = ''
     lastComponentIdRef.current = ''
+    lastStreamingTextRef.current = ''
 
     // Reset closing flag after a brief delay to allow any pending operations to complete
     setTimeout(() => {

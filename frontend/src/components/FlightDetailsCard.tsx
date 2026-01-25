@@ -1,20 +1,16 @@
 import { useState } from 'react'
+import { motion } from 'framer-motion'
 import {
   Plane,
-  MapPin,
-  Clock,
   Users,
   Luggage,
   Wifi,
   Coffee,
   Cloud,
-  Thermometer,
-  Wind,
   TrendingUp,
   ChevronDown,
   ChevronUp,
   CheckCircle,
-  AlertCircle,
   Info,
   Calendar,
   DoorOpen,
@@ -73,7 +69,12 @@ export function FlightDetailsCard({ onClose }: FlightDetailsCardProps) {
   ]
 
   return (
-    <div className="w-full max-w-2xl mx-auto pointer-events-auto">
+    <motion.div
+      initial={{ opacity: 0, y: 20, scale: 0.95 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
+      className="w-full max-w-2xl mx-auto pointer-events-auto"
+    >
       {/* Main Card */}
       <div className="backdrop-blur-xl bg-white/95 rounded-2xl shadow-2xl border border-white/40 overflow-hidden">
         {/* Header - Flight Number & Route */}
@@ -431,6 +432,6 @@ export function FlightDetailsCard({ onClose }: FlightDetailsCardProps) {
           </div>
         </div>
       </div>
-    </div>
+    </motion.div>
   )
 }

@@ -1,4 +1,5 @@
 import { useRef, useEffect } from 'react'
+import { motion } from 'framer-motion'
 import { Send, Mic, MapPin } from 'lucide-react'
 import { StreamingText } from '../StreamingText'
 import { FlightDetailsCard } from '../FlightDetailsCard'
@@ -24,7 +25,44 @@ interface InlineChatProps {
     content?: string;
     componentType?: string;
     componentData?: Record<string, any>;
+    timestamp?: Date;
   }>
+}
+
+// Simple markdown renderer for basic formatting
+function renderMarkdown(text: string): React.ReactNode {
+  const parts: React.ReactNode[] = []
+  let key = 0
+
+  const segments = text.split(/(\*\*.*?\*\*|__.*?__|(?<!\*)\*(?!\*).*?(?<!\*)\*(?!\*)|_.*?_|`.*?`)/g)
+
+  segments.forEach((segment) => {
+    if (!segment) return
+
+    if (segment.match(/^\*\*.*\*\*$/) || segment.match(/^__.*__$/)) {
+      const content = segment.slice(2, -2)
+      parts.push(<strong key={key++}>{content}</strong>)
+    } else if (segment.match(/^(?<!\*)\*(?!\*).*(?<!\*)\*(?!\*)$/) || segment.match(/^_.*_$/)) {
+      const content = segment.slice(1, -1)
+      parts.push(<em key={key++}>{content}</em>)
+    } else if (segment.match(/^`.*`$/)) {
+      const content = segment.slice(1, -1)
+      parts.push(
+        <code key={key++} className="px-1.5 py-0.5 bg-gray-200 rounded text-xs font-mono">
+          {content}
+        </code>
+      )
+    } else {
+      parts.push(segment)
+    }
+  })
+
+  return parts.length > 0 ? parts : text
+}
+
+function formatTime(date?: Date): string {
+  if (!date) return ''
+  return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
 }
 
 export function InlineChat({
@@ -119,7 +157,12 @@ export function InlineChat({
                       </div>
                     )}
                     {message.componentType === 'map' && message.componentData && (
-                      <div className="w-full max-w-2xl mx-auto">
+                      <motion.div
+                        initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        transition={{ duration: 0.4, ease: "easeOut" }}
+                        className="w-full max-w-2xl mx-auto"
+                      >
                         <div className="backdrop-blur-xl bg-white/95 rounded-2xl shadow-2xl border border-white/40 overflow-hidden">
                           <div className="bg-gradient-to-r from-[#0E1F34] to-[#1a3350] p-4 text-white">
                             <div className="flex items-center gap-2">
@@ -145,7 +188,7 @@ export function InlineChat({
                             )}
                           </div>
                         </div>
-                      </div>
+                      </motion.div>
                     )}
                   </div>
                 )
@@ -155,7 +198,7 @@ export function InlineChat({
               return (
                 <div
                   key={message.id}
-                  className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
+                  className={`flex flex-col ${message.type === 'user' ? 'items-end' : 'items-start'}`}
                 >
                   <div
                     className={`
@@ -165,12 +208,19 @@ export function InlineChat({
                         : 'bg-white/20 text-gray-800 backdrop-blur-md border border-white/30 shadow-md'}
                     `}
                   >
-                    <p className="text-sm leading-relaxed">{message.content}</p>
+                    <div className="text-sm leading-relaxed">
+                      {message.type === 'user' ? message.content : renderMarkdown(message.content || '')}
+                    </div>
                   </div>
+                  {message.timestamp && (
+                    <span className="text-xs text-gray-500 mt-1 px-2">
+                      {formatTime(message.timestamp)}
+                    </span>
+                  )}
                 </div>
               )
             })}
-            {streamingText && !isRecording && (
+            {streamingText && !isRecording && isStreaming && (
               <div className="flex justify-start">
                 <div className="max-w-[85%] px-5 py-3 rounded-2xl bg-white/20 text-gray-800 backdrop-blur-md border border-white/30 shadow-md">
                   <StreamingText text={streamingText} isStreaming={isStreaming} />
