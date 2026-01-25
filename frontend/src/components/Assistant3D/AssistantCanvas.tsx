@@ -24,7 +24,6 @@ export default function AssistantCanvas({
   const [postProcessing, setPostProcessing] =
     useState<PostProcessingManager | null>(null)
   const [isReady, setIsReady] = useState(false)
-  const [passiveMode, setPassiveMode] = useState(false)
   // DEPRECATED: Mode system removed
   // const [mode, setMode] = useState<SphereMode>('earth')
 
@@ -228,19 +227,10 @@ export default function AssistantCanvas({
     <>
       <canvas ref={canvasRef} className="w-full h-full" />
       {!isReady && (
-        <div className="absolute inset-0 flex items-center justify-center bg-gray-900">
-          <div className="text-white text-lg">Loading 3D Assistant...</div>
+        <div className="absolute inset-0 flex items-center justify-center bg-transparent">
+          <div className="text-white text-lg">Loading...</div>
         </div>
       )}
-      {/* Passive mode toggle */}
-      <div className="absolute bottom-4 left-4 flex gap-2">
-        <button
-          onClick={() => setPassiveMode((prev) => !prev)}
-          className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg backdrop-blur-sm transition-colors border border-white/20"
-        >
-          Mode: {passiveMode ? 'Passive' : 'Normal'}
-        </button>
-      </div>
     </>
   )
 }

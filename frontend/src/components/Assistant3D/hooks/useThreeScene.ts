@@ -12,7 +12,7 @@ export function useThreeScene(canvasRef: RefObject<HTMLCanvasElement | null>) {
 
     // Scene setup
     const scene = new THREE.Scene()
-    scene.background = new THREE.Color(0x000000) // Black background
+    scene.background = null // Transparent background
     const aspect = window.innerWidth / window.innerHeight
     const camera = new THREE.PerspectiveCamera(75, aspect, 0.1, 1000)
     camera.position.z = 3
@@ -24,6 +24,7 @@ export function useThreeScene(canvasRef: RefObject<HTMLCanvasElement | null>) {
       powerPreference: 'high-performance',
       alpha: true,
     })
+    renderer.setClearColor(0x000000, 0) // Transparent clear color
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
     renderer.setSize(window.innerWidth, window.innerHeight)
 

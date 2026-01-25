@@ -60,12 +60,12 @@ export class ParticleSphereEntity {
       bucketAngleStep: 0,
     }
 
-    // Initialize default colors (all white) - only mode now
+    // Initialize default colors (all black) - only mode now
     this.defaultColors = new Float32Array(this.particleCount * 3)
     for (let i = 0; i < this.particleCount * 3; i += 3) {
-      this.defaultColors[i] = 1.0 // R
-      this.defaultColors[i + 1] = 1.0 // G
-      this.defaultColors[i + 2] = 1.0 // B
+      this.defaultColors[i] = 0.0 // R - black
+      this.defaultColors[i + 1] = 0.0 // G - black
+      this.defaultColors[i + 2] = 0.0 // B - black
     }
 
     // Initialize reusable Vector3 objects
@@ -114,10 +114,10 @@ export class ParticleSphereEntity {
     const colors = new Float32Array(this.particleCount * 3)
     for (let i = 0; i < this.particleCount; i++) {
       const i3 = i * 3
-      // Default to white, will be updated when heightmap loads
-      colors[i3] = 1.0 // R
-      colors[i3 + 1] = 1.0 // G
-      colors[i3 + 2] = 1.0 // B
+      // Default to black for visibility on light backgrounds
+      colors[i3] = 0.0 // R - black
+      colors[i3 + 1] = 0.0 // G - black
+      colors[i3 + 2] = 0.0 // B - black
     }
     this.geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3))
 

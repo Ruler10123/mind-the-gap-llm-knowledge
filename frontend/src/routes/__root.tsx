@@ -1,4 +1,4 @@
-import { Outlet, createRootRouteWithContext } from '@tanstack/react-router'
+import { Outlet, createRootRouteWithContext, useLocation } from '@tanstack/react-router'
 
 import AssistantMenu from '../components/AssistantMenu'
 
@@ -8,11 +8,18 @@ interface MyRouterContext {
   queryClient: QueryClient
 }
 
-export const Route = createRootRouteWithContext<MyRouterContext>()({
-  component: () => (
+function RootComponent() {
+  const location = useLocation()
+  const isKiosk = location.pathname === '/kiosk'
+
+  return (
     <>
-      <AssistantMenu />
+      {!isKiosk && <AssistantMenu />}
       <Outlet />
     </>
-  ),
+  )
+}
+
+export const Route = createRootRouteWithContext<MyRouterContext>()({
+  component: RootComponent,
 })

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { KioskHeader } from './KioskHeader'
-import { Globe3D } from './Globe3D'
+import Assistant3D from '../Assistant3D'
 import { FlightProgressBar } from './FlightProgressBar'
 import { WelcomeMessage } from './WelcomeMessage'
 import { QuickActions } from './QuickActions'
@@ -60,11 +60,12 @@ export function KioskLayout({ user, flight }: KioskLayoutProps) {
       <KioskHeader
         user={user}
         currentTime={currentTime}
-        className="h-16 md:h-20 flex-shrink-0"
+        className="h-16 md:h-20 flex-shrink-0 relative z-30"
       />
 
       {/* Main Content Area - Morphs when chat opens */}
       <main className={`
+        relative z-20
         flex-1 flex flex-col items-center justify-center px-6 md:px-12 lg:px-16 py-8
         transition-all duration-500
         ${showChat ? 'scale-95 opacity-50 pointer-events-none' : 'scale-100 opacity-100'}
@@ -94,18 +95,15 @@ export function KioskLayout({ user, flight }: KioskLayoutProps) {
         />
       </main>
 
-      {/* 3D Globe - Positioned at bottom in passive mode, hidden when chat opens */}
+      {/* 3D Assistant Globe - Centered */}
       <div
         className={`
-          fixed transition-all duration-500 z-30
-          ${showChat ? 'opacity-0 pointer-events-none scale-75' : 'opacity-100 scale-100'}
-          ${isIdle
-            ? 'bottom-0 left-1/2 -translate-x-1/2 w-[280px] h-[280px] md:w-[320px] md:h-[320px]'
-            : 'bottom-1/4 left-1/2 -translate-x-1/2 w-[350px] h-[350px] md:w-[400px] md:h-[400px]'
-          }
+          fixed transition-all duration-500 z-10
+          ${showChat ? 'opacity-30 scale-90 blur-sm pointer-events-none' : 'opacity-100 scale-100'}
+          inset-0
         `}
       >
-        <Globe3D passiveMode={isIdle} />
+        <Assistant3D passiveMode={isIdle} hideInterface={true} />
       </div>
 
       {/* Action Buttons (Mute/Type) - Fixed bottom right */}

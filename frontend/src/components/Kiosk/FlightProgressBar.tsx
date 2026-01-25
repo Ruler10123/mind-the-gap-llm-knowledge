@@ -40,63 +40,32 @@ export function FlightProgressBar({ flight, isCompact = false, onClick }: Flight
         group
       `}
     >
-      {/* Flight Header - Detailed */}
-      <div className="flex items-start justify-between mb-6">
-        <div className="flex-1">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="p-2 rounded-xl bg-[#C8102E]/10">
-              <Plane className="w-6 h-6 text-[#C8102E]" />
-            </div>
-            <div>
-              <h3 className="text-2xl font-bold text-[#0E1F34]">
-                {flight.flightNumber}
-              </h3>
-              <p className="text-sm text-gray-600 font-medium">
-                {flight.origin} → {flight.destination}
-              </p>
-            </div>
-          </div>
+      {/* Flight Header - Simplified */}
+      <div className="text-center mb-6">
+        <h2 className="text-4xl md:text-5xl font-bold text-[#0E1F34] mb-2">
+          {flight.flightNumber}
+        </h2>
+        <p className="text-xl md:text-2xl text-gray-700 font-medium mb-4">
+          {flight.origin} → {flight.destination}
+        </p>
 
-          {/* Quick Info Grid */}
-          <div className="grid grid-cols-3 gap-4 mt-4">
-            <div className="flex items-center gap-2">
-              <MapPin className="w-4 h-4 text-gray-500" />
-              <div>
-                <p className="text-xs text-gray-500">Gate</p>
-                <p className="text-sm font-semibold text-[#0E1F34]">{flight.gate}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <Clock className="w-4 h-4 text-gray-500" />
-              <div>
-                <p className="text-xs text-gray-500">Boarding</p>
-                <p className="text-sm font-semibold text-[#0E1F34]">{flight.boardingTime}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <Plane className="w-4 h-4 text-gray-500" />
-              <div>
-                <p className="text-xs text-gray-500">Departure</p>
-                <p className="text-sm font-semibold text-[#0E1F34]">{flight.departureTime}</p>
-              </div>
-            </div>
+        {/* Quick Info - Larger and more readable */}
+        <div className="flex items-center justify-center gap-8 md:gap-12 mt-6">
+          <div className="text-center">
+            <MapPin className="w-6 h-6 text-[#C8102E] mx-auto mb-1" />
+            <p className="text-xs text-gray-500 uppercase tracking-wide">Gate</p>
+            <p className="text-2xl font-bold text-[#0E1F34]">{flight.gate}</p>
           </div>
-        </div>
-
-        {/* Status Badge */}
-        <div className="flex flex-col items-end gap-2">
-          <span
-            className={`
-              px-4 py-2 rounded-full text-sm font-semibold
-              ${
-                flight.status === 'On Time'
-                  ? 'bg-green-500/20 text-green-700 border border-green-500/30'
-                  : 'bg-yellow-500/20 text-yellow-700 border border-yellow-500/30'
-              }
-            `}
-          >
-            {flight.status}
-          </span>
+          <div className="text-center">
+            <Clock className="w-6 h-6 text-[#C8102E] mx-auto mb-1" />
+            <p className="text-xs text-gray-500 uppercase tracking-wide">Boarding</p>
+            <p className="text-2xl font-bold text-[#0E1F34]">{flight.boardingTime}</p>
+          </div>
+          <div className="text-center">
+            <Plane className="w-6 h-6 text-[#C8102E] mx-auto mb-1" />
+            <p className="text-xs text-gray-500 uppercase tracking-wide">Departure</p>
+            <p className="text-2xl font-bold text-[#0E1F34]">{flight.departureTime}</p>
+          </div>
         </div>
       </div>
 

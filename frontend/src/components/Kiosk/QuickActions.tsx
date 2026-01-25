@@ -25,24 +25,28 @@ export function QuickActions({ isVisible, onActionClick, isFlightDelayed = false
             key={action.id}
             onClick={() => onActionClick?.(action.id)}
             className="
-              flex items-center gap-2
-              px-5 py-3
+              flex items-center gap-3
+              px-6 py-4
               bg-white/10 backdrop-blur-xl
               border border-white/20
               rounded-full
               shadow-lg
               text-[#0E1F34]
-              font-medium
-              text-sm
-              transition-all duration-200
-              hover:bg-white/20
-              hover:shadow-xl
-              hover:scale-105
+              font-semibold
+              text-base
+              transition-all duration-300
+              hover:bg-white/25
+              hover:shadow-2xl
+              hover:scale-110
+              hover:border-[#C8102E]/30
+              hover:-translate-y-1
+              active:scale-95
               focus:outline-none focus:ring-2 focus:ring-[#C8102E]/50
+              group
             "
           >
-            <Icon className="w-4 h-4" />
-            <span>{action.label}</span>
+            <Icon className="w-5 h-5 transition-transform duration-300 group-hover:scale-125 group-hover:rotate-12" />
+            <span className="transition-all duration-300 group-hover:tracking-wide">{action.label}</span>
           </button>
         )
       })}
