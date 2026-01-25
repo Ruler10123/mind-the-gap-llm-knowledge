@@ -127,6 +127,48 @@ export function KioskLayout({ user, flight }: KioskLayoutProps) {
           showChat={showChat}
           onClose={handleClose}
         />
+
+        {/* Microphone Button - Bottom Center (only when idle) */}
+        <div className={`
+          absolute bottom-32 left-1/2 -translate-x-1/2 z-30
+          transition-all duration-500
+          ${showChat ? 'opacity-0 pointer-events-none scale-95' : 'opacity-100 pointer-events-auto scale-100'}
+        `}>
+          <button
+            onClick={handleVoiceActivate}
+            className="group relative flex items-center justify-center"
+          >
+            {/* Outer pulsing ring */}
+            <div className="absolute w-24 h-24 rounded-full bg-white/20 border border-white/40 animate-ping-slow" />
+
+            {/* Middle ring */}
+            <div className="absolute w-20 h-20 rounded-full bg-white/30 border border-white/50 backdrop-blur-md transition-all group-hover:scale-110" />
+
+            {/* Inner button */}
+            <div className="relative w-16 h-16 rounded-full bg-white/40 border-2 border-white/60 backdrop-blur-lg flex items-center justify-center transition-all group-hover:bg-white/50 group-hover:scale-105 shadow-xl">
+              <svg
+                className="w-8 h-8 text-[#0E1F34] transition-all group-hover:scale-110"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={1.5}
+                  d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"
+                />
+              </svg>
+            </div>
+
+            {/* Text hint below */}
+            <div className="absolute top-full mt-4 whitespace-nowrap">
+              <p className="text-sm font-light text-[#0E1F34]/70 animate-fade-in-out">
+                Tap to speak
+              </p>
+            </div>
+          </button>
+        </div>
       </div>
     </div>
   )
