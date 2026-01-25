@@ -57,7 +57,7 @@ function HomePage() {
 
   return (
     <div className="fixed inset-0 bg-black">
-      <Assistant3D passiveMode={!isRecording} />
+      <Assistant3D mode={isRecording ? 'active' : 'passive'} />
       {/* <LoginButtons /> */}
       {/* <UserNameDisplay /> */}
 

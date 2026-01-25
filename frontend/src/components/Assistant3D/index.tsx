@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react'
 import AssistantCanvas from './AssistantCanvas'
 import { useAudioAnalyzer } from './hooks/useAudioAnalyzer'
+import type { AssistantCanvasMode } from './types'
 
 interface Assistant3DProps {
-  passiveMode: boolean
+  mode: AssistantCanvasMode
 }
 
-export default function Assistant3D({ passiveMode }: Assistant3DProps) {
+export default function Assistant3D({ mode }: Assistant3DProps) {
   const { getFrequencyData } = useAudioAnalyzer()
   const [webGLSupported, setWebGLSupported] = useState(true)
 
@@ -35,7 +36,7 @@ export default function Assistant3D({ passiveMode }: Assistant3DProps) {
 
   return (
     <div className="relative w-full h-full">
-      <AssistantCanvas getFrequencyData={getFrequencyData} passiveMode={passiveMode} />
+      <AssistantCanvas getFrequencyData={getFrequencyData} mode={mode} />
     </div>
   )
 }
