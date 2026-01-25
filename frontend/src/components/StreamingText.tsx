@@ -11,23 +11,12 @@ type Props = {
  */
 export function StreamingText({ text, isStreaming }: Props) {
   return (
-    <div
-      className="streaming-text"
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        minHeight: "2em",
-        whiteSpace: "pre-wrap",
-        fontSize: "1rem",
-        lineHeight: 1.5,
-        color: "white",
-      }}
-    >
+    <div className="text-sm leading-relaxed text-white inline-flex items-center min-h-[2em] whitespace-pre-wrap">
       <motion.span
         initial={false}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.2, ease: "easeOut" }}
-        style={{ display: "inline" }}
+        className="inline"
       >
         {text}
       </motion.span>
@@ -35,14 +24,7 @@ export function StreamingText({ text, isStreaming }: Props) {
         <motion.span
           initial={{ opacity: 1 }}
           animate={{ opacity: [1, 0.15, 1] }}
-          style={{
-            display: "inline-block",
-            width: 2,
-            height: "1.1em",
-            marginLeft: 1,
-            backgroundColor: "white",
-            verticalAlign: "text-bottom",
-          }}
+          className="inline-block w-0.5 h-[1.1em] ml-0.5 bg-white align-text-bottom"
           transition={{
             opacity: {
               repeat: Infinity,

@@ -7,7 +7,12 @@ import { useNavigationHandler } from "./useNavigationHandler";
 
 export function useVoiceAssistant() {
   const [isProcessing, setIsProcessing] = useState(false);
-  const { audioElRef, revealedText, isRevealing, playWithReveal, clearText } =
+  const [componentMessages, setComponentMessages] = useState<Array<{
+    id: string;
+    componentType: string;
+    data: Record<string, any>;
+  }>>([]);
+  const { audioElRef, revealedText, isRevealing, playWithReveal, clearText, stopAudio } =
     useAudioReveal();
   const { handleUIAction, modalState, closeModal } = useNavigationHandler();
 
@@ -28,12 +33,32 @@ export function useVoiceAssistant() {
     setIsProcessing(false);
   }, []);
 
+  const handleComponent = useCallback((event: { componentType: string; data: Record<string, any> }) => {
+    console.log("[VoiceAssistant] Component received:", event);
+    setComponentMessages(prev => [...prev, {
+      id: Date.now().toString(),
+      componentType: event.componentType,
+      data: event.data,
+    }]);
+  }, []);
+
   const { handleMessage, clearQueue, getQueuedChunks, getAlignment } =
     useWebSocketMessages({
       onDone: handleDone,
       onError: handleError,
       onUIAction: handleUIAction,
+      onComponent: handleComponent,
     });
+
+  // Expose clear methods for external use - stops audio and clears all buffers
+  const clearAllBuffers = useCallback(() => {
+    console.log("[VoiceAssistant] clearAllBuffers called - stopping all audio and clearing state");
+    stopAudio(); // Stop any currently playing audio (this also revokes blob URLs)
+    clearText(); // Clear revealed text
+    clearQueue(); // Clear audio queue and alignment
+    setIsProcessing(false); // Reset processing state
+    setComponentMessages([]); // Clear component messages
+  }, [stopAudio, clearText, clearQueue]);
 
   const {
     connected,
@@ -113,9 +138,11 @@ export function useVoiceAssistant() {
     toggleMic(handleMicComplete);
   }, [isRecording, micSupported, connected, toggleMic, handleMicComplete]);
 
+  // Only show revealed text (assistant responses), not mic transcript
+  // Mic transcript should only appear in the input field
   const displayText = useMemo(
-    () => (isRecording ? micTranscript : revealedText),
-    [isRecording, micTranscript, revealedText]
+    () => revealedText,
+    [revealedText]
   );
 
   const isStreaming = useMemo(
@@ -143,7 +170,9 @@ export function useVoiceAssistant() {
     isProcessing,
     sendMessage,
     audioElRef,
+    clearAllBuffers,
     modalState,
     closeModal,
+    componentMessages,
   };
 }

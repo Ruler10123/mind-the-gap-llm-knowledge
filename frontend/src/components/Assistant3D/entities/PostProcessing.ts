@@ -21,7 +21,7 @@ export class PostProcessingManager {
 
     // Bloom effect (soft glow)
     const bloom = new BloomEffect({
-      intensity: 0.8,
+      intensity: 0.5,
       luminanceThreshold: 0.3,
       luminanceSmoothing: 0.9,
       mipmapBlur: true,

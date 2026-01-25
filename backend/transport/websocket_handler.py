@@ -35,10 +35,12 @@ class WebSocketHandler:
                 raw = data.get("message") if isinstance(data, dict) else None
 
                 if not isinstance(raw, str) or not raw.strip():
+                    logger.warning(f"[WebSocket] Received invalid message from session {session_id}: missing or empty 'message' field")
                     await send({"type": "error", "message": "Missing or empty 'message' field."})
                     continue
 
                 user_message = raw.strip()
+                logger.info(f"[WebSocket] Received query from session {session_id}: '{user_message[:100]}{'...' if len(user_message) > 100 else ''}'")
                 full_text = ""
 
                 # Process message through session manager

@@ -41,6 +41,8 @@ class SessionManager:
 
         # Get conversation history
         history = await self.store.get_history(session_id)
+        history_length = len(history)
+        logger.info(f"[SessionManager] Processing query for session {session_id} (history: {history_length} messages)")
 
         # Process message
         try:

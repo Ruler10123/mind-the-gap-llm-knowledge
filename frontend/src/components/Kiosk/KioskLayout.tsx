@@ -5,8 +5,9 @@ import { WelcomeMessage } from './WelcomeMessage'
 import { QuickActions } from './QuickActions'
 import { ActionButtons } from './ActionButtons'
 import { InlineChat } from './InlineChat'
-import { useKioskState } from './hooks/useKioskState'
+import { useVoiceAssistantState } from '@/hooks/useVoiceAssistantState'
 import type { UserProfile } from './types'
+import type { AssistantCanvasMode } from '../Assistant3D/types'
 
 interface SimplifiedFlight {
   flightNumber: string
@@ -27,19 +28,41 @@ interface KioskLayoutProps {
 
 export function KioskLayout({ user, flight }: KioskLayoutProps) {
   const {
-    voiceState,
+    connected,
+    status,
+    error,
+    isRecording,
+    micSupported,
+    toggleMic,
+    streamingText,
+    isStreaming,
+    isProcessing,
+    audioElRef,
+    connect,
+    disconnect,
     showChat,
     isMuted,
-    currentQuery,
+    input,
+    messages,
+    voiceState,
     handleVoiceActivate,
     handleType,
-    handleQuery,
+    handleSend,
     handleClose,
     handleMute,
     handleUnmute,
-  } = useKioskState()
+    handleInputChange,
+  } = useVoiceAssistantState()
 
   const [currentTime, setCurrentTime] = useState(new Date())
+
+  // Connect voice assistant on mount
+  useEffect(() => {
+    connect()
+    return () => {
+      disconnect()
+    }
+  }, [connect, disconnect])
 
   // Update time every minute
   useEffect(() => {
@@ -53,8 +76,20 @@ export function KioskLayout({ user, flight }: KioskLayoutProps) {
   const showWelcome = isIdle && !showChat
   const isFlightDelayed = flight.status !== 'On Time'
 
+  // Determine assistant mode based on voice state
+  const assistantMode: AssistantCanvasMode = isRecording
+    ? 'active'
+    : isProcessing
+      ? 'processing'
+      : 'passive'
+
   return (
-    <div className="h-screen overflow-hidden flex flex-col bg-gradient-to-br from-white to-[rgba(51,67,87,0.8)]">
+    <div className="h-screen overflow-hidden flex flex-col bg-gradient-to-br from-white to-[rgba(51,67,87,0.8)] relative">
+      {/* 3D Assistant Globe - Fixed background like index.tsx */}
+      <div className="fixed inset-0 z-0">
+        <Assistant3D mode={assistantMode} isRecording={isRecording} />
+      </div>
+
       {/* Header with embedded progress bar */}
       <KioskHeader
         user={user}
@@ -64,20 +99,7 @@ export function KioskLayout({ user, flight }: KioskLayoutProps) {
       />
 
       {/* Main Container */}
-      <div className="flex-1 relative overflow-hidden">
-        {/* 3D Assistant Globe - Centered, moves lower and to left when chat opens */}
-        <div className={`
-          absolute z-10
-          transition-all duration-700 ease-out
-          ${showChat
-            ? 'left-0 bottom-0 translate-y-1/2 w-[1600px] h-[1600px] -translate-x-1/2 opacity-50'
-            : 'left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] opacity-100'}
-        `}>
-          <Assistant3D 
-            mode={isIdle ? 'passive' : voiceState === 'processing' ? 'processing' : 'active'} 
-          />
-        </div>
-
+      <div className="flex-1 relative overflow-hidden z-10">
         {/* Center Content Area - Chat or Welcome (same space) */}
         <div className="absolute inset-0 flex items-center justify-center z-20 px-6 md:px-12 lg:px-16 py-8">
           {/* Welcome + Quick Actions - Animate Out */}
@@ -105,14 +127,28 @@ export function KioskLayout({ user, flight }: KioskLayoutProps) {
 
           {/* Chat Interface - Animate In (same space, no background) */}
           <div className={`
-            absolute inset-0 flex items-center justify-center px-6 md:px-12 lg:px-16 py-8
-            transition-all duration-500
-            ${showChat ? 'opacity-100 scale-100 pointer-events-auto' : 'opacity-0 scale-95 pointer-events-none'}
+            absolute inset-0 px-6 md:px-12 lg:px-16 py-8
+            transition-opacity duration-500
+            ${showChat ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}
+            flex items-center justify-center
           `}>
             <div className="w-full max-w-3xl h-full">
               <InlineChat
                 isVisible={showChat}
                 onClose={handleClose}
+                connected={connected}
+                status={status}
+                error={error}
+                isRecording={isRecording}
+                micSupported={micSupported}
+                toggleMic={toggleMic}
+                streamingText={streamingText}
+                isStreaming={isStreaming}
+                isProcessing={isProcessing}
+                sendMessage={handleSend}
+                input={input}
+                onInputChange={handleInputChange}
+                messages={messages}
               />
             </div>
           </div>
@@ -169,6 +205,9 @@ export function KioskLayout({ user, flight }: KioskLayoutProps) {
             </div>
           </button>
         </div>
+
+        {/* Hidden Audio Element */}
+        <audio ref={audioElRef} style={{ display: 'none' }} />
       </div>
     </div>
   )

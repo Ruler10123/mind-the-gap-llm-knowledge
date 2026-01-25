@@ -5,7 +5,7 @@ from collections.abc import AsyncIterator
 from langchain_core.messages import BaseMessage, HumanMessage, SystemMessage, AIMessage, ToolMessage
 
 from config import settings
-from core.events import BaseEvent, RetryEvent, ErrorEvent, UIActionEvent
+from core.events import BaseEvent, RetryEvent, ErrorEvent, UIActionEvent, ComponentEvent
 from core.exceptions import LLMParseError, ToolExecutionError, AgentException
 from agent.strategies import RetryStrategy
 from agent.graph import get_agent
@@ -28,24 +28,44 @@ class AgentOrchestrator:
         Process user input with self-correcting loop.
         Yields events for streaming to frontend.
         """
+        logger.info(f"[AgentOrchestrator] Starting query processing: '{input_text[:100]}{'...' if len(input_text) > 100 else ''}' (context: {len(session_context)} messages)")
         attempt = 0
         messages = session_context.copy()
         messages.append(HumanMessage(content=input_text))
 
         while attempt < settings.agent_max_retries:
             try:
+                if attempt > 0:
+                    logger.info(f"[AgentOrchestrator] Retry attempt {attempt}/{settings.agent_max_retries}")
+                else:
+                    logger.info(f"[AgentOrchestrator] Executing agent graph (attempt {attempt + 1}/{settings.agent_max_retries})")
+                
                 # Run agent graph
                 full_text_parts: list[str] = []
+                buffered_components: list[ComponentEvent] = []
+                components_yielded = False
+
                 async for msg_chunk, metadata in self.agent.astream(
                     {"messages": messages, "llm_calls": 0},
                     stream_mode="messages",
                 ):
-                    # Check for UI action in ToolMessage results
+                    # Check for component or UI action in ToolMessage results
                     if isinstance(msg_chunk, ToolMessage):
                         try:
                             content = msg_chunk.content
                             if isinstance(content, str) and content.startswith("{"):
                                 data = json.loads(content)
+
+                                # Check for component - buffer it instead of yielding immediately
+                                component_type = data.get("component_type")
+                                if component_type:
+                                    buffered_components.append(ComponentEvent(
+                                        component_type=component_type,
+                                        data=data.get("data", {}),
+                                    ))
+                                    continue
+
+                                # Legacy: Check for UI action
                                 ui_action = data.get("ui_action")
                                 if ui_action in ("OPEN_MODAL", "NAVIGATE"):
                                     yield UIActionEvent(
@@ -62,10 +82,23 @@ class AgentOrchestrator:
                     text = msg_chunk.content if isinstance(msg_chunk.content, str) else ""
                     if not text:
                         continue
+
+                    # Yield buffered components before first text chunk
+                    if buffered_components and not components_yielded:
+                        for component in buffered_components:
+                            yield component
+                        components_yielded = True
+
                     full_text_parts.append(text)
+
+                # If we have buffered components but no text was generated, yield them now
+                if buffered_components and not components_yielded:
+                    for component in buffered_components:
+                        yield component
 
                 # Success - return full response text
                 full_text = "".join(full_text_parts)
+                logger.info(f"[AgentOrchestrator] Query processed successfully. Response length: {len(full_text)} chars")
                 yield full_text  # Return as string for compatibility
                 break
 

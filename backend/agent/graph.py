@@ -12,6 +12,7 @@ from langgraph.graph.message import add_messages
 from typing_extensions import TypedDict
 
 from config import settings
+from observability.logger import logger
 
 
 @tool
@@ -39,36 +40,24 @@ def divide(a: int, b: int) -> float:
 
 
 @tool
-def suggest_page_navigation(page: str, reason: str = "") -> dict:
-    """Suggest navigating to a specific page in the UI when it adds clear value (e.g., showing dashboard, results, settings).
-    Available pages: home (assistant), kiosk (kiosk interface), flights (flight info), rebooking (flight rebooking), pathfinding (airport navigation)."""
-    allowed_pages = {"home", "kiosk", "flights", "rebooking", "pathfinding"}
-    page_lower = page.lower()
-
-    if page_lower not in allowed_pages:
-        return {
-            "ui_action": "NAVIGATE",
-            "payload": {
-                "page": None,
-                "error": f"Unknown page '{page}'. Available: {', '.join(allowed_pages)}",
-                "reason": reason,
-            }
-        }
-
+def show_flight_details(flight_number: str = "AA 2847") -> dict:
+    """Show flight details card in chat when user asks about their flight, gate, boarding, or flight status.
+    IMPORTANT: After calling this tool, you MUST provide a brief spoken response (1-2 sentences)
+    acknowledging what you're showing them. For example: 'Here are your flight details for AA 2847.'"""
     return {
-        "ui_action": "NAVIGATE",
-        "payload": {
-            "page": page_lower,
-            "reason": reason,
+        "component_type": "flight_details",
+        "data": {
+            "flightNumber": flight_number,
         }
     }
 
 
 @tool
-def open_map(destination: str) -> dict:
-    """Open the map modal showing directions to a destination.
-    Use when the user asks for directions or location of gates, restrooms, or services.
-    Valid destinations: RESTROOM, CUSTOMER_SERVICE, A28, B9, C43, D12"""
+def show_map(destination: str) -> dict:
+    """Show map directions in chat when user asks for directions or location of gates, restrooms, or services.
+    Valid destinations: RESTROOM, CUSTOMER_SERVICE, A28, B9, C43, D12.
+    IMPORTANT: After calling this tool, you MUST provide a brief spoken response (1-2 sentences)
+    acknowledging what you're showing them. For example: 'Here are directions to Gate A28. Follow the highlighted path from your current location.'"""
     destinations = {
         "RESTROOM": ("Directions to Restroom", "/RESTROOM.jpg"),
         "CUSTOMER_SERVICE": ("Directions to Customer Service", "/CUSTOMER_SERVICE.jpg"),
@@ -84,9 +73,8 @@ def open_map(destination: str) -> dict:
     title, image_src = entry
     return {
         "ok": True,
-        "ui_action": "OPEN_MODAL",
-        "modal_id": "MAP_MODAL",
-        "payload": {
+        "component_type": "map",
+        "data": {
             "title": title,
             "imageSrc": image_src,
             "altText": f"{title}. The X marks your current kiosk location.",
@@ -95,7 +83,7 @@ def open_map(destination: str) -> dict:
     }
 
 
-tools = [get_current_time, add, multiply, divide, suggest_page_navigation, open_map]
+tools = [get_current_time, add, multiply, divide, show_flight_details, show_map]
 tools_by_name = {t.name: t for t in tools}
 
 
@@ -109,8 +97,11 @@ SYSTEM_PROMPT = """You are a helpful airport kiosk assistant. You can answer que
 You have access to callable tools (nodes):
 - get_current_time: use when the user asks about the current time, date, or "today"
 - add, multiply, divide: use for basic arithmetic when the user asks for calculations
-- suggest_page_navigation: use to navigate to different pages (home, kiosk, flights, rebooking, pathfinding) when it would help the user
-- open_map: use when the user asks for directions or where to find gates (A28, B9, C43, D12), restrooms, or customer service. Valid destinations: RESTROOM, CUSTOMER_SERVICE, A28, B9, C43, D12
+- show_flight_details: use when the user asks about their flight, gate, boarding status, or flight information
+- show_map: use when the user asks for directions or where to find gates (A28, B9, C43, D12), restrooms, or customer service. Valid destinations: RESTROOM, CUSTOMER_SERVICE, A28, B9, C43, D12
+
+CRITICAL: After calling show_flight_details or show_map, you MUST provide a brief spoken response (1-2 sentences) to accompany the visual component.
+For example: "Here are your flight details" or "Here are directions to Gate A28. Follow the highlighted path."
 
 Call the appropriate tool when it helps answer the user. Otherwise reply directly. Keep replies clear and concise and do not use markdown formatting."""
 
@@ -131,10 +122,13 @@ def _build_agent():
 
     def llm_call(state: dict) -> dict:
         msgs = [SystemMessage(content=SYSTEM_PROMPT)] + state["messages"]
+        llm_call_count = state.get("llm_calls", 0) + 1
+        logger.info(f"[AgentGraph] Making LLM call #{llm_call_count} with {len(msgs)} messages")
         response = model_with_tools.invoke(msgs)
+        logger.info(f"[AgentGraph] LLM call #{llm_call_count} completed. Response has {len(response.tool_calls) if hasattr(response, 'tool_calls') and response.tool_calls else 0} tool call(s)")
         return {
             "messages": [response],
-            "llm_calls": state.get("llm_calls", 0) + 1,
+            "llm_calls": llm_call_count,
         }
 
     def tool_node(state: dict) -> dict:
@@ -142,15 +136,20 @@ def _build_agent():
         last = state["messages"][-1]
         if not isinstance(last, AIMessage) or not last.tool_calls:
             return {"messages": result}
+        
+        logger.info(f"[AgentGraph] Executing {len(last.tool_calls)} tool call(s)")
         for tc in last.tool_calls:
             name = tc["name"] if isinstance(tc, dict) else getattr(tc, "name", None)
             args = tc["args"] if isinstance(tc, dict) else getattr(tc, "args", {})
             tid = tc["id"] if isinstance(tc, dict) else getattr(tc, "id", "")
+            logger.info(f"[AgentGraph] Calling tool: {name} with args: {args}")
             tool_fn = tools_by_name.get(name)
             if not tool_fn:
+                logger.warning(f"[AgentGraph] Unknown tool requested: {name}")
                 result.append(ToolMessage(content=f"Unknown tool: {name}", tool_call_id=tid))
                 continue
             observation = tool_fn.invoke(args)
+            logger.info(f"[AgentGraph] Tool {name} completed successfully")
             # Use JSON for dict results, str for others
             content = json.dumps(observation) if isinstance(observation, dict) else str(observation)
             result.append(ToolMessage(content=content, tool_call_id=tid))
