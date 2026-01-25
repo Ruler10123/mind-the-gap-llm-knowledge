@@ -37,7 +37,10 @@ class Settings(BaseSettings):
     embedding_model: str = "all-MiniLM-L6-v2"
 
     # Authentication Settings
-    auth_mongo_uri: str = Field(default="", description="MongoDB Atlas connection string for auth")
+    auth_mongo_uri: str = Field(
+        default="mongodb://localhost:27017",
+        description="MongoDB connection string for auth (local dev default)",
+    )
     auth_database_name: str = Field(default="access_control", description="Auth database name")
     auth_collection_name: str = Field(default="users", description="Auth collection name")
     auth_vector_index_name: str = Field(default="face_vector_index", description="Vector index name")
