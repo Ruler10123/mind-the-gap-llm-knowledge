@@ -6,18 +6,7 @@
     <title>Streaming audio test</title>
   </head>
   <body>
-    <div>
-      <button id="connect">Connect</button>
-      <button id="disconnect" disabled>Disconnect</button>
-      <span id="status"></span>
-    </div>
-    <div>
-      <input id="input" type="text" placeholder="Message..." disabled />
-      <button id="send" disabled>Send</button>
-    </div>
-    <pre id="log"></pre>
-    <div id="aiResponse" style="min-height: 2em; margin-top: 8px; white-space: pre-wrap; font-family: monospace;"></div>
-    <audio id="audio" style="display: none"></audio>
-    <script type="module" src="/src/main.ts"></script>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

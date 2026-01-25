@@ -8,14 +8,15 @@ from fastapi.middleware.cors import CORSMiddleware
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
 
 from agent.graph import get_agent
-from tts.elevenlabs_client import stream_tts
+from tts.elevenlabs_client import stream_tts_with_timestamps
+from tts.elevenlabs_client import _merge_alignment
 
 app = FastAPI(title="AI Assistant API")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
-    allow_credentials=True,
+    allow_origins=["*"],  # local dev: file://, localhost:*, 127.0.0.1:*
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -56,21 +57,39 @@ async def websocket_assistant(websocket: WebSocket) -> None:
                     if not text:
                         continue
                     full_text_parts.append(text)
-                    await send({"type": "text", "content": text})
             except Exception as e:
                 await send({"type": "error", "message": str(e)})
                 continue
 
             full_text = "".join(full_text_parts)
-            if full_text.strip():
-                try:
-                    async for audio_chunk in stream_tts(full_text):
-                        b64 = base64.b64encode(audio_chunk).decode("ascii")
-                        await send({"type": "audio", "chunk": b64})
-                except Exception as e:
-                    await send({"type": "error", "message": f"TTS failed: {e}"})
-
             messages.append(AIMessage(content=full_text))
+
+            if not full_text.strip():
+                await send({"type": "done"})
+                continue
+
+            alignment_acc: dict[str, list] = {}
+            try:
+                async for audio_chunk, alignment_part in stream_tts_with_timestamps(full_text):
+                    b64 = base64.b64encode(audio_chunk).decode("ascii")
+                    await send({"type": "audio", "chunk": b64})
+                    _merge_alignment(alignment_acc, alignment_part)
+                if alignment_acc:
+                    await send(
+                        {
+                            "type": "alignment",
+                            "characters": alignment_acc.get("characters", []),
+                            "character_start_times_seconds": alignment_acc.get(
+                                "character_start_times_seconds", []
+                            ),
+                            "character_end_times_seconds": alignment_acc.get(
+                                "character_end_times_seconds", []
+                            ),
+                        }
+                    )
+            except Exception as e:
+                await send({"type": "error", "message": f"TTS failed: {e}"})
+
             await send({"type": "done"})
 
     except WebSocketDisconnect:

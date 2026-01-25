@@ -1,5 +1,6 @@
-"""LangGraph agent: StateGraph, Gemini, tools."""
+"""LangGraph agent: general assistant with tool-calling (node) capability."""
 
+from datetime import datetime, timezone
 from typing import Annotated, Literal
 
 from langchain_core.messages import AIMessage, BaseMessage, SystemMessage, ToolMessage
@@ -13,24 +14,30 @@ from config import settings
 
 
 @tool
+def get_current_time() -> str:
+    """Return the current date and time in ISO format (UTC). Use when the user asks about time, date, or today."""
+    return datetime.now(timezone.utc).isoformat()
+
+
+@tool
 def add(a: int, b: int) -> int:
-    """Adds `a` and `b`."""
+    """Add two integers. Use for basic arithmetic when the user asks to add numbers."""
     return a + b
 
 
 @tool
 def multiply(a: int, b: int) -> int:
-    """Multiply `a` and `b`."""
+    """Multiply two integers. Use for basic arithmetic when the user asks to multiply numbers."""
     return a * b
 
 
 @tool
 def divide(a: int, b: int) -> float:
-    """Divide `a` by `b`."""
+    """Divide a by b. Use for basic arithmetic when the user asks to divide numbers. b must not be 0."""
     return a / b
 
 
-tools = [add, multiply, divide]
+tools = [get_current_time, add, multiply, divide]
 tools_by_name = {t.name: t for t in tools}
 
 
@@ -39,10 +46,13 @@ class MessagesState(TypedDict):
     llm_calls: int
 
 
-SYSTEM_PROMPT = (
-    "You are a helpful assistant tasked with performing arithmetic on a set of inputs. "
-    "Use tools when the user asks for calculations. Keep replies concise."
-)
+SYSTEM_PROMPT = """You are a helpful general assistant. You can answer questions, have conversations, and use tools when useful.
+
+You have access to callable tools (nodes):
+- get_current_time: use when the user asks about the current time, date, or "today"
+- add, multiply, divide: use for basic arithmetic when the user asks for calculations
+
+Call the appropriate tool when it helps answer the user. Otherwise reply directly. Keep replies clear and concise."""
 
 _agent = None
 
