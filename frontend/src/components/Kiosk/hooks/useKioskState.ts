@@ -1,33 +1,73 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import type { VoiceState } from '../types'
 
-export function useKioskState() {
+interface UseKioskStateProps {
+  isRecording: boolean
+  isProcessing: boolean
+  connected: boolean
+  streamingText: string
+  sendMessage: (text: string) => void
+  toggleMic: () => void
+  micTranscript?: string
+}
+
+export function useKioskState({
+  isRecording,
+  isProcessing,
+  connected,
+  streamingText,
+  sendMessage,
+  toggleMic,
+  micTranscript,
+}: UseKioskStateProps) {
   const [voiceState, setVoiceState] = useState<VoiceState>('idle')
   const [currentQuery, setCurrentQuery] = useState<string | null>(null)
   const [showChat, setShowChat] = useState(false)
   const [isMuted, setIsMuted] = useState(false)
 
-  const handleVoiceActivate = () => {
-    if (voiceState === 'idle') {
+  // Sync voice state with actual recording/processing states
+  useEffect(() => {
+    if (isRecording) {
       setVoiceState('listening')
+    } else if (isProcessing) {
+      setVoiceState('processing')
+    } else if (streamingText) {
+      setVoiceState('speaking')
+    } else if (showChat) {
+      setVoiceState('idle')
+    }
+  }, [isRecording, isProcessing, streamingText, showChat])
+
+  // Update input with microphone transcript when recording
+  useEffect(() => {
+    if (micTranscript && isRecording) {
+      setCurrentQuery(micTranscript)
+    }
+  }, [micTranscript, isRecording])
+
+  const handleVoiceActivate = () => {
+    if (!connected) return
+    
+    if (voiceState === 'idle' || !showChat) {
       setShowChat(true)
       setCurrentQuery(null)
-    } else if (voiceState === 'listening') {
-      // Stop listening
-      setVoiceState('idle')
-      setShowChat(false)
+      // Start recording
+      toggleMic()
+    } else if (isRecording) {
+      // Stop recording and send
+      toggleMic()
     }
   }
 
   const handleType = () => {
-    setVoiceState('listening')
     setShowChat(true)
     setCurrentQuery(null)
   }
 
   const handleQuery = (query: string) => {
+    if (!connected || !query.trim()) return
     setCurrentQuery(query)
-    setVoiceState('speaking')
+    sendMessage(query)
   }
 
   const handleClose = () => {

@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { Send, Mic } from 'lucide-react'
+import { StreamingText } from '../StreamingText'
 
 interface Message {
   id: string
@@ -10,48 +11,101 @@ interface Message {
 interface InlineChatProps {
   isVisible: boolean
   onClose: () => void
+  connected: boolean
+  status: string
+  error: string | null
+  isRecording: boolean
+  micSupported: boolean
+  toggleMic: () => void
+  streamingText: string
+  isStreaming: boolean
+  isProcessing: boolean
+  sendMessage: (text: string) => void
+  micTranscript?: string
 }
 
-export function InlineChat({ isVisible, onClose }: InlineChatProps) {
+export function InlineChat({
+  isVisible,
+  onClose,
+  connected,
+  status,
+  error,
+  isRecording,
+  micSupported,
+  toggleMic,
+  streamingText,
+  isStreaming,
+  isProcessing,
+  sendMessage,
+  micTranscript,
+}: InlineChatProps) {
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
-  const [isListening, setIsListening] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const messagesContainerRef = useRef<HTMLDivElement>(null)
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' })
+    }
   }
 
   useEffect(() => {
-    scrollToBottom()
-  }, [messages])
+    // Use setTimeout to ensure DOM has updated
+    const timeoutId = setTimeout(() => {
+      scrollToBottom()
+    }, 0)
+    return () => clearTimeout(timeoutId)
+  }, [messages, streamingText])
+
+  // Update input with microphone transcript when recording
+  useEffect(() => {
+    if (micTranscript && isRecording) {
+      setInput(micTranscript)
+    }
+  }, [micTranscript, isRecording])
+
+  // Add user message when recording stops and we have a transcript
+  // The voice assistant will automatically send the message, we just display it
+  const lastSentTranscriptRef = useRef<string>('')
+  useEffect(() => {
+    if (!isRecording && micTranscript && micTranscript.trim() && micTranscript !== lastSentTranscriptRef.current) {
+      lastSentTranscriptRef.current = micTranscript
+      const userMessage: Message = {
+        id: Date.now().toString(),
+        type: 'user',
+        content: micTranscript
+      }
+      setMessages(prev => [...prev, userMessage])
+      setInput('')
+    }
+  }, [isRecording, micTranscript])
 
   const handleSend = () => {
-    if (!input.trim()) return
+    const text = input.trim()
+    if (!text || !connected) return
 
     const userMessage: Message = {
       id: Date.now().toString(),
       type: 'user',
-      content: input
+      content: text
     }
 
     setMessages(prev => [...prev, userMessage])
     setInput('')
-
-    // Simulate assistant response
-    setTimeout(() => {
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        type: 'assistant',
-        content: 'I can help you with that. What would you like to know about your flight?'
-      }
-      setMessages(prev => [...prev, assistantMessage])
-    }, 1000)
+    sendMessage(text)
   }
 
   const handleVoiceToggle = () => {
-    setIsListening(!isListening)
-    // TODO: Implement voice input
+    if (!connected || !micSupported) return
+    toggleMic()
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault()
+      handleSend()
+    }
   }
 
   if (!isVisible) return null
@@ -59,22 +113,25 @@ export function InlineChat({ isVisible, onClose }: InlineChatProps) {
   return (
     <div className="h-full flex flex-col overflow-hidden">
       {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto p-6 space-y-4">
-        {messages.length === 0 ? (
+      <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-6 space-y-4">
+        {messages.length === 0 && !streamingText ? (
           <div className="h-full flex flex-col items-center justify-center text-center">
             <div className={`
               w-20 h-20 rounded-full mb-6 flex items-center justify-center
-              ${isListening ? 'bg-[#C8102E] animate-pulse' : 'bg-white/20'}
+              ${isRecording ? 'bg-[#C8102E] animate-pulse' : 'bg-white/20'}
               transition-all duration-300
             `}>
-              <Mic className={`w-10 h-10 ${isListening ? 'text-white' : 'text-gray-400'}`} />
+              <Mic className={`w-10 h-10 ${isRecording ? 'text-white' : 'text-gray-400'}`} />
             </div>
             <p className="text-gray-600 text-lg font-light mb-2">
-              {isListening ? 'Listening...' : 'Voice-First Assistant'}
+              {isRecording ? 'Listening...' : connected ? 'Voice-First Assistant' : 'Connecting...'}
             </p>
             <p className="text-gray-500 text-sm">
-              Tap the microphone or type to start
+              {!connected ? status : 'Tap the microphone or type to start'}
             </p>
+            {error && (
+              <p className="text-red-500 text-xs mt-2 max-w-md">{error}</p>
+            )}
           </div>
         ) : (
           <>
@@ -95,6 +152,13 @@ export function InlineChat({ isVisible, onClose }: InlineChatProps) {
                 </div>
               </div>
             ))}
+            {streamingText && (
+              <div className="flex justify-start">
+                <div className="max-w-[85%] px-5 py-3 rounded-2xl bg-white/20 text-gray-800 backdrop-blur-md border border-white/30 shadow-md">
+                  <StreamingText text={streamingText} isStreaming={isStreaming} />
+                </div>
+              </div>
+            )}
             <div ref={messagesEndRef} />
           </>
         )}
@@ -106,14 +170,23 @@ export function InlineChat({ isVisible, onClose }: InlineChatProps) {
           {/* Voice Toggle Button */}
           <button
             onClick={handleVoiceToggle}
+            disabled={!connected || !micSupported || (isStreaming && !isRecording)}
             className={`
               p-4 rounded-full transition-all duration-300
-              ${isListening
+              ${isRecording
                 ? 'bg-[#C8102E] shadow-lg shadow-[#C8102E]/50 scale-110'
                 : 'bg-white/20 hover:bg-white/30'}
+              disabled:opacity-50 disabled:cursor-not-allowed
             `}
+            title={
+              !micSupported
+                ? 'Microphone not supported'
+                : isRecording
+                  ? 'Stop recording and send'
+                  : 'Start microphone input'
+            }
           >
-            <Mic className={`w-6 h-6 ${isListening ? 'text-white' : 'text-gray-700'}`} />
+            <Mic className={`w-6 h-6 ${isRecording ? 'text-white' : 'text-gray-700'}`} />
           </button>
 
           {/* Text Input - Subtle */}
@@ -122,14 +195,16 @@ export function InlineChat({ isVisible, onClose }: InlineChatProps) {
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-              placeholder="Or type here..."
-              className="flex-1 bg-transparent text-gray-800 placeholder-gray-500 focus:outline-none text-sm"
+              onKeyDown={handleKeyDown}
+              placeholder={connected ? "Or type here..." : "Connecting..."}
+              disabled={!connected}
+              className="flex-1 bg-transparent text-gray-800 placeholder-gray-500 focus:outline-none text-sm disabled:opacity-50"
             />
-            {input.trim() && (
+            {input.trim() && connected && (
               <button
                 onClick={handleSend}
-                className="p-2 rounded-full bg-[#C8102E] hover:bg-[#a00d26] transition-all active:scale-95"
+                disabled={isProcessing}
+                className="p-2 rounded-full bg-[#C8102E] hover:bg-[#a00d26] transition-all active:scale-95 disabled:opacity-50"
               >
                 <Send className="w-4 h-4 text-white" />
               </button>
