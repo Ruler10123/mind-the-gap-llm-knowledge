@@ -193,7 +193,16 @@ export function useVoiceAssistantState() {
     // Set closing flag to prevent adding messages
     isClosingRef.current = true
 
-    // Stop recording if active (this may send the transcript, but we'll clear UI anyway)
+    // Clear auto-send timeout if active
+    if (autoSendTimeoutRef.current) {
+      clearTimeout(autoSendTimeoutRef.current)
+      autoSendTimeoutRef.current = null
+    }
+
+    // Reset auto-send transcript tracking
+    lastTranscriptRef.current = ''
+
+    // Stop recording if active (this will stop mic and Assistant3D audio analyzer)
     if (voiceAssistant.isRecording) {
       voiceAssistant.toggleMic()
     }
@@ -207,6 +216,7 @@ export function useVoiceAssistantState() {
     setShowChat(false)
     setInput('')
     setMessages([])
+    setIsMuted(false) // Reset mute state
     lastSentTranscriptRef.current = ''
     lastComponentIdRef.current = ''
     lastStreamingTextRef.current = ''
