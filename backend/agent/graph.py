@@ -3,6 +3,7 @@
 import json
 from datetime import datetime, timezone
 from typing import Annotated, Literal
+from zoneinfo import ZoneInfo
 
 from langchain_core.messages import AIMessage, BaseMessage, SystemMessage, ToolMessage
 from langchain_core.tools import tool
@@ -18,8 +19,10 @@ from weather.service import get_weather_service
 
 @tool
 def get_current_time() -> str:
-    """Return the current date and time in ISO format (UTC). Use when the user asks about time, date, or today."""
-    return datetime.now(timezone.utc).isoformat()
+    """Return the current date and time in ISO format (CST). Use when the user asks about time, date, or today."""
+    utc_time = datetime.now(timezone.utc)
+    cst_time = utc_time.astimezone(ZoneInfo("America/Chicago"))
+    return cst_time.isoformat()
 
 
 @tool
