@@ -85,7 +85,7 @@ You have access to callable tools (nodes):
 - add, multiply, divide: use for basic arithmetic when the user asks for calculations
 - open_map: use when the user asks for directions or where to find gates (A28, B9, C43, D12), restrooms, or customer service. Valid destinations: RESTROOM, CUSTOMER_SERVICE, A28, B9, C43, D12
 
-Call the appropriate tool when it helps answer the user. Otherwise reply directly. Keep replies clear and concise."""
+Call the appropriate tool when it helps answer the user. Otherwise reply directly. Keep replies clear and concise and do not use markdown formatting."""
 
 _agent = None
 

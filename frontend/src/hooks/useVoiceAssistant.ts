@@ -21,6 +21,7 @@ type WebSocketMessage = {
 export function useVoiceAssistant() {
   const [streamingText, setStreamingText] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
   const audioQueueRef = useRef<string[]>([]);
   const alignmentRef = useRef<Alignment | null>(null);
   const audioElRef = useRef<HTMLAudioElement | null>(null);
@@ -59,6 +60,7 @@ export function useVoiceAssistant() {
       audio.src = url;
       setStreamingText("");
       setIsStreaming(true);
+      setIsProcessing(false); // Transition from processing to streaming
       console.log("[VoiceAssistant] Starting audio playback, alignment characters:", align?.characters.length ?? 0);
 
       let lastIdx = -1;
@@ -95,14 +97,16 @@ export function useVoiceAssistant() {
       audio.play().catch((e: Error) => {
         console.error("[VoiceAssistant] Audio playback failed:", e);
         setIsStreaming(false);
+        setIsProcessing(false);
         URL.revokeObjectURL(url);
       });
     } catch (e) {
       console.error("[VoiceAssistant] Audio decode failed:", e);
       audioQueueRef.current = [];
       setIsStreaming(false);
+      setIsProcessing(false);
     }
-  }, []);
+  }, [setIsProcessing]);
 
   const handleMessage = useCallback(
     (data: string) => {
@@ -133,6 +137,7 @@ export function useVoiceAssistant() {
             console.error("[VoiceAssistant] Error message received:", msg.message);
             audioQueueRef.current = [];
             alignmentRef.current = null;
+            setIsProcessing(false);
             break;
           default:
             console.log("[VoiceAssistant] Unknown message type:", msg.type);
@@ -169,6 +174,7 @@ export function useVoiceAssistant() {
         return;
       }
       console.log("[VoiceAssistant] Sending message:", t);
+      setIsProcessing(true);
       audioQueueRef.current = [];
       alignmentRef.current = null;
       setStreamingText("");
@@ -208,6 +214,7 @@ export function useVoiceAssistant() {
     toggleMic: wrappedToggleMic,
     streamingText: isRecording ? micTranscript : streamingText,
     isStreaming: isRecording || isStreaming,
+    isProcessing,
     sendMessage,
     audioElRef,
   };

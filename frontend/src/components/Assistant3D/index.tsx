@@ -5,11 +5,23 @@ import type { AssistantCanvasMode } from './types'
 
 interface Assistant3DProps {
   mode: AssistantCanvasMode
+  isRecording?: boolean
 }
 
-export default function Assistant3D({ mode }: Assistant3DProps) {
-  const { getFrequencyData } = useAudioAnalyzer()
+export default function Assistant3D({ mode, isRecording = false }: Assistant3DProps) {
+  const { getFrequencyData, initAudio, stopAudio, isActive } = useAudioAnalyzer()
   const [webGLSupported, setWebGLSupported] = useState(true)
+
+  // Initialize/stop audio analyzer based on recording state
+  useEffect(() => {
+    if (isRecording && !isActive) {
+      console.log('[Assistant3D] Recording started, initializing audio analyzer...')
+      initAudio()
+    } else if (!isRecording && isActive) {
+      console.log('[Assistant3D] Recording stopped, stopping audio analyzer...')
+      stopAudio()
+    }
+  }, [isRecording, isActive, initAudio, stopAudio])
 
   // Check WebGL support
   useEffect(() => {
