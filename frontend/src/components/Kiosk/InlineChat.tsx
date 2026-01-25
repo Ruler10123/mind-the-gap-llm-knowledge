@@ -179,10 +179,10 @@ export function InlineChat({
                             {message.componentData.notes && message.componentData.notes.length > 0 && (
                               <div className="mt-4 space-y-2">
                                 {message.componentData.notes.map((note: string, i: number) => (
-                                  <p key={i} className="text-sm text-gray-700 flex items-start gap-2">
-                                    <span className="text-[#C8102E]">•</span>
-                                    <span>{note}</span>
-                                  </p>
+                                  <div key={i} className="text-sm text-gray-700 flex items-start gap-2">
+                                    <span className="text-[#C8102E] flex-shrink-0">•</span>
+                                    <div className="flex-1">{renderMarkdown(note)}</div>
+                                  </div>
                                 ))}
                               </div>
                             )}
@@ -205,7 +205,7 @@ export function InlineChat({
                       max-w-[85%] px-5 py-3 rounded-2xl
                       ${message.type === 'user'
                         ? 'bg-[#C8102E] text-white shadow-lg'
-                        : 'bg-white/30 text-white backdrop-blur-md border border-white/30 shadow-md'}
+                        : 'bg-[#0E1F34]/50 text-white backdrop-blur-md border border-white/30 shadow-md'}
                     `}
                   >
                     <div className="text-sm leading-relaxed">
@@ -222,7 +222,7 @@ export function InlineChat({
             })}
             {streamingText && !isRecording && isStreaming && (
               <div className="flex justify-start">
-                <div className="max-w-[85%] px-5 py-3 rounded-2xl bg-white/30 text-white backdrop-blur-md border border-white/30 shadow-md">
+                <div className="max-w-[85%] px-5 py-3 rounded-2xl bg-[#0E1F34]/50 text-white backdrop-blur-md border border-white/30 shadow-md">
                   <StreamingText text={streamingText} isStreaming={isStreaming} />
                 </div>
               </div>

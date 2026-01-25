@@ -51,6 +51,7 @@ export function useSpeechRecognition() {
 
     rec.onresult = (e: SpeechRecognitionEvent) => {
       console.log(`[Mic] onresult fired, results length: ${e.results.length}`);
+      // Rebuild transcript from scratch using only final results to avoid duplicates
       let committed = "";
       let interim = "";
       for (let i = 0; i < e.results.length; i++) {
@@ -61,13 +62,15 @@ export function useSpeechRecognition() {
           committed += t;
           console.log(`[Mic] Final result [${i}]: "${t}"`);
         } else {
+          // Only the last result should be interim
           interim = t;
           console.log(`[Mic] Interim result [${i}]: "${t}"`);
         }
       }
-      transcriptRef.current += committed;
-      const newTranscript = transcriptRef.current + interim;
-      console.log(`[Mic] Updated transcript: "${newTranscript}" (committed: "${transcriptRef.current}", interim: "${interim}")`);
+      // Update transcriptRef with only the committed portion (no accumulation)
+      transcriptRef.current = committed;
+      const newTranscript = committed + interim;
+      console.log(`[Mic] Updated transcript: "${newTranscript}" (committed: "${committed}", interim: "${interim}")`);
       setTranscript(newTranscript);
     };
 
