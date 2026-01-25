@@ -125,6 +125,10 @@ const RebookingModal = ({
                 currentFlight={{
                   flightNumber: currentFlight.flightNumber,
                   departureTime: currentFlight.departureTime,
+                  origin: currentFlight.origin || { code: 'DFW', city: 'Dallas' },
+                  destination: currentFlight.destination || { code: 'LAX', city: 'Los Angeles' },
+                  arrivalTime: currentFlight.arrivalTime || '',
+                  departureDate: '',
                 }}
                 alternatives={alternatives}
                 onConfirm={handleConfirm}
