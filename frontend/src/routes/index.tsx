@@ -146,6 +146,21 @@ function HomePage() {
           </div>
         )}
 
+        {/* Processing Indicator - Center (shown when processing but no text yet) */}
+        {isProcessing && !streamingText && !isRecording && (
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-auto">
+            <div className="flex flex-col items-center gap-4">
+              <div className="relative">
+                <div className="w-16 h-16 border-4 border-cyan-500/30 border-t-cyan-500 rounded-full animate-spin" />
+                <div className="absolute inset-0 w-16 h-16 border-4 border-transparent border-r-cyan-400/50 rounded-full animate-spin" style={{ animationDirection: 'reverse', animationDuration: '1.5s' }} />
+              </div>
+              <div className="text-white/80 text-sm font-medium tracking-wide">
+                Processing your request...
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Streaming Text Display - Center */}
         {streamingText && !isRecording && (
           <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-auto max-w-2xl px-6">
@@ -167,10 +182,17 @@ function HomePage() {
             />
             <button
               onClick={handleSend}
-              disabled={!connected || !input.trim()}
-              className="px-4 py-2 rounded-full bg-cyan-500/20 hover:bg-cyan-500/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all text-cyan-200 text-sm"
+              disabled={!connected || !input.trim() || isProcessing}
+              className="px-4 py-2 rounded-full bg-cyan-500/20 hover:bg-cyan-500/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all text-cyan-200 text-sm flex items-center gap-2"
             >
-              Send
+              {isProcessing ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-cyan-200/30 border-t-cyan-200 rounded-full animate-spin" />
+                  <span>Processing...</span>
+                </>
+              ) : (
+                'Send'
+              )}
             </button>
             <button
               onClick={toggleMic}

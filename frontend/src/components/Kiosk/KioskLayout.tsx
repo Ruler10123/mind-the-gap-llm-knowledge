@@ -8,6 +8,8 @@ import { InlineChat } from './InlineChat'
 import MapModal from '../MapModal/MapModal'
 import { FlightDetailsCard } from '../FlightDetailsCard'
 import DestinationInfoModal from '../DestinationInfoModal'
+import RebookingModal from './RebookingModal'
+import { OverbookingModal } from './OverbookingModal'
 import { useVoiceAssistantState } from '@/hooks/useVoiceAssistantState'
 import type { UserProfile } from './types'
 import type { AssistantCanvasMode } from '../Assistant3D/types'
@@ -232,6 +234,33 @@ export function KioskLayout({ user, flight }: KioskLayoutProps) {
           isOpen={modalState.isOpen}
           onClose={closeModal}
           destination={modalState.destinationData || {}}
+        />
+      )}
+
+      {modalState?.isOpen && modalState.modalId === 'REBOOKING' && modalState.rebookingData && (
+        <RebookingModal
+          isOpen={modalState.isOpen}
+          onClose={closeModal}
+          currentFlight={modalState.rebookingData.currentFlight}
+          isRefundable={modalState.rebookingData.isRefundable || false}
+          alternatives={modalState.rebookingData.alternatives || []}
+          sendMessage={handleSend}
+        />
+      )}
+
+      {modalState?.isOpen && modalState.modalId === 'OVERBOOKING' && (
+        <OverbookingModal
+          isOpen={modalState.isOpen}
+          onClose={closeModal}
+          offer={modalState.overbookingOffer}
+          onAccept={() => {
+            handleSend("I accept the overbooking offer")
+            closeModal()
+          }}
+          onDecline={() => {
+            handleSend("I decline the overbooking offer")
+            closeModal()
+          }}
         />
       )}
     </div>

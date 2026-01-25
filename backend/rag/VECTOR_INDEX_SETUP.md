@@ -33,13 +33,17 @@ This guide explains how to create the vector search index required for RAG funct
 
 **Index Definition (JSON):**
 
+Use `numDimensions` that matches your `EMBEDDING_MODEL`:
+- **768** — default, `all-mpnet-base-v2`
+- **384** — `all-MiniLM-L6-v2` (set `EMBEDDING_MODEL=all-MiniLM-L6-v2` in .env)
+
 ```json
 {
   "fields": [
     {
       "type": "vector",
       "path": "embedding",
-      "numDimensions": 384,
+      "numDimensions": 768,
       "similarity": "cosine"
     },
     {
@@ -63,8 +67,8 @@ This guide explains how to create the vector search index required for RAG funct
 ## Index Configuration Explained
 
 ### Vector Field
-- **path**: `embedding` - The field containing the 384-dimensional embedding vectors
-- **numDimensions**: `384` - Dimension count from all-MiniLM-L6-v2 model
+- **path**: `embedding` - The field containing the embedding vectors
+- **numDimensions**: Must match `EMBEDDING_MODEL` — **768** for `all-mpnet-base-v2` (default), **384** for `all-MiniLM-L6-v2`
 - **similarity**: `cosine` - Cosine similarity metric for vector comparisons
 
 ### Filter Fields
@@ -124,7 +128,7 @@ Expected output: 3 results with similarity scores > 0.5 for relevant matches.
 1. **Index not active:** Check status in Atlas UI
 2. **No documents:** Verify collection has documents with `embedding` field
 3. **Wrong index name:** Ensure `RAG_VECTOR_INDEX_NAME` in .env matches `RAG_vector_index`
-4. **Dimension mismatch:** Embeddings must be exactly 384 dimensions
+4. **Dimension mismatch:** `numDimensions` in the index must equal the embedding model output (768 for all-mpnet-base-v2, 384 for all-MiniLM-L6-v2). Set `EMBEDDING_MODEL` in .env to match your index.
 
 ### Vector Search Error
 

@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { X } from 'lucide-react'
+import { useNavigate } from '@tanstack/react-router'
 
 interface LoginModalProps {
   isOpen: boolean
@@ -8,6 +10,7 @@ interface LoginModalProps {
 }
 
 export default function LoginModal({ isOpen, onClose, type }: LoginModalProps) {
+  const navigate = useNavigate()
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [stream, setStream] = useState<MediaStream | null>(null)
@@ -83,25 +86,35 @@ export default function LoginModal({ isOpen, onClose, type }: LoginModalProps) {
       const formData = new FormData()
       formData.append('file', imageBlob, 'capture.jpg')
 
-      const endpoint = type === 'face' ? '/api/auth/face' : '/api/auth/qr'
-      const response = await fetch(`http://localhost:8000${endpoint}`, {
+      const endpoint = type === 'face' ? '/auth/face' : '/auth/qr'
+      const response = await fetch(`/api${endpoint}`, {
         method: 'POST',
         body: formData,
       })
+
+      // Check HTTP status before parsing JSON
+      if (!response.ok) {
+        const errorText = await response.text()
+        let errorMessage = 'Authentication failed'
+        try {
+          const errorData = JSON.parse(errorText)
+          errorMessage = errorData.detail || errorMessage
+        } catch {
+          errorMessage = errorText || errorMessage
+        }
+        throw new Error(errorMessage)
+      }
 
       const data = await response.json()
 
       if (data.status === 'success') {
         setSuccess(true)
         console.log('Authentication successful:', data.user)
-        // Store user data in localStorage or state management
         localStorage.setItem('user', JSON.stringify(data.user))
-
-        // Dispatch custom event to notify other components
         window.dispatchEvent(new Event('userAuthenticated'))
 
-        // Close modal after short delay
         setTimeout(() => {
+          navigate({ to: '/kiosk' })
           onClose()
         }, 1500)
       } else {
@@ -119,22 +132,30 @@ export default function LoginModal({ isOpen, onClose, type }: LoginModalProps) {
     }
   }
 
-  if (!isOpen) return null
-
   return (
-    <>
-      {/* Backdrop */}
-      <div
-        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 animate-in fade-in duration-200"
-        onClick={onClose}
-      />
+    <AnimatePresence>
+      {isOpen && (
+        <>
+          {/* Backdrop */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
+            onClick={onClose}
+          />
 
-      {/* Modal */}
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
-        <div
-          className="bg-gray-900 rounded-2xl shadow-2xl border border-gray-800 w-full max-w-md pointer-events-auto animate-in zoom-in-95 duration-200"
-          onClick={(e) => e.stopPropagation()}
-        >
+          {/* Modal */}
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              className="bg-gray-900 rounded-2xl shadow-2xl border border-gray-800 w-full max-w-md pointer-events-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b border-gray-800">
             <h2 className="text-xl font-semibold text-white">
@@ -206,8 +227,10 @@ export default function LoginModal({ isOpen, onClose, type }: LoginModalProps) {
               )}
             </button>
           </div>
-        </div>
+        </motion.div>
       </div>
     </>
+      )}
+    </AnimatePresence>
   )
 }

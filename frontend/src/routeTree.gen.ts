@@ -9,6 +9,8 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as RegistrationRouteImport } from './routes/registration'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as KioskRouteImport } from './routes/kiosk'
 import { Route as FlightsRouteImport } from './routes/flights'
 import { Route as FlightPreviewRouteImport } from './routes/flight-preview'
@@ -17,6 +19,16 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as RebookingIndexRouteImport } from './routes/rebooking/index'
 import { Route as PathfindingIndexRouteImport } from './routes/pathfinding/index'
 
+const RegistrationRoute = RegistrationRouteImport.update({
+  id: '/registration',
+  path: '/registration',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const KioskRoute = KioskRouteImport.update({
   id: '/kiosk',
   path: '/kiosk',
@@ -59,6 +71,8 @@ export interface FileRoutesByFullPath {
   '/flight-preview': typeof FlightPreviewRoute
   '/flights': typeof FlightsRoute
   '/kiosk': typeof KioskRoute
+  '/login': typeof LoginRoute
+  '/registration': typeof RegistrationRoute
   '/pathfinding/': typeof PathfindingIndexRoute
   '/rebooking/': typeof RebookingIndexRoute
 }
@@ -68,6 +82,8 @@ export interface FileRoutesByTo {
   '/flight-preview': typeof FlightPreviewRoute
   '/flights': typeof FlightsRoute
   '/kiosk': typeof KioskRoute
+  '/login': typeof LoginRoute
+  '/registration': typeof RegistrationRoute
   '/pathfinding': typeof PathfindingIndexRoute
   '/rebooking': typeof RebookingIndexRoute
 }
@@ -78,6 +94,8 @@ export interface FileRoutesById {
   '/flight-preview': typeof FlightPreviewRoute
   '/flights': typeof FlightsRoute
   '/kiosk': typeof KioskRoute
+  '/login': typeof LoginRoute
+  '/registration': typeof RegistrationRoute
   '/pathfinding/': typeof PathfindingIndexRoute
   '/rebooking/': typeof RebookingIndexRoute
 }
@@ -89,6 +107,8 @@ export interface FileRouteTypes {
     | '/flight-preview'
     | '/flights'
     | '/kiosk'
+    | '/login'
+    | '/registration'
     | '/pathfinding/'
     | '/rebooking/'
   fileRoutesByTo: FileRoutesByTo
@@ -98,6 +118,8 @@ export interface FileRouteTypes {
     | '/flight-preview'
     | '/flights'
     | '/kiosk'
+    | '/login'
+    | '/registration'
     | '/pathfinding'
     | '/rebooking'
   id:
@@ -107,6 +129,8 @@ export interface FileRouteTypes {
     | '/flight-preview'
     | '/flights'
     | '/kiosk'
+    | '/login'
+    | '/registration'
     | '/pathfinding/'
     | '/rebooking/'
   fileRoutesById: FileRoutesById
@@ -117,12 +141,28 @@ export interface RootRouteChildren {
   FlightPreviewRoute: typeof FlightPreviewRoute
   FlightsRoute: typeof FlightsRoute
   KioskRoute: typeof KioskRoute
+  LoginRoute: typeof LoginRoute
+  RegistrationRoute: typeof RegistrationRoute
   PathfindingIndexRoute: typeof PathfindingIndexRoute
   RebookingIndexRoute: typeof RebookingIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/registration': {
+      id: '/registration'
+      path: '/registration'
+      fullPath: '/registration'
+      preLoaderRoute: typeof RegistrationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/kiosk': {
       id: '/kiosk'
       path: '/kiosk'
@@ -181,6 +221,8 @@ const rootRouteChildren: RootRouteChildren = {
   FlightPreviewRoute: FlightPreviewRoute,
   FlightsRoute: FlightsRoute,
   KioskRoute: KioskRoute,
+  LoginRoute: LoginRoute,
+  RegistrationRoute: RegistrationRoute,
   PathfindingIndexRoute: PathfindingIndexRoute,
   RebookingIndexRoute: RebookingIndexRoute,
 }

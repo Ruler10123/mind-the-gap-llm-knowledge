@@ -20,7 +20,7 @@ class DocumentChunk(BaseModel):
 
     chunk_id: str
     content: str
-    embedding: List[float]  # 384-dim from all-MiniLM-L6-v2
+    embedding: List[float]  # dims match embedding model (e.g. 768 all-mpnet-base-v2, 384 all-MiniLM-L6-v2)
     source: str
     category: Optional[str] = None
     metadata: Dict[str, Any] = Field(default_factory=dict)

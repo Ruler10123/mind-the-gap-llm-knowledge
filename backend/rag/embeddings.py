@@ -21,7 +21,7 @@ class EmbeddingService:
             text: Text to embed
 
         Returns:
-            Embedding vector (384-dim for all-MiniLM-L6-v2)
+            Embedding vector (dims match model, e.g. 768 for all-mpnet-base-v2)
         """
         if not text or not text.strip():
             raise ValueError("Cannot embed empty text")
