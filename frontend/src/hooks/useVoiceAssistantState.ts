@@ -99,6 +99,66 @@ export function useVoiceAssistantState() {
     }
   }, [voiceAssistant.isRecording, voiceAssistant.micTranscript])
 
+  // Auto-send when mic is enabled and no new text is added for a short period
+  const autoSendTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const lastTranscriptRef = useRef<string>('')
+  useEffect(() => {
+    // Clear any existing timeout
+    if (autoSendTimeoutRef.current) {
+      clearTimeout(autoSendTimeoutRef.current)
+      autoSendTimeoutRef.current = null
+    }
+
+    // Only auto-send when recording and we have a transcript
+    if (
+      voiceAssistant.isRecording && 
+      voiceAssistant.micTranscript && 
+      voiceAssistant.micTranscript.trim() &&
+      voiceAssistant.connected &&
+      !voiceAssistant.isProcessing &&
+      !isClosingRef.current
+    ) {
+      const currentTranscript = voiceAssistant.micTranscript.trim()
+      
+      // If transcript changed, reset the timer
+      if (currentTranscript !== lastTranscriptRef.current) {
+        lastTranscriptRef.current = currentTranscript
+        
+        // Set timeout to auto-send after 2 seconds of no new text
+        autoSendTimeoutRef.current = setTimeout(() => {
+          // Only send if still recording and transcript hasn't changed
+          if (
+            voiceAssistant.isRecording &&
+            voiceAssistant.micTranscript?.trim() === currentTranscript &&
+            !isClosingRef.current
+          ) {
+            console.log('[VoiceAssistantState] Auto-sending message after silence:', currentTranscript)
+            // Stop recording first, then send
+            voiceAssistant.toggleMic()
+            // The handleMicComplete callback will send the message
+          }
+        }, 2000) // 2 seconds of silence
+      }
+    } else if (!voiceAssistant.isRecording) {
+      // Clear the ref when recording stops
+      lastTranscriptRef.current = ''
+    }
+
+    // Cleanup timeout on unmount or when conditions change
+    return () => {
+      if (autoSendTimeoutRef.current) {
+        clearTimeout(autoSendTimeoutRef.current)
+        autoSendTimeoutRef.current = null
+      }
+    }
+  }, [
+    voiceAssistant.isRecording,
+    voiceAssistant.micTranscript,
+    voiceAssistant.connected,
+    voiceAssistant.isProcessing,
+    voiceAssistant.toggleMic,
+  ])
+
   // Handlers
   const handleVoiceActivate = useCallback(() => {
     if (!voiceAssistant.connected || voiceAssistant.isProcessing) return
