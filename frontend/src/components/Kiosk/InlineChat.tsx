@@ -179,10 +179,10 @@ export function InlineChat({
                             {message.componentData.notes && message.componentData.notes.length > 0 && (
                               <div className="mt-4 space-y-2">
                                 {message.componentData.notes.map((note: string, i: number) => (
-                                  <p key={i} className="text-sm text-gray-700 flex items-start gap-2">
-                                    <span className="text-[#C8102E]">•</span>
-                                    <span>{note}</span>
-                                  </p>
+                                  <div key={i} className="text-sm text-gray-700 flex items-start gap-2">
+                                    <span className="text-[#C8102E] flex-shrink-0">•</span>
+                                    <div className="flex-1">{renderMarkdown(note)}</div>
+                                  </div>
                                 ))}
                               </div>
                             )}
