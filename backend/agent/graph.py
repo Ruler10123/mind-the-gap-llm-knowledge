@@ -282,7 +282,7 @@ def show_weather(location: str = "Dallas") -> dict:
 @tool
 def show_map(destination: str) -> dict:
     """Show map directions in chat when user asks for directions or location of gates, restrooms, or services.
-    Valid destinations: RESTROOM, CUSTOMER_SERVICE, A28, B9.
+    Valid destinations: RESTROOM, CUSTOMER_SERVICE, A28, B9. Don't reference specific gates, like A28, B9, etc. Just say "Gates".
     IMPORTANT: After calling this tool, you MUST provide a brief spoken response (1-2 sentences)
     acknowledging what you're showing them. For example: 'Here are directions to Gate A28. Follow the highlighted path from your current location.'"""
     destinations = {
