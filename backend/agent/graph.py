@@ -13,6 +13,7 @@ from typing_extensions import TypedDict
 
 from config import settings
 from observability.logger import logger
+from weather.service import get_weather_service
 
 
 @tool
@@ -126,37 +127,145 @@ def show_weather(location: str = "Dallas") -> dict:
     # Normalize location
     normalized = location_map.get(location_lower, location)
     
+    # Get weather service
+    weather_service = get_weather_service()
+    
     # Handle "both" case
     if location_lower == "both":
-        # Generate advice for Los Angeles (destination)
-        la_advice = _get_weather_advice("Los Angeles", 72, "Sunny")
+        # Fetch real weather for both locations
+        dallas_weather = weather_service.get_weather_sync("Dallas,US")
+        la_weather = weather_service.get_weather_sync("Los Angeles,US")
+        
+        # Build response with real data or fallbacks
+        locations_data = []
+        
+        # Dallas
+        if dallas_weather:
+            locations_data.append({
+                "location": dallas_weather["location"],
+                "temp": dallas_weather["temp"],
+                "condition": dallas_weather["condition"],
+                "high": dallas_weather["high"],
+                "low": dallas_weather["low"],
+                "humidity": dallas_weather["humidity"],
+                "windSpeed": dallas_weather["windSpeed"],
+                "visibility": dallas_weather["visibility"],
+                "uvIndex": dallas_weather["uvIndex"],
+                "icon": dallas_weather["icon"],
+                "description": dallas_weather["description"],
+                "advice": None,
+            })
+        else:
+            # Fallback
+            locations_data.append({
+                "location": "Dallas",
+                "temp": 78,
+                "condition": "Sunny",
+                "high": 82,
+                "low": 68,
+                "humidity": 45,
+                "windSpeed": 8,
+                "visibility": 10,
+                "uvIndex": 7,
+                "icon": "01d",
+                "description": "clear sky",
+                "advice": None,
+            })
+        
+        # Los Angeles
+        if la_weather:
+            la_advice = _get_weather_advice(la_weather["location"], la_weather["temp"], la_weather["condition"])
+            locations_data.append({
+                "location": la_weather["location"],
+                "temp": la_weather["temp"],
+                "condition": la_weather["condition"],
+                "high": la_weather["high"],
+                "low": la_weather["low"],
+                "humidity": la_weather["humidity"],
+                "windSpeed": la_weather["windSpeed"],
+                "visibility": la_weather["visibility"],
+                "uvIndex": la_weather["uvIndex"],
+                "icon": la_weather["icon"],
+                "description": la_weather["description"],
+                "advice": la_advice,
+            })
+        else:
+            # Fallback
+            la_advice = _get_weather_advice("Los Angeles", 72, "Sunny")
+            locations_data.append({
+                "location": "Los Angeles",
+                "temp": 72,
+                "condition": "Sunny",
+                "high": 75,
+                "low": 68,
+                "humidity": 60,
+                "windSpeed": 5,
+                "visibility": 10,
+                "uvIndex": 6,
+                "icon": "01d",
+                "description": "clear sky",
+                "advice": la_advice,
+            })
+        
         return {
             "component_type": "weather",
             "data": {
-                "locations": [
-                    {"location": "Dallas", "advice": None},
-                    {"location": "Los Angeles", "advice": la_advice},
-                ],
+                "locations": locations_data,
             },
         }
+    
+    # Fetch real weather data
+    weather_data = weather_service.get_weather_sync(f"{normalized},US")
     
     # Check if this is destination weather (for advice)
     is_destination = normalized == "Los Angeles"
     
     # Generate advice for destination
     advice = None
-    if is_destination:
-        # Dummy weather data for advice generation (in real implementation, this would come from API)
-        # Using typical LA weather as placeholder
+    if is_destination and weather_data:
+        advice = _get_weather_advice(weather_data["location"], weather_data["temp"], weather_data["condition"])
+    elif is_destination:
+        # Fallback advice
         advice = _get_weather_advice(normalized, 72, "Sunny")
     
-    return {
-        "component_type": "weather",
-        "data": {
-            "location": normalized,
-            "advice": advice,
-        },
-    }
+    # Build response with real data or fallback
+    if weather_data:
+        return {
+            "component_type": "weather",
+            "data": {
+                "location": weather_data["location"],
+                "temp": weather_data["temp"],
+                "condition": weather_data["condition"],
+                "high": weather_data["high"],
+                "low": weather_data["low"],
+                "humidity": weather_data["humidity"],
+                "windSpeed": weather_data["windSpeed"],
+                "visibility": weather_data["visibility"],
+                "uvIndex": weather_data["uvIndex"],
+                "icon": weather_data["icon"],
+                "description": weather_data["description"],
+                "advice": advice,
+            },
+        }
+    else:
+        # Fallback to dummy data if API fails
+        return {
+            "component_type": "weather",
+            "data": {
+                "location": normalized,
+                "temp": 78 if normalized == "Dallas" else 72,
+                "condition": "Sunny",
+                "high": 82 if normalized == "Dallas" else 75,
+                "low": 68,
+                "humidity": 45,
+                "windSpeed": 8,
+                "visibility": 10,
+                "uvIndex": 7,
+                "icon": "01d",
+                "description": "clear sky",
+                "advice": advice,
+            },
+        }
 
 
 @tool

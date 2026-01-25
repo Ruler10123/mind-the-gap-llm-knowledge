@@ -161,10 +161,20 @@ export function InlineChat({
                       <div className="w-full max-w-2xl space-y-4">
                         {message.componentData?.locations ? (
                           // Multiple locations (e.g., "both")
-                          message.componentData.locations.map((loc: { location: string; advice?: string | null }, idx: number) => (
+                          message.componentData.locations.map((loc: any, idx: number) => (
                             <WeatherWidget
                               key={idx}
                               location={loc.location}
+                              temp={loc.temp}
+                              condition={loc.condition}
+                              high={loc.high}
+                              low={loc.low}
+                              humidity={loc.humidity}
+                              windSpeed={loc.windSpeed}
+                              visibility={loc.visibility}
+                              uvIndex={loc.uvIndex}
+                              icon={loc.icon}
+                              description={loc.description}
                               advice={loc.advice}
                               isMinimized={false}
                             />
@@ -173,6 +183,16 @@ export function InlineChat({
                           // Single location
                           <WeatherWidget
                             location={message.componentData?.location ?? 'Dallas'}
+                            temp={message.componentData?.temp}
+                            condition={message.componentData?.condition}
+                            high={message.componentData?.high}
+                            low={message.componentData?.low}
+                            humidity={message.componentData?.humidity}
+                            windSpeed={message.componentData?.windSpeed}
+                            visibility={message.componentData?.visibility}
+                            uvIndex={message.componentData?.uvIndex}
+                            icon={message.componentData?.icon}
+                            description={message.componentData?.description}
                             advice={message.componentData?.advice}
                             isMinimized={false}
                           />

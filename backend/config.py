@@ -17,6 +17,7 @@ class Settings(BaseSettings):
     vultr_model: str = "llama-3.1-70b-instruct-fp8"  # Default model
     elevenlabs_api_key: str = ""
     elevenlabs_voice_id: str = ""
+    openweather_api_key: str = ""
 
     # MongoDB
     mongodb_uri: str = "mongodb://localhost:27017"
