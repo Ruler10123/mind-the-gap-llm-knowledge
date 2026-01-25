@@ -4,14 +4,12 @@ import AssistantInterface from './AssistantInterface'
 import { MapModal } from '@/components/MapModal'
 import { useAudioAnalyzer } from './hooks/useAudioAnalyzer'
 
-export interface MapModalPayload {
-  title: string
-  imageSrc: string
-  altText: string
-  notes?: string[]
+interface Assistant3DProps {
+  passiveMode?: boolean
+  hideInterface?: boolean
 }
 
-export default function Assistant3D() {
+export default function Assistant3D({ passiveMode, hideInterface = false }: Assistant3DProps) {
   const { isActive, error, initAudio, stopAudio, getFrequencyData } =
     useAudioAnalyzer()
   const [webGLSupported, setWebGLSupported] = useState(true)
@@ -40,56 +38,22 @@ export default function Assistant3D() {
   const handleSubmitPrompt = (text: string) => {
     if (!text.trim()) return
     setIsSubmitting(true)
-
-    // Close existing connection if any
-    if (wsRef.current) {
-      wsRef.current.close()
-    }
-
-    const ws = new WebSocket('ws://localhost:8000/ws')
-    wsRef.current = ws
-
-    ws.onopen = () => {
-      ws.send(JSON.stringify({ message: text }))
-    }
-
-    ws.onmessage = (event) => {
-      try {
-        const msg = JSON.parse(event.data)
-
-        // Handle UI action events (modal)
-        if (msg.type === 'ui_action' && msg.action === 'OPEN_MODAL') {
-          setModalData(msg.payload)
-        }
-
-        // Handle done event
-        if (msg.type === 'done') {
-          setIsSubmitting(false)
-        }
-
-        // Handle error event
-        if (msg.type === 'error') {
-          console.error('WebSocket error:', msg.message)
-          setIsSubmitting(false)
-        }
-      } catch (e) {
-        console.error('Failed to parse message:', e)
-      }
-    }
-
-    ws.onerror = () => {
-      console.error('WebSocket connection error')
-      setIsSubmitting(false)
-    }
-
-    ws.onclose = () => {
-      wsRef.current = null
-    }
+    // TODO: Connect to backend API
+    console.log('Prompt submitted:', text)
+    // Simulate API call
+    await new Promise((resolve) => setTimeout(resolve, 1000))
+    setIsSubmitting(false)
   }
 
-  const handleCloseModal = () => {
-    setModalData(null)
-  }
+  // Automatically enable passiveMode (show bubble) when microphone is disabled
+  // unless passiveMode is explicitly set
+  const effectivePassiveMode = passiveMode ?? !isActive
+  console.log('[Assistant3D] Render state', {
+    isActive,
+    passiveMode,
+    effectivePassiveMode,
+    webGLSupported,
+  })
 
   if (!webGLSupported) {
     return (
@@ -106,22 +70,16 @@ export default function Assistant3D() {
 
   return (
     <div className="relative w-full h-full">
-      <AssistantCanvas getFrequencyData={getFrequencyData} />
-      <AssistantInterface
-        isAudioActive={isActive}
-        onToggleAudio={handleToggleAudio}
-        error={error}
-        onSubmitPrompt={handleSubmitPrompt}
-        isSubmitting={isSubmitting}
-      />
-      <MapModal
-        isOpen={modalData !== null}
-        onClose={handleCloseModal}
-        title={modalData?.title ?? ''}
-        imageSrc={modalData?.imageSrc ?? ''}
-        altText={modalData?.altText ?? ''}
-        notes={modalData?.notes}
-      />
+      <AssistantCanvas getFrequencyData={getFrequencyData} passiveMode={effectivePassiveMode} />
+      {!hideInterface && (
+        <AssistantInterface
+          isAudioActive={isActive}
+          onToggleAudio={handleToggleAudio}
+          error={error}
+          onSubmitPrompt={handleSubmitPrompt}
+          isSubmitting={isSubmitting}
+        />
+      )}
     </div>
   )
 }

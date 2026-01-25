@@ -12,17 +12,18 @@ import { ANIMATION_CONSTANTS } from './constants/animationConstants'
 
 interface AssistantCanvasProps {
   getFrequencyData: () => Uint8Array<ArrayBuffer> | null
+  passiveMode?: boolean
 }
 
 export default function AssistantCanvas({
   getFrequencyData,
+  passiveMode = false,
 }: AssistantCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const [entity, setEntity] = useState<ParticleSphereEntity | null>(null)
   const [postProcessing, setPostProcessing] =
     useState<PostProcessingManager | null>(null)
   const [isReady, setIsReady] = useState(false)
-  const [passiveMode, setPassiveMode] = useState(false)
   // DEPRECATED: Mode system removed
   // const [mode, setMode] = useState<SphereMode>('earth')
 
@@ -41,23 +42,39 @@ export default function AssistantCanvas({
 
   // Initialize entity and post-processing
   useEffect(() => {
-    if (!scene || !camera || !renderer) return
+    if (!scene || !camera || !renderer) {
+      console.log('[AssistantCanvas] Waiting for scene/camera/renderer...', {
+        hasScene: !!scene,
+        hasCamera: !!camera,
+        hasRenderer: !!renderer,
+      })
+      return
+    }
 
+    console.log('[AssistantCanvas] Starting 3D scene initialization...')
     try {
       // Create entity
+      console.log('[AssistantCanvas] Creating ParticleSphereEntity...')
       const particleSphere = new ParticleSphereEntity()
+      console.log('[AssistantCanvas] Adding mesh to scene...')
       scene.add(particleSphere.mesh)
       setEntity(particleSphere)
+      console.log('[AssistantCanvas] Entity created and added to scene')
 
       // Create post-processing
+      console.log('[AssistantCanvas] Creating PostProcessingManager...')
       const postProc = new PostProcessingManager(renderer, scene, camera)
       setPostProcessing(postProc)
+      console.log('[AssistantCanvas] Post-processing created')
 
       // Force initial render to ensure sphere is visible immediately
       // Update entity once to initialize positions
+      console.log('[AssistantCanvas] Running initial entity update...')
       particleSphere.update(null)
       // Render immediately
+      console.log('[AssistantCanvas] Running initial render...')
       postProc.render(0)
+      console.log('[AssistantCanvas] Initial render complete')
 
       // Handle resize for post-processing
       const handleResize = () => {
@@ -66,6 +83,7 @@ export default function AssistantCanvas({
       window.addEventListener('resize', handleResize)
 
       setIsReady(true)
+      console.log('[AssistantCanvas] 3D scene initialization complete, isReady set to true')
 
       return () => {
         window.removeEventListener('resize', handleResize)
@@ -226,19 +244,10 @@ export default function AssistantCanvas({
     <>
       <canvas ref={canvasRef} className="w-full h-full" />
       {!isReady && (
-        <div className="absolute inset-0 flex items-center justify-center bg-gray-900">
-          <div className="text-white text-lg">Loading 3D Assistant...</div>
+        <div className="absolute inset-0 flex items-center justify-center bg-transparent">
+          <div className="text-white text-lg">Loading...</div>
         </div>
       )}
-      {/* Passive mode toggle */}
-      <div className="absolute bottom-4 left-4 flex gap-2">
-        <button
-          onClick={() => setPassiveMode((prev) => !prev)}
-          className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg backdrop-blur-sm transition-colors border border-white/20"
-        >
-          Mode: {passiveMode ? 'Passive' : 'Normal'}
-        </button>
-      </div>
     </>
   )
 }

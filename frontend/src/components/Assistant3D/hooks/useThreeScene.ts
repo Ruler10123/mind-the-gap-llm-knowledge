@@ -1,54 +1,67 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useState } from 'react'
 import * as THREE from 'three'
 import type { RefObject } from 'react'
 
 export function useThreeScene(canvasRef: RefObject<HTMLCanvasElement | null>) {
-  const sceneRef = useRef<THREE.Scene | undefined>(undefined)
-  const cameraRef = useRef<THREE.PerspectiveCamera | undefined>(undefined)
-  const rendererRef = useRef<THREE.WebGLRenderer | undefined>(undefined)
+  const [scene, setScene] = useState<THREE.Scene | undefined>(undefined)
+  const [camera, setCamera] = useState<THREE.PerspectiveCamera | undefined>(undefined)
+  const [renderer, setRenderer] = useState<THREE.WebGLRenderer | undefined>(undefined)
 
   useEffect(() => {
-    if (!canvasRef.current) return
+    if (!canvasRef.current) {
+      console.log('[useThreeScene] Canvas ref not available yet')
+      return
+    }
 
+    console.log('[useThreeScene] Initializing Three.js scene...')
     // Scene setup
-    const scene = new THREE.Scene()
-    scene.background = new THREE.Color(0x000000) // Black background
+    const newScene = new THREE.Scene()
+    newScene.background = null // Transparent background
+    console.log('[useThreeScene] Scene created')
+    
     const aspect = window.innerWidth / window.innerHeight
-    const camera = new THREE.PerspectiveCamera(75, aspect, 0.1, 1000)
-    camera.position.z = 3
+    const newCamera = new THREE.PerspectiveCamera(75, aspect, 0.1, 1000)
+    newCamera.position.z = 3
+    console.log('[useThreeScene] Camera created', { aspect, position: newCamera.position })
 
     // Renderer (no shadows, performance mode)
-    const renderer = new THREE.WebGLRenderer({
+    const newRenderer = new THREE.WebGLRenderer({
       canvas: canvasRef.current,
       antialias: false,
       powerPreference: 'high-performance',
       alpha: true,
     })
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
-    renderer.setSize(window.innerWidth, window.innerHeight)
+    newRenderer.setClearColor(0x000000, 0) // Transparent clear color
+    newRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+    newRenderer.setSize(window.innerWidth, window.innerHeight)
+    console.log('[useThreeScene] Renderer created', {
+      size: { width: window.innerWidth, height: window.innerHeight },
+      pixelRatio: newRenderer.getPixelRatio(),
+    })
 
-    // Store refs
-    sceneRef.current = scene
-    cameraRef.current = camera
-    rendererRef.current = renderer
+    // Store in state to trigger re-render
+    setScene(newScene)
+    setCamera(newCamera)
+    setRenderer(newRenderer)
+    console.log('[useThreeScene] Three.js scene initialization complete')
 
     // Handle resize
     const handleResize = () => {
-      camera.aspect = window.innerWidth / window.innerHeight
-      camera.updateProjectionMatrix()
-      renderer.setSize(window.innerWidth, window.innerHeight)
+      newCamera.aspect = window.innerWidth / window.innerHeight
+      newCamera.updateProjectionMatrix()
+      newRenderer.setSize(window.innerWidth, window.innerHeight)
     }
     window.addEventListener('resize', handleResize)
 
     return () => {
       window.removeEventListener('resize', handleResize)
-      renderer.dispose()
+      newRenderer.dispose()
     }
   }, [canvasRef])
 
   return {
-    scene: sceneRef.current,
-    camera: cameraRef.current,
-    renderer: rendererRef.current,
+    scene,
+    camera,
+    renderer,
   }
 }

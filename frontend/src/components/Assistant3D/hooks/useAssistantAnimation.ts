@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import * as THREE from 'three'
 import { ANIMATION_CONSTANTS } from '../constants/animationConstants'
 import type { ParticleSphereEntity } from '../entities/ParticleSphereEntity'
@@ -16,15 +16,22 @@ export function useAssistantAnimation(
   isDraggingRef: { current: boolean },
   passiveMode: boolean,
 ) {
+  // Persist current scale and position across re-renders for smooth transitions
+  const currentScaleRef = useRef(new THREE.Vector3(1, 1, 1))
+  const currentPositionRef = useRef(new THREE.Vector3(0, 0, 0))
+  
   useEffect(() => {
     if (!scene || !camera || !entity || !postProcessing) return
 
     let animationId: number
     const clock = new THREE.Clock()
     
-    // Current scale and position for smooth transitions
-    const currentScale = new THREE.Vector3(1, 1, 1)
-    const currentPosition = new THREE.Vector3(0, 0, 0)
+    // Initialize scale and position from current mesh state if available
+    // This ensures smooth transition when passiveMode changes
+    if (entity.mesh) {
+      currentScaleRef.current.copy(entity.mesh.scale)
+      currentPositionRef.current.copy(entity.mesh.position)
+    }
     
     // Calculate passive mode transformations
     const calculatePassiveModeTransform = () => {
@@ -67,12 +74,12 @@ export function useAssistantAnimation(
       
       // Smoothly interpolate scale and position
       const lerpFactor = ANIMATION_CONSTANTS.passiveMode.transitionSpeed
-      currentScale.lerp(targetScale, lerpFactor)
-      currentPosition.lerp(targetPosition, lerpFactor)
+      currentScaleRef.current.lerp(targetScale, lerpFactor)
+      currentPositionRef.current.lerp(targetPosition, lerpFactor)
       
       // Apply transformations to entity mesh
-      entity.mesh.scale.copy(currentScale)
-      entity.mesh.position.copy(currentPosition)
+      entity.mesh.scale.copy(currentScaleRef.current)
+      entity.mesh.position.copy(currentPositionRef.current)
 
       // Handle rotation updates
       if (isDraggingRef.current) {
@@ -122,8 +129,8 @@ export function useAssistantAnimation(
         }
       }
 
-      // Update entity
-      entity.update(frequencyData)
+      // Update entity with passive mode flag
+      entity.update(frequencyData, passiveMode)
 
       // Render with post-processing
       postProcessing.render(delta)

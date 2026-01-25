@@ -46,8 +46,10 @@ export class ParticleSphereEntity {
   private tempVector3: THREE.Vector3
 
   constructor() {
+    console.log('[ParticleSphereEntity] Starting initialization...')
     // Create particle positions in sphere formation
     this.particleCount = ANIMATION_CONSTANTS.particles.count
+    console.log(`[ParticleSphereEntity] Particle count: ${this.particleCount}`)
     this.positions = new Float32Array(this.particleCount * 3)
     this.basePositions = new Float32Array(this.particleCount * 3)
     this.targetColors = new Float32Array(this.particleCount * 3)
@@ -63,9 +65,9 @@ export class ParticleSphereEntity {
     // Initialize default colors (all white) - only mode now
     this.defaultColors = new Float32Array(this.particleCount * 3)
     for (let i = 0; i < this.particleCount * 3; i += 3) {
-      this.defaultColors[i] = 1.0 // R
-      this.defaultColors[i + 1] = 1.0 // G
-      this.defaultColors[i + 2] = 1.0 // B
+      this.defaultColors[i] = 1.0 // R - white
+      this.defaultColors[i + 1] = 1.0 // G - white
+      this.defaultColors[i + 2] = 1.0 // B - white
     }
 
     // Initialize reusable Vector3 objects
@@ -114,10 +116,10 @@ export class ParticleSphereEntity {
     const colors = new Float32Array(this.particleCount * 3)
     for (let i = 0; i < this.particleCount; i++) {
       const i3 = i * 3
-      // Default to white, will be updated when heightmap loads
-      colors[i3] = 1.0 // R
-      colors[i3 + 1] = 1.0 // G
-      colors[i3 + 2] = 1.0 // B
+      // Default to white for visibility on dark backgrounds
+      colors[i3] = 1.0 // R - white
+      colors[i3 + 1] = 1.0 // G - white
+      colors[i3 + 2] = 1.0 // B - white
     }
     this.geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3))
 
@@ -160,6 +162,13 @@ export class ParticleSphereEntity {
 
     // Points mesh
     this.mesh = new THREE.Points(this.geometry, this.material)
+    console.log('[ParticleSphereEntity] Initialization complete', {
+      particleCount: this.particleCount,
+      hasGeometry: !!this.geometry,
+      hasMaterial: !!this.material,
+      hasMesh: !!this.mesh,
+      meshVisible: this.mesh.visible,
+    })
   }
 
   /**
@@ -529,7 +538,15 @@ export class ParticleSphereEntity {
     this.geometry.attributes.color.needsUpdate = true
   }
 
-  update(frequencyData: Uint8Array<ArrayBuffer> | null) {
+  update(frequencyData: Uint8Array<ArrayBuffer> | null, passiveMode: boolean = false) {
+    if (!this.isInitialized) {
+      console.log('[ParticleSphereEntity] First update call', {
+        hasFrequencyData: !!frequencyData,
+        passiveMode,
+      })
+      this.isInitialized = true
+    }
+    
     // Update base positions with smooth transitions between modes
     this.updateBasePositions()
 
@@ -569,10 +586,17 @@ export class ParticleSphereEntity {
           ANIMATION_CONSTANTS.audioSmoothing.factor
       }
 
-      // Deformation intensity based on vocal range
+      // Deformation intensity based on vocal range - use passive mode constants if enabled
+      const intensityMult = passiveMode
+        ? ANIMATION_CONSTANTS.deformation.passiveIntensityMultiplier
+        : ANIMATION_CONSTANTS.deformation.intensityMultiplier
+      const volumeMult = passiveMode
+        ? ANIMATION_CONSTANTS.deformation.passiveVolumeMultiplier
+        : ANIMATION_CONSTANTS.deformation.volumeMultiplier
+
       const deformationIntensity = Math.max(
-        midFreq * ANIMATION_CONSTANTS.deformation.intensityMultiplier,
-        volume * ANIMATION_CONSTANTS.deformation.volumeMultiplier,
+        midFreq * intensityMult,
+        volume * volumeMult,
       )
 
       // Create spike centers distributed across the sphere based on frequency bands
@@ -658,12 +682,14 @@ export class ParticleSphereEntity {
           }
         }
 
-        // Apply displacement
+        // Apply displacement - use passive mode max height if enabled
         if (totalSpikeInfluence > 0) {
           this.tempVector3.normalize()
           const displacementAmount =
             totalSpikeInfluence * ANIMATION_CONSTANTS.spikes.heightMultiplier
-          const maxSpikeHeight = ANIMATION_CONSTANTS.spikes.maxHeight
+          const maxSpikeHeight = passiveMode
+            ? ANIMATION_CONSTANTS.deformation.passiveMaxDisplacement
+            : ANIMATION_CONSTANTS.spikes.maxHeight
           const displacement = Math.min(displacementAmount, maxSpikeHeight)
 
           positions[i3] = baseX + normal.x * displacement
