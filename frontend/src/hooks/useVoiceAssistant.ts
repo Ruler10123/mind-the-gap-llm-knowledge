@@ -123,6 +123,7 @@ export function useVoiceAssistant() {
       // Skip sending if we're closing (to prevent sending messages when chat is closed)
       if (isClosingRef.current) {
         console.log("[VoiceAssistant] Skipping send - chat is closing");
+        setIsProcessing(false);
         return;
       }
       if (finalTranscript) {
@@ -135,6 +136,7 @@ export function useVoiceAssistant() {
         console.warn(
           "[VoiceAssistant] handleMicComplete called with empty transcript"
         );
+        setIsProcessing(false);
       }
     },
     [sendMessage]
@@ -150,6 +152,13 @@ export function useVoiceAssistant() {
       "connected:",
       connected
     );
+    // When stopping to send: set processing *before* stop so we never render
+    // passive (isRecording false, isProcessing false). stop() sync-sets
+    // isRecording false; onend runs async and calls sendMessage. Without this,
+    // we'd jitter passive -> processing.
+    if (isRecording) {
+      setIsProcessing(true);
+    }
     toggleMic(handleMicComplete);
   }, [isRecording, micSupported, connected, toggleMic, handleMicComplete]);
 
