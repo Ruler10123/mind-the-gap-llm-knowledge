@@ -16,7 +16,14 @@
       "Bash(find:*)",
       "Bash(npx tsc:*)",
       "Bash(git checkout:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(pnpm list:*)",
+      "Bash(pnpm install:*)",
+      "Bash(dir node_modules)",
+      "Bash(findstr:*)",
+      "Bash(test:*)",
+      "Bash(pnpm:*)",
+      "Bash(npm install:*)"
     ]
   }
 }
