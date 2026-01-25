@@ -15,37 +15,45 @@ export default function LoginButtons() {
     <>
       {/* Login Buttons Container */}
       <div className="fixed inset-x-0 bottom-0 top-0 flex items-center justify-center pointer-events-none z-10">
-        <div className="transform translate-y-24 pointer-events-auto">
-          <div className="flex gap-4">
+        <div className="transform translate-y-32 pointer-events-auto">
+          <div className="flex flex-col md:flex-row gap-6 md:gap-8">
             {/* Face Login Button */}
             <button
               onClick={() => handleOpenModal('face')}
-              className="group relative flex flex-col items-center gap-2 px-6 py-4 bg-white/10 hover:bg-white/25 backdrop-blur-xl border border-white/20 hover:border-blue-500/30 rounded-full shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-110 hover:-translate-y-1 active:scale-95 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+              className="group relative flex flex-col items-center gap-4 px-12 py-8 bg-white/20 hover:bg-white/35 backdrop-blur-3xl border-2 border-white/30 hover:border-[#0E1F34]/40 rounded-3xl shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-105 hover:-translate-y-2 active:scale-95 focus:outline-none focus:ring-4 focus:ring-[#0E1F34]/30"
             >
               <div className="relative">
                 <ScanFace
-                  size={32}
-                  className="text-[#0E1F34] group-hover:text-blue-600 transition-colors duration-300 group-hover:scale-125 group-hover:rotate-12"
+                  size={64}
+                  className="text-[#0E1F34] group-hover:text-[#C8102E] transition-colors duration-300 group-hover:scale-110"
+                  strokeWidth={1.5}
                 />
               </div>
-              <span className="text-base font-semibold text-[#0E1F34] group-hover:tracking-wide transition-all duration-300">
+              <span className="text-2xl font-semibold text-[#0E1F34] group-hover:tracking-wide transition-all duration-300">
                 Face Login
+              </span>
+              <span className="text-sm text-gray-600 font-light">
+                Scan your face to continue
               </span>
             </button>
 
             {/* QR Login Button */}
             <button
               onClick={() => handleOpenModal('qr')}
-              className="group relative flex flex-col items-center gap-2 px-6 py-4 bg-white/10 hover:bg-white/25 backdrop-blur-xl border border-white/20 hover:border-[#C8102E]/30 rounded-full shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-110 hover:-translate-y-1 active:scale-95 focus:outline-none focus:ring-2 focus:ring-[#C8102E]/50"
+              className="group relative flex flex-col items-center gap-4 px-12 py-8 bg-white/20 hover:bg-white/35 backdrop-blur-3xl border-2 border-white/30 hover:border-[#C8102E]/40 rounded-3xl shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-105 hover:-translate-y-2 active:scale-95 focus:outline-none focus:ring-4 focus:ring-[#C8102E]/30"
             >
               <div className="relative">
                 <QrCode
-                  size={32}
-                  className="text-[#0E1F34] group-hover:text-[#C8102E] transition-colors duration-300 group-hover:scale-125 group-hover:rotate-12"
+                  size={64}
+                  className="text-[#0E1F34] group-hover:text-[#C8102E] transition-colors duration-300 group-hover:scale-110"
+                  strokeWidth={1.5}
                 />
               </div>
-              <span className="text-base font-semibold text-[#0E1F34] group-hover:tracking-wide transition-all duration-300">
+              <span className="text-2xl font-semibold text-[#0E1F34] group-hover:tracking-wide transition-all duration-300">
                 QR Login
+              </span>
+              <span className="text-sm text-gray-600 font-light">
+                Scan your boarding pass
               </span>
             </button>
           </div>

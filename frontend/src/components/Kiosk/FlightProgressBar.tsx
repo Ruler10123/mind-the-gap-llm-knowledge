@@ -32,10 +32,10 @@ export function FlightProgressBar({ flight, isCompact = false, onClick, showProg
         title: 'Check-in Status',
         items: [
           { label: 'Counter Status', value: 'Open - Desks 15-18', status: 'success' },
-          { label: 'Mobile Check-in', value: 'Completed', status: 'success' },
-          { label: 'Checked Bags', value: '2 bags ($80 total)', status: 'info' },
-          { label: 'Additional Bags', value: 'Add for $150', status: 'warning' },
-          { label: 'Boarding Pass', value: 'In Mobile App', status: 'success' },
+          { label: 'Mobile Check-in', value: 'Available', status: 'info' },
+          { label: 'Checked Bags', value: '0 of 2 bags', status: 'warning' },
+          { label: 'Additional Bags', value: 'Add for $150', status: 'info' },
+          { label: 'Boarding Pass', value: 'Not yet issued', status: 'warning' },
           { label: 'ID Verification', value: 'Required at Gate', status: 'info' },
         ]
       }
@@ -95,11 +95,11 @@ export function FlightProgressBar({ flight, isCompact = false, onClick, showProg
       info: {
         title: 'Boarding Progress',
         items: [
-          { label: 'Your Group', value: 'Group 3 - Now Boarding', status: 'success' },
+          { label: 'Your Group', value: 'Group 3 - Pending', status: 'info' },
           { label: 'Seat Assignment', value: '12F (Window)', status: 'info' },
-          { label: 'Bags Loaded', value: '1 of 2 loaded', status: 'warning' },
-          { label: 'Remaining Bag', value: 'Loading in 5 min', status: 'warning' },
-          { label: 'Mobile Boarding Pass', value: 'Ready to Scan', status: 'success' },
+          { label: 'Bags Loaded', value: '0 of 2 loaded', status: 'warning' },
+          { label: 'Bag Status', value: 'Awaiting loading', status: 'info' },
+          { label: 'Mobile Boarding Pass', value: 'Ready when boarding', status: 'info' },
           { label: 'Estimated Departure', value: flight.departureTime + ' (On Time)', status: 'success' },
         ]
       }
@@ -113,10 +113,10 @@ export function FlightProgressBar({ flight, isCompact = false, onClick, showProg
         items: [
           { label: 'Flight Duration', value: '3h 30m', status: 'info' },
           { label: 'Estimated Arrival', value: '4:15 PM CST', status: 'info' },
-          { label: 'Wi-Fi Access', value: 'Premium Plan ($19)', status: 'success' },
-          { label: 'In-Flight Entertainment', value: 'Streaming Available', status: 'success' },
-          { label: 'Meal Service', value: 'Vegetarian Pasta', status: 'info' },
-          { label: 'Flight Tracker', value: 'Live Map in App', status: 'info' },
+          { label: 'Wi-Fi Access', value: 'Available onboard', status: 'info' },
+          { label: 'In-Flight Entertainment', value: 'Streaming Available', status: 'info' },
+          { label: 'Meal Service', value: 'Pre-selected meal ready', status: 'info' },
+          { label: 'Flight Tracker', value: 'Available in app', status: 'info' },
         ]
       }
     },
@@ -127,11 +127,11 @@ export function FlightProgressBar({ flight, isCompact = false, onClick, showProg
       info: {
         title: 'Arrival & Next Steps',
         items: [
-          { label: 'Arrival Status', value: 'Landed - Gate C12', status: 'success' },
-          { label: 'Baggage Claim', value: 'Belt 3 - Level 1', status: 'info' },
-          { label: 'Bag 1', value: 'Claimed', status: 'success' },
-          { label: 'Bag 2', value: 'On Carousel', status: 'warning' },
-          { label: 'Ground Transport', value: 'Rideshare: Level 1, Door 3', status: 'info' },
+          { label: 'Arrival Status', value: 'Not yet arrived', status: 'info' },
+          { label: 'Baggage Claim', value: 'TBD upon arrival', status: 'info' },
+          { label: 'Checked Bags', value: '2 bags expected', status: 'info' },
+          { label: 'Bag Tracking', value: 'Available in app', status: 'info' },
+          { label: 'Ground Transport', value: 'Rideshare options available', status: 'info' },
           { label: 'Next Flight', value: 'No connections today', status: 'info' },
         ]
       }
@@ -142,10 +142,8 @@ export function FlightProgressBar({ flight, isCompact = false, onClick, showProg
 
   const handlePhaseClick = (e: React.MouseEvent, phaseId: string, index: number) => {
     e.stopPropagation()
-    // Only allow clicking on completed or current phases
-    if (index <= currentPhaseIndex) {
-      setOpenDropdown(openDropdown === phaseId ? null : phaseId)
-    }
+    // Allow clicking on all phases to see information
+    setOpenDropdown(openDropdown === phaseId ? null : phaseId)
   }
 
   const getStatusColor = (status: string) => {
@@ -193,7 +191,7 @@ export function FlightProgressBar({ flight, isCompact = false, onClick, showProg
             const isCurrent = index === currentPhaseIndex
             const isUpcoming = index > currentPhaseIndex
             const Icon = phase.icon
-            const isClickable = index <= currentPhaseIndex
+            const isClickable = true // All phases are clickable
             const isOpen = openDropdown === phase.id
 
             return (
@@ -207,7 +205,7 @@ export function FlightProgressBar({ flight, isCompact = false, onClick, showProg
                       ${isComplete ? 'bg-[#C8102E]' : ''}
                       ${isCurrent ? 'bg-[#C8102E] ring-2 ring-[#C8102E]/30' : ''}
                       ${isUpcoming ? 'bg-white/20' : ''}
-                      ${isClickable ? 'cursor-pointer hover:scale-110 hover:shadow-lg' : 'cursor-not-allowed'}
+                      cursor-pointer hover:scale-110 hover:shadow-lg
                     `}
                   >
                     <Icon
@@ -228,21 +226,21 @@ export function FlightProgressBar({ flight, isCompact = false, onClick, showProg
 
                   {/* Dropdown */}
                   {isOpen && (
-                    <div className="absolute top-full mt-3 z-50 min-w-[340px] animate-in fade-in slide-in-from-top-2 duration-200">
-                      <div className="relative overflow-hidden rounded-3xl backdrop-blur-3xl bg-white/30 border border-white/40 shadow-2xl">
+                    <div className="absolute top-full mt-3 z-50 w-[280px] max-w-[90vw] animate-in fade-in slide-in-from-top-2 duration-200">
+                      <div className="relative overflow-hidden rounded-2xl backdrop-blur-3xl bg-white/30 border border-white/40 shadow-2xl">
                         {/* Header with gradient */}
-                        <div className="bg-gradient-to-br from-[#0E1F34] to-[#1a3a5c] px-4 py-3 border-b border-white/20">
-                          <h3 className="text-sm font-medium text-white flex items-center gap-2">
-                            <Icon className="w-4 h-4 text-[#C8102E]" />
+                        <div className="bg-gradient-to-br from-[#0E1F34] to-[#1a3a5c] px-3 py-2.5 border-b border-white/20">
+                          <h3 className="text-xs font-medium text-white flex items-center gap-2">
+                            <Icon className="w-3.5 h-3.5 text-[#C8102E]" />
                             {phase.info.title}
                           </h3>
                         </div>
                         {/* Content */}
-                        <div className="p-4 space-y-2">
+                        <div className="p-3 space-y-1.5 max-h-[250px] overflow-y-auto">
                           {phase.info.items.map((item, idx) => (
-                            <div key={idx} className="flex items-center justify-between py-2 px-3 rounded-xl bg-white/20 border border-white/30 hover:bg-white/30 transition-colors">
-                              <span className="text-xs font-light text-[#0E1F34]">{item.label}</span>
-                              <span className={`text-xs font-medium ${getStatusColor(item.status)}`}>
+                            <div key={idx} className="flex items-center justify-between py-1.5 px-2.5 rounded-lg bg-white/20 border border-white/30 hover:bg-white/30 transition-colors">
+                              <span className="text-[10px] font-light text-[#0E1F34] truncate pr-2">{item.label}</span>
+                              <span className={`text-[10px] font-medium ${getStatusColor(item.status)} whitespace-nowrap`}>
                                 {item.value}
                               </span>
                             </div>
