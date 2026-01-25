@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { Send, Mic, MapPin } from 'lucide-react'
 import { StreamingText } from '../StreamingText'
 import { FlightDetailsCard } from '../FlightDetailsCard'
+import { WeatherWidget } from '../WeatherWidget'
 
 interface InlineChatProps {
   isVisible: boolean
@@ -154,6 +155,14 @@ export function InlineChat({
                     {message.componentType === 'flight_details' && (
                       <div className="w-full max-w-2xl">
                         <FlightDetailsCard />
+                      </div>
+                    )}
+                    {message.componentType === 'weather' && (
+                      <div className="w-full max-w-2xl">
+                        <WeatherWidget
+                          location={message.componentData?.location ?? 'Dallas'}
+                          isMinimized={false}
+                        />
                       </div>
                     )}
                     {message.componentType === 'map' && message.componentData && (

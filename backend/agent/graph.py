@@ -53,6 +53,20 @@ def show_flight_details(flight_number: str = "AA 2847") -> dict:
 
 
 @tool
+def show_weather(location: str = "Dallas") -> dict:
+    """Show weather widget in chat when user asks about weather, temperature, or conditions
+    at the airport or their destination. Use the specified location (city name, e.g. Dallas, DFW).
+    IMPORTANT: After calling this tool, you MUST provide a brief spoken response (1-2 sentences)
+    acknowledging what you're showing them. For example: 'Here\'s the weather in Dallas.'"""
+    return {
+        "component_type": "weather",
+        "data": {
+            "location": location.strip() or "Dallas",
+        },
+    }
+
+
+@tool
 def show_map(destination: str) -> dict:
     """Show map directions in chat when user asks for directions or location of gates, restrooms, or services.
     Valid destinations: RESTROOM, CUSTOMER_SERVICE, A28, B9.
@@ -157,7 +171,7 @@ def search_knowledge_base(query: str) -> str:
         return f"Unable to search knowledge base: {str(e)}"
 
 
-tools = [get_current_time, add, multiply, divide, show_flight_details, show_map, search_knowledge_base]
+tools = [get_current_time, add, multiply, divide, show_flight_details, show_weather, show_map, search_knowledge_base]
 tools_by_name = {t.name: t for t in tools}
 
 
@@ -172,11 +186,12 @@ You have access to callable tools (nodes):
 - get_current_time: use when the user asks about the current time, date, or "today"
 - add, multiply, divide: use for basic arithmetic when the user asks for calculations
 - show_flight_details: use when the user asks about their flight, gate, boarding status, or flight information
+- show_weather: use when the user asks about weather, temperature, or conditions at the airport or their destination (pass location e.g. Dallas, DFW)
 - show_map: use when the user asks for directions or where to find gates (A28, B9, C43, D12), restrooms, or customer service. Valid destinations: RESTROOM, CUSTOMER_SERVICE, A28, B9, C43, D12
 - search_knowledge_base: use when the user asks about airport policies, procedures, baggage rules, security guidelines, available services, or facility information
 
-CRITICAL: After calling show_flight_details or show_map, you MUST provide a brief spoken response (1-2 sentences) to accompany the visual component.
-For example: "Here are your flight details" or "Here are directions to Gate A28. Follow the highlighted path."
+CRITICAL: After calling show_flight_details, show_weather, or show_map, you MUST provide a brief spoken response (1-2 sentences) to accompany the visual component.
+For example: "Here are your flight details" or "Here's the weather in Dallas." or "Here are directions to Gate A28. Follow the highlighted path."
 
 Call the appropriate tool when it helps answer the user. Otherwise reply directly. Keep replies clear and concise and do not use markdown formatting."""
 
