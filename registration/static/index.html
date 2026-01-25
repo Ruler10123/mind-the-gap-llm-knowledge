@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Kiosk - Biometric & QR Auth</title>
+    <title>Passenger Registration - American Airlines</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -12,207 +15,222 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #ffffff 0%, rgba(51, 67, 87, 0.8) 100%);
             min-height: 100vh;
             padding: 20px;
-            color: #333;
+            color: #0E1F34;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
         .container {
-            max-width: 1400px;
+            max-width: 600px;
             margin: 0 auto;
+            padding: 40px 20px;
         }
 
         .header {
             text-align: center;
-            color: white;
-            margin-bottom: 30px;
+            margin-bottom: 40px;
+        }
+
+        .header-logo {
+            height: 60px;
+            width: auto;
+            margin-bottom: 20px;
+            object-fit: contain;
         }
 
         .header h1 {
-            font-size: 2.5em;
+            font-size: 2.5rem;
+            font-weight: 300;
+            color: #0E1F34;
             margin-bottom: 10px;
+            letter-spacing: -0.02em;
         }
 
         .header p {
-            font-size: 1.1em;
-            opacity: 0.9;
-        }
-
-        .grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-bottom: 20px;
+            font-size: 1.1rem;
+            color: #666;
+            font-weight: 400;
         }
 
         .card {
-            background: white;
-            border-radius: 12px;
-            padding: 25px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 1rem;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            box-shadow: 0 25px 70px rgba(0, 0, 0, 0.15);
         }
 
         .card h2 {
-            font-size: 1.5em;
-            margin-bottom: 15px;
-            color: #667eea;
-            border-bottom: 2px solid #667eea;
-            padding-bottom: 10px;
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: #0E1F34;
+            margin-bottom: 30px;
+            text-align: center;
         }
 
-        .camera-section {
-            grid-column: 1 / -1;
+        .form-group {
+            margin-bottom: 24px;
         }
 
-        #video {
-            width: 100%;
-            max-width: 640px;
-            height: auto;
-            border-radius: 8px;
-            background: #000;
+        .form-group label {
             display: block;
-            margin: 15px auto;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #0E1F34;
+            font-size: 0.95rem;
         }
 
-        #canvas {
-            display: none;
+        .form-group input[type="text"],
+        .form-group input[type="file"] {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            color: #0E1F34;
+            transition: all 0.3s ease;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .form-group input[type="text"]:focus {
+            outline: none;
+            border-color: #C8102E;
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 0 0 3px rgba(200, 16, 46, 0.1);
+        }
+
+        .form-group input[type="file"] {
+            padding: 12px;
+            cursor: pointer;
+        }
+
+        .form-group input[type="file"]:focus {
+            outline: none;
+            border-color: #C8102E;
+            box-shadow: 0 0 0 3px rgba(200, 16, 46, 0.1);
+        }
+
+        .form-group input[type="file"]::file-selector-button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 0.5rem;
+            background: #C8102E;
+            color: white;
+            font-weight: 500;
+            cursor: pointer;
+            margin-right: 12px;
+            transition: all 0.3s ease;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .form-group input[type="file"]::file-selector-button:hover {
+            background: #a00d26;
+            transform: translateY(-1px);
         }
 
         .btn {
-            background: #667eea;
+            width: 100%;
+            background: #C8102E;
             color: white;
             border: none;
-            padding: 12px 24px;
-            font-size: 1em;
-            border-radius: 6px;
+            padding: 16px 32px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 1rem;
             cursor: pointer;
             transition: all 0.3s ease;
-            margin: 5px;
+            font-family: 'Inter', sans-serif;
+            margin-top: 8px;
+            box-shadow: 0 4px 12px rgba(200, 16, 46, 0.3);
         }
 
-        .btn:hover {
-            background: #5568d3;
+        .btn:hover:not(:disabled) {
+            background: #a00d26;
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 6px 20px rgba(200, 16, 46, 0.4);
+        }
+
+        .btn:active:not(:disabled) {
+            transform: translateY(0);
         }
 
         .btn:disabled {
             background: #ccc;
             cursor: not-allowed;
             transform: none;
-        }
-
-        .btn-success {
-            background: #10b981;
-        }
-
-        .btn-success:hover {
-            background: #059669;
-        }
-
-        .btn-danger {
-            background: #ef4444;
-        }
-
-        .btn-danger:hover {
-            background: #dc2626;
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 500;
-            color: #555;
-        }
-
-        .form-group input {
-            width: 100%;
-            padding: 10px;
-            border: 2px solid #e5e7eb;
-            border-radius: 6px;
-            font-size: 1em;
-            transition: border-color 0.3s ease;
-        }
-
-        .form-group input:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-
-        .tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .tab {
-            flex: 1;
-            padding: 12px;
-            background: #f3f4f6;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 1em;
-            transition: all 0.3s ease;
-        }
-
-        .tab.active {
-            background: #667eea;
-            color: white;
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
+            box-shadow: none;
         }
 
         .result {
-            margin-top: 20px;
-            padding: 15px;
-            border-radius: 8px;
-            border-left: 4px solid #667eea;
+            margin-top: 24px;
+            padding: 20px;
+            border-radius: 0.75rem;
+            animation: fade-in 0.3s ease-out;
         }
 
         .result.success {
-            background: #d1fae5;
-            border-color: #10b981;
+            background: rgba(209, 250, 229, 0.3);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: #065f46;
         }
 
         .result.error {
-            background: #fee2e2;
-            border-color: #ef4444;
+            background: rgba(254, 226, 226, 0.3);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #991b1b;
         }
 
         .result h3 {
-            margin-bottom: 10px;
+            margin-bottom: 12px;
+            font-size: 1.2rem;
+            font-weight: 600;
         }
 
-        .user-info {
-            background: #f9fafb;
-            padding: 15px;
-            border-radius: 6px;
-            margin-top: 10px;
+        .qr-display {
+            text-align: center;
+            margin-top: 20px;
         }
 
-        .user-info p {
-            margin: 5px 0;
+        .qr-display img {
+            max-width: 300px;
+            width: 100%;
+            border: 2px solid rgba(200, 16, 46, 0.3);
+            border-radius: 0.75rem;
+            margin: 16px 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .qr-display p {
+            margin: 8px 0;
+            font-weight: 500;
+        }
+
+        .qr-display small {
+            color: #666;
+            font-size: 0.9rem;
         }
 
         .loading {
             display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #667eea;
+            width: 18px;
+            height: 18px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid white;
             border-radius: 50%;
             animation: spin 1s linear infinite;
             margin-left: 10px;
@@ -224,229 +242,378 @@
             100% { transform: rotate(360deg); }
         }
 
-        .qr-display {
-            text-align: center;
-            margin-top: 15px;
+        @keyframes fade-in {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
-        .qr-display img {
-            max-width: 300px;
-            border: 2px solid #667eea;
-            border-radius: 8px;
-            margin: 10px 0;
+        .file-preview {
+            margin-top: 12px;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 0.5rem;
+            font-size: 0.9rem;
+            color: #0E1F34;
+        }
+
+        .photo-options {
+            display: flex;
+            gap: 12px;
+            margin-top: 8px;
+            align-items: stretch;
+        }
+
+        .photo-options input[type="file"] {
+            flex: 1;
+            margin: 0;
+        }
+
+        .btn-secondary {
+            flex: 0 0 auto;
+            min-width: 140px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            color: #0E1F34;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 12px 20px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: #C8102E;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary:active {
+            transform: translateY(0);
+        }
+
+        /* Camera Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            animation: fade-in 0.3s ease-out;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .camera-modal {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 1rem;
+            padding: 30px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: fade-in 0.3s ease-out;
+        }
+
+        .camera-modal h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #0E1F34;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .camera-preview {
+            width: 100%;
+            max-width: 500px;
+            height: auto;
+            border-radius: 0.75rem;
+            background: #000;
+            margin: 0 auto 20px;
+            display: block;
         }
 
         .camera-controls {
-            text-align: center;
-            margin: 15px 0;
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
         }
 
-        .status-badge {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-size: 0.9em;
+        .btn-camera {
+            padding: 12px 24px;
+            font-size: 1rem;
             font-weight: 500;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Inter', sans-serif;
+            border: none;
         }
 
-        .status-not-boarded {
-            background: #fef3c7;
-            color: #92400e;
+        .btn-capture {
+            background: #C8102E;
+            color: white;
+            box-shadow: 0 4px 12px rgba(200, 16, 46, 0.3);
         }
 
-        .status-boarded {
-            background: #d1fae5;
-            color: #065f46;
+        .btn-capture:hover {
+            background: #a00d26;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(200, 16, 46, 0.4);
+        }
+
+        .btn-cancel {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            color: #0E1F34;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-cancel:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: #C8102E;
+        }
+
+        .camera-error {
+            text-align: center;
+            padding: 20px;
+            color: #991b1b;
+            background: rgba(254, 226, 226, 0.3);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 0.75rem;
+            margin-bottom: 20px;
+        }
+
+        #canvas {
+            display: none;
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                padding: 20px 16px;
+            }
+
+            .card {
+                padding: 30px 24px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .header p {
+                font-size: 1rem;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>Smart Kiosk Authentication</h1>
-            <p>Biometric Face Recognition & QR Code Verification System</p>
+            <img src="/static/americanairlineslogo.png" alt="American Airlines" class="header-logo" onerror="this.style.display='none'">
+            <h1>Passenger Registration</h1>
+            <p>Register for biometric authentication</p>
         </div>
 
-        <div class="grid">
-            <!-- Camera Section -->
-            <div class="card camera-section">
-                <h2>Camera Feed</h2>
-                <video id="video" autoplay></video>
-                <canvas id="canvas"></canvas>
-                <div class="camera-controls">
-                    <button class="btn btn-success" id="startCamera">Start Camera</button>
-                    <button class="btn btn-danger" id="stopCamera" disabled>Stop Camera</button>
-                </div>
-            </div>
-
-            <!-- Registration Panel -->
-            <div class="card">
-                <h2>Passenger Registration</h2>
+        <div class="card">
+            <h2>Register New Passenger</h2>
+            <form id="registrationForm">
                 <div class="form-group">
-                    <label>Name</label>
-                    <input type="text" id="regName" placeholder="John Doe">
-                </div>
-                <div class="form-group">
-                    <label>Passenger ID</label>
-                    <input type="text" id="regPassengerId" placeholder="ABC123">
-                </div>
-                <div class="form-group">
-                    <label>Flight Number</label>
-                    <input type="text" id="regFlight" placeholder="AA100">
-                </div>
-                <div class="form-group">
-                    <label>Seat</label>
-                    <input type="text" id="regSeat" placeholder="12A">
-                </div>
-                <div class="form-group">
-                    <label>Boarding Group</label>
-                    <input type="text" id="regGroup" placeholder="Group 2">
-                </div>
-                <button class="btn" id="registerBtn">Capture & Register</button>
-                <div id="registerResult"></div>
-            </div>
-
-            <!-- Verification Panel -->
-            <div class="card">
-                <h2>Authentication</h2>
-                <div class="tabs">
-                    <button class="tab active" data-tab="faceTab">Face Recognition</button>
-                    <button class="tab" data-tab="qrTab">QR Code</button>
+                    <label for="regName">Full Name</label>
+                    <input type="text" id="regName" name="name" placeholder="John Doe" required>
                 </div>
 
-                <!-- Face Auth Tab -->
-                <div class="tab-content active" id="faceTab">
-                    <p style="margin-bottom: 15px; color: #666;">Capture your face from the camera feed to authenticate.</p>
-                    <button class="btn" id="faceAuthBtn">Capture & Verify Face</button>
-                    <div id="faceAuthResult"></div>
+                <div class="form-group">
+                    <label for="regPassengerId">Passenger ID</label>
+                    <input type="text" id="regPassengerId" name="passenger_id" placeholder="ABC123" required>
                 </div>
 
-                <!-- QR Auth Tab -->
-                <div class="tab-content" id="qrTab">
-                    <div class="form-group">
-                        <label>QR Token</label>
-                        <input type="text" id="qrToken" placeholder="Paste QR token here">
+                <div class="form-group">
+                    <label for="regFlight">Flight Number</label>
+                    <input type="text" id="regFlight" name="flight_number" placeholder="AA100" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="regSeat">Seat Assignment</label>
+                    <input type="text" id="regSeat" name="seat" placeholder="12A" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="regGroup">Boarding Group</label>
+                    <input type="text" id="regGroup" name="group" placeholder="Group 2" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="regPhoto">Passenger Photo</label>
+                    <div class="photo-options">
+                        <input type="file" id="regPhoto" name="file" accept="image/*" required>
+                        <button type="button" class="btn-secondary" id="takePhotoBtn">Take Photo</button>
                     </div>
-                    <button class="btn" id="qrAuthBtn">Verify QR Code</button>
-                    <div id="qrAuthResult"></div>
+                    <div id="filePreview" class="file-preview" style="display: none;"></div>
                 </div>
+
+                <button type="submit" class="btn" id="registerBtn">Register Passenger</button>
+                <div id="registerResult"></div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Camera Modal -->
+    <div class="modal-overlay" id="cameraModal">
+        <div class="camera-modal">
+            <h3>Take Photo</h3>
+            <div id="cameraError" class="camera-error" style="display: none;"></div>
+            <video id="cameraVideo" class="camera-preview" autoplay playsinline></video>
+            <canvas id="canvas"></canvas>
+            <div class="camera-controls">
+                <button type="button" class="btn-camera btn-capture" id="captureBtn">Capture Photo</button>
+                <button type="button" class="btn-camera btn-cancel" id="closeCameraBtn">Cancel</button>
             </div>
         </div>
     </div>
 
     <script>
-        // Camera Management
-        const video = document.getElementById('video');
+        // File input and preview elements
+        const fileInput = document.getElementById('regPhoto');
+        const filePreview = document.getElementById('filePreview');
+
+        // Camera functionality
+        const cameraModal = document.getElementById('cameraModal');
+        const takePhotoBtn = document.getElementById('takePhotoBtn');
+        const closeCameraBtn = document.getElementById('closeCameraBtn');
+        const captureBtn = document.getElementById('captureBtn');
+        const cameraVideo = document.getElementById('cameraVideo');
         const canvas = document.getElementById('canvas');
-        const startCameraBtn = document.getElementById('startCamera');
-        const stopCameraBtn = document.getElementById('stopCamera');
-        let stream = null;
+        const cameraError = document.getElementById('cameraError');
+        let cameraStream = null;
 
-        startCameraBtn.addEventListener('click', async () => {
+        // Open camera modal
+        takePhotoBtn.addEventListener('click', async () => {
+            cameraError.style.display = 'none';
+            cameraModal.classList.add('active');
+            
             try {
-                stream = await navigator.mediaDevices.getUserMedia({
-                    video: { width: 640, height: 480 }
+                cameraStream = await navigator.mediaDevices.getUserMedia({
+                    video: { 
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 },
+                        facingMode: 'user'
+                    }
                 });
-                video.srcObject = stream;
-                startCameraBtn.disabled = true;
-                stopCameraBtn.disabled = false;
+                cameraVideo.srcObject = cameraStream;
             } catch (error) {
-                alert('Error accessing camera: ' + error.message);
+                cameraError.textContent = `Error accessing camera: ${error.message}`;
+                cameraError.style.display = 'block';
+                console.error('Camera error:', error);
             }
         });
 
-        stopCameraBtn.addEventListener('click', () => {
-            if (stream) {
-                stream.getTracks().forEach(track => track.stop());
-                video.srcObject = null;
-                startCameraBtn.disabled = false;
-                stopCameraBtn.disabled = true;
+        // Close camera modal
+        function closeCamera() {
+            if (cameraStream) {
+                cameraStream.getTracks().forEach(track => track.stop());
+                cameraStream = null;
+            }
+            cameraVideo.srcObject = null;
+            cameraModal.classList.remove('active');
+        }
+
+        closeCameraBtn.addEventListener('click', closeCamera);
+        cameraModal.addEventListener('click', (e) => {
+            if (e.target === cameraModal) {
+                closeCamera();
             }
         });
 
-        // Tab Switching
-        document.querySelectorAll('.tab').forEach(tab => {
-            tab.addEventListener('click', () => {
-                const targetId = tab.dataset.tab;
+        // Capture photo
+        captureBtn.addEventListener('click', () => {
+            if (!cameraStream) return;
 
-                // Update active tab
-                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-                tab.classList.add('active');
-
-                // Update active content
-                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-                document.getElementById(targetId).classList.add('active');
-            });
-        });
-
-        // Capture frame from video
-        function captureFrame() {
-            if (!stream) {
-                alert('Please start the camera first');
-                return null;
-            }
-
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
+            canvas.width = cameraVideo.videoWidth;
+            canvas.height = cameraVideo.videoHeight;
             const ctx = canvas.getContext('2d');
-            ctx.drawImage(video, 0, 0);
+            ctx.drawImage(cameraVideo, 0, 0);
 
-            return new Promise((resolve) => {
-                canvas.toBlob(resolve, 'image/jpeg');
-            });
-        }
+            canvas.toBlob((blob) => {
+                // Create a File object from the blob
+                const file = new File([blob], 'camera-capture.jpg', { type: 'image/jpeg' });
+                
+                // Create a DataTransfer object to set the file input
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(file);
+                fileInput.files = dataTransfer.files;
+                
+                // Trigger change event to update preview
+                fileInput.dispatchEvent(new Event('change', { bubbles: true }));
+                
+                // Close camera
+                closeCamera();
+            }, 'image/jpeg', 0.95);
+        });
 
-        // Display result helper
-        function displayResult(elementId, data, isSuccess) {
-            const element = document.getElementById(elementId);
-            const resultClass = isSuccess ? 'success' : 'error';
+        // File input preview
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                filePreview.textContent = `Selected: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+                filePreview.style.display = 'block';
+            } else {
+                filePreview.style.display = 'none';
+            }
+        });
 
-            let html = `<div class="result ${resultClass}">`;
-            html += `<h3>${data.message || data.detail || 'Unknown response'}</h3>`;
+        // Registration form submission
+        const registrationForm = document.getElementById('registrationForm');
+        const registerBtn = document.getElementById('registerBtn');
+        const resultDiv = document.getElementById('registerResult');
 
-            if (data.user) {
-                html += `<div class="user-info">`;
-                html += `<p><strong>Name:</strong> ${data.user.name}</p>`;
-                html += `<p><strong>Passenger ID:</strong> ${data.user.passenger_id}</p>`;
-                html += `<p><strong>Flight:</strong> ${data.user.ticket_info.flight_number}</p>`;
-                html += `<p><strong>Seat:</strong> ${data.user.ticket_info.seat}</p>`;
-                html += `<p><strong>Group:</strong> ${data.user.ticket_info.group}</p>`;
+        registrationForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
 
-                const boardedClass = data.user.status.boarded ? 'status-boarded' : 'status-not-boarded';
-                const boardedText = data.user.status.boarded ? 'Boarded' : 'Not Boarded';
-                html += `<p><strong>Status:</strong> <span class="status-badge ${boardedClass}">${boardedText}</span></p>`;
-                html += `</div>`;
+            const formData = new FormData();
+            const photoFile = fileInput.files[0];
+
+            if (!photoFile) {
+                resultDiv.innerHTML = `
+                    <div class="result error">
+                        <h3>Error</h3>
+                        <p>Please select a photo to upload.</p>
+                    </div>
+                `;
+                return;
             }
 
-            if (data.similarity_score !== undefined) {
-                html += `<p><strong>Similarity Score:</strong> ${(data.similarity_score * 100).toFixed(1)}%</p>`;
-            }
-
-            html += `</div>`;
-            element.innerHTML = html;
-        }
-
-        // Registration
-        document.getElementById('registerBtn').addEventListener('click', async () => {
-            const btn = document.getElementById('registerBtn');
-            const resultDiv = document.getElementById('registerResult');
+            formData.append('file', photoFile);
+            formData.append('name', document.getElementById('regName').value);
+            formData.append('passenger_id', document.getElementById('regPassengerId').value);
+            formData.append('flight_number', document.getElementById('regFlight').value);
+            formData.append('seat', document.getElementById('regSeat').value);
+            formData.append('group', document.getElementById('regGroup').value);
 
             try {
-                btn.disabled = true;
-                btn.innerHTML = 'Capturing... <span class="loading"></span>';
-
-                const blob = await captureFrame();
-                if (!blob) return;
-
-                const formData = new FormData();
-                formData.append('file', blob, 'capture.jpg');
-                formData.append('name', document.getElementById('regName').value);
-                formData.append('passenger_id', document.getElementById('regPassengerId').value);
-                formData.append('flight_number', document.getElementById('regFlight').value);
-                formData.append('seat', document.getElementById('regSeat').value);
-                formData.append('group', document.getElementById('regGroup').value);
-
-                btn.innerHTML = 'Registering... <span class="loading"></span>';
+                registerBtn.disabled = true;
+                registerBtn.innerHTML = 'Registering... <span class="loading"></span>';
 
                 const response = await fetch('/api/register', {
                     method: 'POST',
@@ -460,95 +627,39 @@
                     resultDiv.innerHTML = `
                         <div class="result success">
                             <h3>Registration Successful!</h3>
+                            <p>Your passenger account has been created successfully.</p>
                             <div class="qr-display">
                                 <p><strong>Your QR Code:</strong></p>
                                 <img src="${url}" alt="QR Code">
                                 <p><small>Download this QR code for authentication</small></p>
+                                <a href="${url}" download="${document.getElementById('regPassengerId').value}_qr.png" style="display: inline-block; margin-top: 12px; padding: 10px 20px; background: #C8102E; color: white; text-decoration: none; border-radius: 0.5rem; font-weight: 500; transition: all 0.3s ease;" onmouseover="this.style.background='#a00d26'" onmouseout="this.style.background='#C8102E'">Download QR Code</a>
                             </div>
                         </div>
                     `;
+
+                    // Reset form
+                    registrationForm.reset();
+                    filePreview.style.display = 'none';
                 } else {
                     const error = await response.json();
-                    displayResult('registerResult', error, false);
+                    resultDiv.innerHTML = `
+                        <div class="result error">
+                            <h3>Registration Failed</h3>
+                            <p>${error.detail || error.message || 'An error occurred during registration.'}</p>
+                        </div>
+                    `;
                 }
             } catch (error) {
-                resultDiv.innerHTML = `<div class="result error"><h3>Error: ${error.message}</h3></div>`;
+                resultDiv.innerHTML = `
+                    <div class="result error">
+                        <h3>Error</h3>
+                        <p>${error.message || 'An unexpected error occurred. Please try again.'}</p>
+                    </div>
+                `;
             } finally {
-                btn.disabled = false;
-                btn.innerHTML = 'Capture & Register';
+                registerBtn.disabled = false;
+                registerBtn.innerHTML = 'Register Passenger';
             }
-        });
-
-        // Face Authentication
-        document.getElementById('faceAuthBtn').addEventListener('click', async () => {
-            const btn = document.getElementById('faceAuthBtn');
-            const resultDiv = document.getElementById('faceAuthResult');
-
-            try {
-                btn.disabled = true;
-                btn.innerHTML = 'Capturing... <span class="loading"></span>';
-
-                const blob = await captureFrame();
-                if (!blob) return;
-
-                const formData = new FormData();
-                formData.append('file', blob, 'capture.jpg');
-
-                btn.innerHTML = 'Verifying... <span class="loading"></span>';
-
-                const response = await fetch('/api/auth/face', {
-                    method: 'POST',
-                    body: formData
-                });
-
-                const data = await response.json();
-                displayResult('faceAuthResult', data, data.status === 'success');
-
-            } catch (error) {
-                resultDiv.innerHTML = `<div class="result error"><h3>Error: ${error.message}</h3></div>`;
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = 'Capture & Verify Face';
-            }
-        });
-
-        // QR Authentication
-        document.getElementById('qrAuthBtn').addEventListener('click', async () => {
-            const btn = document.getElementById('qrAuthBtn');
-            const resultDiv = document.getElementById('qrAuthResult');
-            const token = document.getElementById('qrToken').value;
-
-            if (!token) {
-                alert('Please enter a QR token');
-                return;
-            }
-
-            try {
-                btn.disabled = true;
-                btn.innerHTML = 'Verifying... <span class="loading"></span>';
-
-                const response = await fetch('/api/auth/qr', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ qr_token: token })
-                });
-
-                const data = await response.json();
-                displayResult('qrAuthResult', data, data.status === 'success');
-
-            } catch (error) {
-                resultDiv.innerHTML = `<div class="result error"><h3>Error: ${error.message}</h3></div>`;
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = 'Verify QR Code';
-            }
-        });
-
-        // Auto-start camera on page load
-        window.addEventListener('load', () => {
-            startCameraBtn.click();
         });
     </script>
 </body>
