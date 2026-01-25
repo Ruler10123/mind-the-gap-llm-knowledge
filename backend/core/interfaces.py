@@ -1,22 +1,10 @@
 """Protocol definitions for core abstractions."""
 
-from typing import Any, AsyncIterator, Protocol
+from typing import AsyncIterator, Protocol
 from langchain_core.messages import BaseMessage
 
 from core.events import BaseEvent
-from core.schemas import ToolResult, Citation
-
-
-class Tool(Protocol):
-    """Tool interface."""
-
-    name: str
-    description: str
-    is_read_only: bool
-
-    async def execute(self, args: dict[str, Any]) -> Any:
-        """Execute tool with arguments."""
-        ...
+from core.schemas import Citation
 
 
 class Agent(Protocol):

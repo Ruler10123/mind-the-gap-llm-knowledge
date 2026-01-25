@@ -12,7 +12,8 @@
       "Bash(pnpm lint:*)",
       "Bash(pnpm tsc:*)",
       "Bash(pnpm run check:*)",
-      "Bash(git -C /c/Users/zanbo/Documents/Projects/Hackathons/TAMUHack26 log --oneline --graph --all -20)"
+      "Bash(git -C /c/Users/zanbo/Documents/Projects/Hackathons/TAMUHack26 log --oneline --graph --all -20)",
+      "Bash(find:*)"
     ]
   }
 }

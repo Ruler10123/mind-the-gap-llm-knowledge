@@ -1,42 +1,35 @@
 import { useEffect, useRef, useState } from 'react'
 import { useThreeScene } from './hooks/useThreeScene'
 import { useAssistantAnimation } from './hooks/useAssistantAnimation'
-import {
-  ParticleSphereEntity
-  
-} from './entities/ParticleSphereEntity'
+import { ParticleSphereEntity } from './entities/ParticleSphereEntity'
 import { PostProcessingManager } from './entities/PostProcessing'
 import { ANIMATION_CONSTANTS } from './constants/animationConstants'
-// DEPRECATED: Mode system removed - only uniform white sphere mode now
-// import type {SphereMode} from './entities/ParticleSphereEntity';
+import type { AssistantCanvasMode } from './types'
 
 interface AssistantCanvasProps {
   getFrequencyData: () => Uint8Array<ArrayBuffer> | null
-  passiveMode?: boolean
+  mode?: AssistantCanvasMode
 }
 
 export default function AssistantCanvas({
   getFrequencyData,
-  passiveMode = false,
+  mode = 'active',
 }: AssistantCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const [entity, setEntity] = useState<ParticleSphereEntity | null>(null)
   const [postProcessing, setPostProcessing] =
     useState<PostProcessingManager | null>(null)
   const [isReady, setIsReady] = useState(false)
-  // DEPRECATED: Mode system removed
-  // const [mode, setMode] = useState<SphereMode>('earth')
 
-  // Mouse drag rotation state
-  const isDraggingRef = useRef(false)
-  const lastMousePosRef = useRef({ x: 0, y: 0 })
-  const lastMouseTimeRef = useRef(0)
-  const manualRotationRef = useRef({ x: 0, y: 0 })
-  const velocityRef = useRef({ x: 0, y: 0 })
-  const targetRotationRef = useRef({ x: 0, y: 0 })
-  const velocityHistoryRef = useRef<
-    Array<{ x: number; y: number; time: number }>
-  >([])
+  const dragStateRef = useRef({
+    isDragging: false,
+    lastMousePos: { x: 0, y: 0 },
+    lastMouseTime: 0,
+    manualRotation: { x: 0, y: 0 },
+    velocity: { x: 0, y: 0 },
+    targetRotation: { x: 0, y: 0 },
+    velocityHistory: [] as Array<{ x: number; y: number; time: number }>,
+  })
 
   const { scene, camera, renderer } = useThreeScene(canvasRef)
 
@@ -101,115 +94,75 @@ export default function AssistantCanvas({
     if (!entity) return
 
     const interval = setInterval(() => {
-      if (!isDraggingRef.current) {
-        // Sync manual rotation with entity rotation when not dragging
-        manualRotationRef.current = {
-          x: entity.mesh.rotation.x,
-          y: entity.mesh.rotation.y,
-        }
+      if (!dragStateRef.current.isDragging) {
+        const r = dragStateRef.current.manualRotation
+        r.x = entity.mesh.rotation.x
+        r.y = entity.mesh.rotation.y
       }
     }, 16) // ~60fps sync
 
     return () => clearInterval(interval)
   }, [entity])
 
-  // DEPRECATED: Mode switching removed - only uniform white sphere mode
-  // useEffect(() => {
-  //   if (!entity) return
-  //   entity.setMode(mode)
-  // }, [entity, mode])
-
-  // const handleToggleMode = () => {
-  //   setMode((prev) => (prev === 'earth' ? 'default' : 'earth'))
-  // }
-
-  // Mouse drag handlers for rotation
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas || !entity) return
 
     const handleMouseDown = (e: MouseEvent) => {
-      isDraggingRef.current = true
-      lastMousePosRef.current = { x: e.clientX, y: e.clientY }
-      lastMouseTimeRef.current = performance.now()
-      velocityRef.current = { x: 0, y: 0 } // Reset velocity on new drag
-      velocityHistoryRef.current = [] // Clear velocity history
-      targetRotationRef.current = {
-        x: entity.mesh.rotation.x,
-        y: entity.mesh.rotation.y,
-      }
-      manualRotationRef.current = {
-        x: entity.mesh.rotation.x,
-        y: entity.mesh.rotation.y,
-      }
+      const d = dragStateRef.current
+      d.isDragging = true
+      d.lastMousePos = { x: e.clientX, y: e.clientY }
+      d.lastMouseTime = performance.now()
+      d.velocity = { x: 0, y: 0 }
+      d.velocityHistory = []
+      d.targetRotation = { x: entity.mesh.rotation.x, y: entity.mesh.rotation.y }
+      d.manualRotation = { x: entity.mesh.rotation.x, y: entity.mesh.rotation.y }
       canvas.style.cursor = 'grabbing'
-      entity.setAutoRotation(false) // Disable auto-rotation while dragging
+      entity.setAutoRotation(false)
     }
 
     const handleMouseMove = (e: MouseEvent) => {
-      if (!isDraggingRef.current) return
+      const d = dragStateRef.current
+      if (!d.isDragging) return
 
       const now = performance.now()
-      const deltaTime = (now - lastMouseTimeRef.current) / 1000 // Convert to seconds
-      const deltaX = e.clientX - lastMousePosRef.current.x
-      const deltaY = e.clientY - lastMousePosRef.current.y
+      const deltaTime = (now - d.lastMouseTime) / 1000
+      const deltaX = e.clientX - d.lastMousePos.x
 
-      // Update target rotation (smooth accumulation) - only horizontal (y-axis)
-      targetRotationRef.current.y +=
-        deltaX * ANIMATION_CONSTANTS.dragRotation.speed
-      // X-axis rotation is not affected by mouse drag
+      d.targetRotation.y += deltaX * ANIMATION_CONSTANTS.dragRotation.speed
 
-      // Calculate instantaneous velocity for momentum (only horizontal)
       if (deltaTime > 0 && deltaTime < 0.1) {
-        // Only use recent, valid time deltas
         const instantVelocityY =
           (deltaX * ANIMATION_CONSTANTS.dragRotation.speed) / deltaTime
-        const instantVelocityX = 0 // No vertical rotation from mouse
+        const instantVelocityX = 0
 
-        // Store velocity history (keep last 5 samples for smoothing)
-        velocityHistoryRef.current.push({
-          x: instantVelocityX,
-          y: instantVelocityY,
-          time: now,
-        })
-
-        // Keep only recent history (last 100ms)
+        d.velocityHistory.push({ x: instantVelocityX, y: instantVelocityY, time: now })
         const cutoffTime = now - 100
-        velocityHistoryRef.current = velocityHistoryRef.current.filter(
-          (v) => v.time > cutoffTime,
-        )
+        d.velocityHistory = d.velocityHistory.filter((v) => v.time > cutoffTime)
 
-        // Calculate smoothed velocity from history
-        if (velocityHistoryRef.current.length > 0) {
-          const avgVelocity = velocityHistoryRef.current.reduce(
-            (acc, v) => ({
-              x: acc.x + v.x,
-              y: acc.y + v.y,
-            }),
+        if (d.velocityHistory.length > 0) {
+          const avg = d.velocityHistory.reduce(
+            (acc, v) => ({ x: acc.x + v.x, y: acc.y + v.y }),
             { x: 0, y: 0 },
           )
-          const count = velocityHistoryRef.current.length
-          velocityRef.current = {
-            x: avgVelocity.x / count,
-            y: avgVelocity.y / count,
-          }
+          const n = d.velocityHistory.length
+          d.velocity = { x: avg.x / n, y: avg.y / n }
         }
       }
 
-      lastMousePosRef.current = { x: e.clientX, y: e.clientY }
-      lastMouseTimeRef.current = now
+      d.lastMousePos = { x: e.clientX, y: e.clientY }
+      d.lastMouseTime = now
     }
 
     const handleMouseUp = () => {
-      isDraggingRef.current = false
+      dragStateRef.current.isDragging = false
       canvas.style.cursor = 'grab'
-      // Keep velocity for momentum, don't re-enable auto-rotation yet
     }
 
     const handleMouseLeave = () => {
-      isDraggingRef.current = false
+      dragStateRef.current.isDragging = false
       canvas.style.cursor = 'grab'
-      entity.setAutoRotation(true) // Re-enable auto-rotation when mouse leaves
+      entity.setAutoRotation(true)
     }
 
     canvas.style.cursor = 'grab'
@@ -226,18 +179,14 @@ export default function AssistantCanvas({
     }
   }, [entity])
 
-  // Animation loop
   useAssistantAnimation(
     scene,
     camera,
     entity,
     postProcessing,
     getFrequencyData,
-    velocityRef,
-    manualRotationRef,
-    targetRotationRef,
-    isDraggingRef,
-    passiveMode,
+    dragStateRef,
+    mode,
   )
 
   return (

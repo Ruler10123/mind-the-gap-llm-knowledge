@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react'
 import { KioskHeader } from './KioskHeader'
 import Assistant3D from '../Assistant3D'
-import { FlightProgressBar } from './FlightProgressBar'
 import { WelcomeMessage } from './WelcomeMessage'
 import { QuickActions } from './QuickActions'
 import { ActionButtons } from './ActionButtons'
-import { ConversationPanel } from './ConversationPanel'
-import { useKioskState } from './hooks/useKioskState'
+import { InlineChat } from './InlineChat'
+import { useVoiceAssistantState } from '@/hooks/useVoiceAssistantState'
 import type { UserProfile } from './types'
+import type { AssistantCanvasMode } from '../Assistant3D/types'
 
 interface SimplifiedFlight {
   flightNumber: string
@@ -28,19 +28,41 @@ interface KioskLayoutProps {
 
 export function KioskLayout({ user, flight }: KioskLayoutProps) {
   const {
-    voiceState,
+    connected,
+    status,
+    error,
+    isRecording,
+    micSupported,
+    toggleMic,
+    streamingText,
+    isStreaming,
+    isProcessing,
+    audioElRef,
+    connect,
+    disconnect,
     showChat,
     isMuted,
-    currentQuery,
+    input,
+    messages,
+    voiceState,
     handleVoiceActivate,
     handleType,
-    handleQuery,
+    handleSend,
     handleClose,
     handleMute,
     handleUnmute,
-  } = useKioskState()
+    handleInputChange,
+  } = useVoiceAssistantState()
 
   const [currentTime, setCurrentTime] = useState(new Date())
+
+  // Connect voice assistant on mount
+  useEffect(() => {
+    connect()
+    return () => {
+      disconnect()
+    }
+  }, [connect, disconnect])
 
   // Update time every minute
   useEffect(() => {
@@ -54,74 +76,97 @@ export function KioskLayout({ user, flight }: KioskLayoutProps) {
   const showWelcome = isIdle && !showChat
   const isFlightDelayed = flight.status !== 'On Time'
 
+  // Determine assistant mode based on voice state
+  const assistantMode: AssistantCanvasMode = isRecording
+    ? 'active'
+    : isProcessing
+      ? 'processing'
+      : 'passive'
+
   return (
-    <div className="h-screen overflow-hidden flex flex-col bg-gradient-to-br from-white to-[rgba(51,67,87,0.8)]">
-      {/* Header */}
+    <div className="h-screen overflow-hidden flex flex-col bg-gradient-to-br from-white to-[rgba(51,67,87,0.8)] relative">
+      {/* 3D Assistant Globe - Fixed background like index.tsx */}
+      <div className="fixed inset-0 z-0">
+        <Assistant3D mode={assistantMode} isRecording={isRecording} />
+      </div>
+
+      {/* Header with embedded progress bar */}
       <KioskHeader
         user={user}
         currentTime={currentTime}
+        flight={flight}
         className="h-16 md:h-20 flex-shrink-0 relative z-30"
       />
 
-      {/* Main Content Area - Morphs when chat opens */}
-      <main className={`
-        relative z-20
-        flex-1 flex flex-col items-center justify-center px-6 md:px-12 lg:px-16 py-8
-        transition-all duration-500
-        ${showChat ? 'scale-95 opacity-50 pointer-events-none' : 'scale-100 opacity-100'}
-      `}>
-        {/* Welcome Message (only when idle) */}
-        {user && (
-          <WelcomeMessage
-            userName={user.name}
-            isVisible={showWelcome}
-          />
-        )}
+      {/* Main Container */}
+      <div className="flex-1 relative overflow-hidden z-10">
+        {/* Center Content Area - Chat or Welcome (same space) */}
+        <div className="absolute inset-0 flex items-center justify-center z-20 px-6 md:px-12 lg:px-16 py-8">
+          {/* Welcome + Quick Actions - Animate Out */}
+          <div className={`
+            flex flex-col items-center justify-center max-w-4xl w-full pointer-events-none
+            transition-all duration-500
+            ${showChat ? 'opacity-0 scale-95 pointer-events-none' : 'opacity-100 scale-100'}
+          `}>
+            {user && (
+              <WelcomeMessage
+                userName={user.name}
+                isVisible={showWelcome}
+              />
+            )}
 
-        {/* Flight Progress Bar */}
-        <FlightProgressBar
-          flight={flight}
-          isCompact={!isIdle || showChat}
+            <QuickActions
+              isVisible={isIdle && !showChat}
+              isFlightDelayed={isFlightDelayed}
+              onActionClick={(action) => {
+                console.log('Quick action:', action)
+                handleVoiceActivate()
+              }}
+            />
+          </div>
+
+          {/* Chat Interface - Animate In (same space, no background) */}
+          <div className={`
+            absolute inset-0 px-6 md:px-12 lg:px-16 py-8
+            transition-opacity duration-500
+            ${showChat ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}
+            flex items-center justify-center
+          `}>
+            <div className="w-full max-w-3xl h-full">
+              <InlineChat
+                isVisible={showChat}
+                onClose={handleClose}
+                connected={connected}
+                status={status}
+                error={error}
+                isRecording={isRecording}
+                micSupported={micSupported}
+                toggleMic={toggleMic}
+                streamingText={streamingText}
+                isStreaming={isStreaming}
+                isProcessing={isProcessing}
+                sendMessage={handleSend}
+                input={input}
+                onInputChange={handleInputChange}
+                messages={messages}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Action Buttons - Right Side */}
+        <ActionButtons
+          isMuted={isMuted}
+          onMute={handleMute}
+          onUnmute={handleUnmute}
+          onType={handleType}
+          showChat={showChat}
+          onClose={handleClose}
         />
 
-        {/* Quick Actions (only when idle) */}
-        <QuickActions
-          isVisible={isIdle && !showChat}
-          isFlightDelayed={isFlightDelayed}
-          onActionClick={(action) => {
-            console.log('Quick action:', action)
-            handleVoiceActivate()
-          }}
-        />
-      </main>
-
-      {/* 3D Assistant Globe - Centered */}
-      <div
-        className={`
-          fixed transition-all duration-500 z-10
-          ${showChat ? 'opacity-30 scale-90 blur-sm pointer-events-none' : 'opacity-100 scale-100'}
-          inset-0
-        `}
-      >
-        <Assistant3D passiveMode={isIdle} hideInterface={true} />
+        {/* Hidden Audio Element */}
+        <audio ref={audioElRef} style={{ display: 'none' }} />
       </div>
-
-      {/* Action Buttons (Mute/Type) - Fixed bottom right */}
-      <ActionButtons
-        isMuted={isMuted}
-        onMute={handleMute}
-        onUnmute={handleUnmute}
-        onType={handleType}
-      />
-
-      {/* Conversation Modal */}
-      <ConversationPanel
-        isVisible={showChat}
-        voiceState={voiceState}
-        currentQuery={currentQuery}
-        onClose={handleClose}
-        onQuery={handleQuery}
-      />
     </div>
   )
 }

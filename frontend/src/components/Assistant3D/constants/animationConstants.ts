@@ -46,30 +46,21 @@ export const ANIMATION_CONSTANTS = {
     maxDisplacement: 0.08,
     intensityMultiplier: 1.5,
     volumeMultiplier: 0.8,
-    // Passive mode - less aggressive vibrations
     passiveMaxDisplacement: 0.03,
     passiveIntensityMultiplier: 0.5,
     passiveVolumeMultiplier: 0.3,
   },
 
-  // Continent sampling
-  continentSampling: {
-    bias: 8.0, // Statistical weight for sampling particles on continents (3x more likely)
-    elevation: 0.015, // Slight elevation for continent particles above ocean level
-  },
-
-  // Color precalculation
-  colorPrecalculation: {
-    rotationBuckets: 36, // Number of precomputed rotation angles (10° intervals)
-  },
-
-  // Nearest neighbor mapping
-  nearestNeighbor: {
-    gridResolution: 20, // Spatial hash grid resolution (20×20)
-  },
-
   // Passive mode transitions
   passiveMode: {
     transitionSpeed: 0.05, // Lerp factor for smooth transitions (0-1, higher = faster)
+  },
+
+  // Processing mode – slow noise displacement (no audio reactivity)
+  processingMode: {
+    noiseScale: 4,
+    displacementAmplitude: 0.025,
+    driftSpeed: 0.2,
+    rotateSpeed: 0.12,
   },
 } as const

@@ -1,5 +1,20 @@
 import { useRef, useState } from 'react'
 
+/**
+ * Manages microphone access and a Web Audio API AnalyserNode for real-time
+ * frequency data. Used to drive audio-reactive visuals (e.g. particle sphere).
+ *
+ * - Requests `getUserMedia` on `initAudio`; stores AnalyserNode, AudioContext,
+ *   and MediaStream in refs. Stops tracks and closes context on `stopAudio`.
+ * - `getFrequencyData` returns a `Uint8Array` of frequency bins (FFT size 128);
+ *   call each frame for viz. Returns `null` if not initialized.
+ *
+ * @returns `{ isActive, error, initAudio, stopAudio, getFrequencyData }`
+ *   - `isActive`: true after successful `initAudio`
+ *   - `error`: `"Microphone access denied"` on permission failure, else `null`
+ *   - `initAudio` / `stopAudio`: start/teardown microphone and analyzer
+ *   - `getFrequencyData`: returns current frequency data or `null`
+ */
 export function useAudioAnalyzer() {
   const [isActive, setIsActive] = useState(false)
   const [error, setError] = useState<string | null>(null)

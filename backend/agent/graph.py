@@ -39,6 +39,32 @@ def divide(a: int, b: int) -> float:
 
 
 @tool
+def suggest_page_navigation(page: str, reason: str = "") -> dict:
+    """Suggest navigating to a specific page in the UI when it adds clear value (e.g., showing dashboard, results, settings).
+    Available pages: home (assistant), kiosk (kiosk interface), flights (flight info), rebooking (flight rebooking), pathfinding (airport navigation)."""
+    allowed_pages = {"home", "kiosk", "flights", "rebooking", "pathfinding"}
+    page_lower = page.lower()
+
+    if page_lower not in allowed_pages:
+        return {
+            "ui_action": "NAVIGATE",
+            "payload": {
+                "page": None,
+                "error": f"Unknown page '{page}'. Available: {', '.join(allowed_pages)}",
+                "reason": reason,
+            }
+        }
+
+    return {
+        "ui_action": "NAVIGATE",
+        "payload": {
+            "page": page_lower,
+            "reason": reason,
+        }
+    }
+
+
+@tool
 def open_map(destination: str) -> dict:
     """Open the map modal showing directions to a destination.
     Use when the user asks for directions or location of gates, restrooms, or services.
@@ -69,7 +95,7 @@ def open_map(destination: str) -> dict:
     }
 
 
-tools = [get_current_time, add, multiply, divide, open_map]
+tools = [get_current_time, add, multiply, divide, suggest_page_navigation, open_map]
 tools_by_name = {t.name: t for t in tools}
 
 
@@ -83,9 +109,10 @@ SYSTEM_PROMPT = """You are a helpful airport kiosk assistant. You can answer que
 You have access to callable tools (nodes):
 - get_current_time: use when the user asks about the current time, date, or "today"
 - add, multiply, divide: use for basic arithmetic when the user asks for calculations
+- suggest_page_navigation: use to navigate to different pages (home, kiosk, flights, rebooking, pathfinding) when it would help the user
 - open_map: use when the user asks for directions or where to find gates (A28, B9, C43, D12), restrooms, or customer service. Valid destinations: RESTROOM, CUSTOMER_SERVICE, A28, B9, C43, D12
 
-Call the appropriate tool when it helps answer the user. Otherwise reply directly. Keep replies clear and concise."""
+Call the appropriate tool when it helps answer the user. Otherwise reply directly. Keep replies clear and concise and do not use markdown formatting."""
 
 _agent = None
 
