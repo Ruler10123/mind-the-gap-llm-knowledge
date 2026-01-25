@@ -22,7 +22,7 @@ const mockFlight = {
   departureTime: '3:00 PM',
   status: 'On Time',
   progress: 60,
-  currentPhase: 'boarding' as const
+  currentPhase: 'gate' as const
 }
 
 function KioskRoute() {
