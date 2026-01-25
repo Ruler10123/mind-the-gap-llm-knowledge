@@ -11,8 +11,8 @@ class Settings(BaseSettings):
     )
 
     # API Keys
-    google_api_key: str = ""
-    gemini_api_key: str = ""
+    vultr_api_key: str = ""
+    vultr_model: str = "llama-3.1-70b-instruct-fp8"  # Default model
     elevenlabs_api_key: str = ""
     elevenlabs_voice_id: str = ""
 
@@ -33,9 +33,6 @@ class Settings(BaseSettings):
     # RAG
     rag_top_k: int = 5
     embedding_model: str = "all-MiniLM-L6-v2"
-
-    def api_key_google(self) -> str:
-        return self.google_api_key or self.gemini_api_key
 
     def api_key_elevenlabs(self) -> str:
         return self.elevenlabs_api_key

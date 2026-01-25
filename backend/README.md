@@ -1,6 +1,6 @@
 # AI Assistant API
 
-FastAPI backend for an agentic AI assistant using LangGraph (Gemini) and ElevenLabs TTS. Exposes a WebSocket endpoint that streams text and audio.
+FastAPI backend for an agentic AI assistant using LangGraph (Vultr Serverless Inference) and ElevenLabs TTS. Exposes a WebSocket endpoint that streams text and audio.
 
 ## Setup
 
@@ -16,7 +16,8 @@ uv sync
 
 | Variable | Required | Description |
 |----------|----------|-------------|
-| `GOOGLE_API_KEY` or `GEMINI_API_KEY` | Yes | Gemini API key ([Google AI Studio](https://aistudio.google.com/apikey)) |
+| `VULTR_API_KEY` | Yes | Vultr Serverless Inference API key |
+| `VULTR_MODEL` | No | Vultr model name (defaults to `llama-3.1-70b-instruct-fp8`) |
 | `ELEVENLABS_API_KEY` | Yes | ElevenLabs API key |
 | `ELEVENLABS_VOICE_ID` | Yes | ElevenLabs voice ID |
 

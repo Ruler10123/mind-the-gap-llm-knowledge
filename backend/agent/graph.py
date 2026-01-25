@@ -5,7 +5,7 @@ from typing import Annotated, Literal
 
 from langchain_core.messages import AIMessage, BaseMessage, SystemMessage, ToolMessage
 from langchain_core.tools import tool
-from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_openai import ChatOpenAI
 from langgraph.graph import END, START, StateGraph
 from langgraph.graph.message import add_messages
 from typing_extensions import TypedDict
@@ -58,9 +58,13 @@ _agent = None
 
 
 def _build_agent():
-    model = ChatGoogleGenerativeAI(
-        model="gemini-2.5-flash",
-        api_key=settings.api_key_google(),
+    if not settings.vultr_api_key:
+        raise ValueError("VULTR_API_KEY must be provided")
+    
+    model = ChatOpenAI(
+        model=settings.vultr_model,
+        api_key=settings.vultr_api_key,
+        base_url="https://api.vultrinference.com/v1",
         temperature=0,
     )
     model_with_tools = model.bind_tools(tools)
