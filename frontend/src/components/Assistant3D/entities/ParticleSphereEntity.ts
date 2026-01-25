@@ -46,8 +46,10 @@ export class ParticleSphereEntity {
   private tempVector3: THREE.Vector3
 
   constructor() {
+    console.log('[ParticleSphereEntity] Starting initialization...')
     // Create particle positions in sphere formation
     this.particleCount = ANIMATION_CONSTANTS.particles.count
+    console.log(`[ParticleSphereEntity] Particle count: ${this.particleCount}`)
     this.positions = new Float32Array(this.particleCount * 3)
     this.basePositions = new Float32Array(this.particleCount * 3)
     this.targetColors = new Float32Array(this.particleCount * 3)
@@ -60,12 +62,12 @@ export class ParticleSphereEntity {
       bucketAngleStep: 0,
     }
 
-    // Initialize default colors (all black) - only mode now
+    // Initialize default colors (all white) - only mode now
     this.defaultColors = new Float32Array(this.particleCount * 3)
     for (let i = 0; i < this.particleCount * 3; i += 3) {
-      this.defaultColors[i] = 0.0 // R - black
-      this.defaultColors[i + 1] = 0.0 // G - black
-      this.defaultColors[i + 2] = 0.0 // B - black
+      this.defaultColors[i] = 1.0 // R - white
+      this.defaultColors[i + 1] = 1.0 // G - white
+      this.defaultColors[i + 2] = 1.0 // B - white
     }
 
     // Initialize reusable Vector3 objects
@@ -114,10 +116,10 @@ export class ParticleSphereEntity {
     const colors = new Float32Array(this.particleCount * 3)
     for (let i = 0; i < this.particleCount; i++) {
       const i3 = i * 3
-      // Default to black for visibility on light backgrounds
-      colors[i3] = 0.0 // R - black
-      colors[i3 + 1] = 0.0 // G - black
-      colors[i3 + 2] = 0.0 // B - black
+      // Default to white for visibility on dark backgrounds
+      colors[i3] = 1.0 // R - white
+      colors[i3 + 1] = 1.0 // G - white
+      colors[i3 + 2] = 1.0 // B - white
     }
     this.geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3))
 
@@ -160,6 +162,13 @@ export class ParticleSphereEntity {
 
     // Points mesh
     this.mesh = new THREE.Points(this.geometry, this.material)
+    console.log('[ParticleSphereEntity] Initialization complete', {
+      particleCount: this.particleCount,
+      hasGeometry: !!this.geometry,
+      hasMaterial: !!this.material,
+      hasMesh: !!this.mesh,
+      meshVisible: this.mesh.visible,
+    })
   }
 
   /**
@@ -530,6 +539,14 @@ export class ParticleSphereEntity {
   }
 
   update(frequencyData: Uint8Array<ArrayBuffer> | null, passiveMode: boolean = false) {
+    if (!this.isInitialized) {
+      console.log('[ParticleSphereEntity] First update call', {
+        hasFrequencyData: !!frequencyData,
+        passiveMode,
+      })
+      this.isInitialized = true
+    }
+    
     // Update base positions with smooth transitions between modes
     this.updateBasePositions()
 

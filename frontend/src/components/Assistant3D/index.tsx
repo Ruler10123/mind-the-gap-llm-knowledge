@@ -8,7 +8,7 @@ interface Assistant3DProps {
   hideInterface?: boolean
 }
 
-export default function Assistant3D({ passiveMode = false, hideInterface = false }: Assistant3DProps) {
+export default function Assistant3D({ passiveMode, hideInterface = false }: Assistant3DProps) {
   const { isActive, error, initAudio, stopAudio, getFrequencyData } =
     useAudioAnalyzer()
   const [webGLSupported, setWebGLSupported] = useState(true)
@@ -42,6 +42,16 @@ export default function Assistant3D({ passiveMode = false, hideInterface = false
     setIsSubmitting(false)
   }
 
+  // Automatically enable passiveMode (show bubble) when microphone is disabled
+  // unless passiveMode is explicitly set
+  const effectivePassiveMode = passiveMode ?? !isActive
+  console.log('[Assistant3D] Render state', {
+    isActive,
+    passiveMode,
+    effectivePassiveMode,
+    webGLSupported,
+  })
+
   if (!webGLSupported) {
     return (
       <div className="w-full h-full flex items-center justify-center bg-gray-900 text-white">
@@ -57,7 +67,7 @@ export default function Assistant3D({ passiveMode = false, hideInterface = false
 
   return (
     <div className="relative w-full h-full">
-      <AssistantCanvas getFrequencyData={getFrequencyData} passiveMode={passiveMode} />
+      <AssistantCanvas getFrequencyData={getFrequencyData} passiveMode={effectivePassiveMode} />
       {!hideInterface && (
         <AssistantInterface
           isAudioActive={isActive}

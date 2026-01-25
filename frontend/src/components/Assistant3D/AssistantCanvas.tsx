@@ -42,23 +42,39 @@ export default function AssistantCanvas({
 
   // Initialize entity and post-processing
   useEffect(() => {
-    if (!scene || !camera || !renderer) return
+    if (!scene || !camera || !renderer) {
+      console.log('[AssistantCanvas] Waiting for scene/camera/renderer...', {
+        hasScene: !!scene,
+        hasCamera: !!camera,
+        hasRenderer: !!renderer,
+      })
+      return
+    }
 
+    console.log('[AssistantCanvas] Starting 3D scene initialization...')
     try {
       // Create entity
+      console.log('[AssistantCanvas] Creating ParticleSphereEntity...')
       const particleSphere = new ParticleSphereEntity()
+      console.log('[AssistantCanvas] Adding mesh to scene...')
       scene.add(particleSphere.mesh)
       setEntity(particleSphere)
+      console.log('[AssistantCanvas] Entity created and added to scene')
 
       // Create post-processing
+      console.log('[AssistantCanvas] Creating PostProcessingManager...')
       const postProc = new PostProcessingManager(renderer, scene, camera)
       setPostProcessing(postProc)
+      console.log('[AssistantCanvas] Post-processing created')
 
       // Force initial render to ensure sphere is visible immediately
       // Update entity once to initialize positions
+      console.log('[AssistantCanvas] Running initial entity update...')
       particleSphere.update(null)
       // Render immediately
+      console.log('[AssistantCanvas] Running initial render...')
       postProc.render(0)
+      console.log('[AssistantCanvas] Initial render complete')
 
       // Handle resize for post-processing
       const handleResize = () => {
@@ -67,6 +83,7 @@ export default function AssistantCanvas({
       window.addEventListener('resize', handleResize)
 
       setIsReady(true)
+      console.log('[AssistantCanvas] 3D scene initialization complete, isReady set to true')
 
       return () => {
         window.removeEventListener('resize', handleResize)
