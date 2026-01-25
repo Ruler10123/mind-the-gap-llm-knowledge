@@ -14,7 +14,7 @@ export function useVoiceAssistant() {
   }>>([]);
   const { audioElRef, revealedText, isRevealing, playWithReveal, clearText, stopAudio } =
     useAudioReveal();
-  const { handleUIAction, modalState, closeModal } = useNavigationHandler();
+  const { handleUIAction, modalState, closeModal, openPendingModal, clearPendingModal } = useNavigationHandler();
 
   const handleDone = useCallback(() => {
     console.log("[VoiceAssistant] Done message received, playing all chunks");
@@ -99,9 +99,10 @@ export function useVoiceAssistant() {
       setIsProcessing(true);
       clearQueue();
       clearText();
+      clearPendingModal(); // Clear any pending modals from previous requests
       send({ message: t });
     },
-    [send, clearQueue, clearText]
+    [send, clearQueue, clearText, clearPendingModal]
   );
 
   const handleMicComplete = useCallback(
@@ -149,6 +150,15 @@ export function useVoiceAssistant() {
     () => isRecording || isRevealing,
     [isRecording, isRevealing]
   );
+
+  // Open pending modals only when text is actually visible (not just when audio starts)
+  useEffect(() => {
+    // Only open modal when there's actual visible text content (at least a few characters)
+    // This ensures the modal appears when speech/text is actually visible, not just when audio playback begins
+    if (revealedText && revealedText.trim().length > 0 && !modalState.isOpen) {
+      openPendingModal();
+    }
+  }, [revealedText, modalState.isOpen, openPendingModal]);
 
   const error = useMemo(
     () => wsError || micError || null,

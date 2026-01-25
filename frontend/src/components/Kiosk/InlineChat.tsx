@@ -124,14 +124,30 @@ export function InlineChat({
               // Render component messages
               if (message.type === 'component') {
                 return (
-                  <div key={message.id} className="flex justify-start w-full">
+                  <motion.div
+                    key={message.id}
+                    initial={{ opacity: 0, y: 10, x: -20 }}
+                    animate={{ opacity: 1, y: 0, x: 0 }}
+                    transition={{ type: 'spring', damping: 20, stiffness: 300 }}
+                    className="flex justify-start w-full"
+                  >
                     {message.componentType === 'flight_details' && (
-                      <div className="w-full max-w-2xl">
+                      <motion.div
+                        initial={{ scale: 0.95 }}
+                        animate={{ scale: 1 }}
+                        transition={{ type: 'spring', damping: 20, stiffness: 300, delay: 0.05 }}
+                        className="w-full max-w-2xl"
+                      >
                         <FlightDetailsCard />
-                      </div>
+                      </motion.div>
                     )}
                     {message.componentType === 'weather' && (
-                      <div className="w-full max-w-2xl space-y-4">
+                      <motion.div
+                        initial={{ scale: 0.95 }}
+                        animate={{ scale: 1 }}
+                        transition={{ type: 'spring', damping: 20, stiffness: 300, delay: 0.05 }}
+                        className="w-full max-w-2xl space-y-4"
+                      >
                         {message.componentData?.locations ? (
                           // Multiple locations (e.g., "both")
                           message.componentData.locations.map((loc: any, idx: number) => (
@@ -170,7 +186,7 @@ export function InlineChat({
                             isMinimized={false}
                           />
                         )}
-                      </div>
+                      </motion.div>
                     )}
                     {message.componentType === 'map' && message.componentData && (
                       <motion.div
@@ -346,32 +362,48 @@ export function InlineChat({
                       </motion.div>
                     )}
                     {message.componentType === 'flight_delay' && message.componentData && (
-                      <div className="w-full max-w-2xl">
+                      <motion.div
+                        initial={{ scale: 0.95 }}
+                        animate={{ scale: 1 }}
+                        transition={{ type: 'spring', damping: 20, stiffness: 300, delay: 0.05 }}
+                        className="w-full max-w-2xl"
+                      >
                         <FlightDelayInfo
                           {...message.componentData}
                           sendMessage={sendMessage}
                         />
-                      </div>
+                      </motion.div>
                     )}
                     {message.componentType === 'flight_cancellation' && message.componentData && (
-                      <div className="w-full max-w-2xl">
+                      <motion.div
+                        initial={{ scale: 0.95 }}
+                        animate={{ scale: 1 }}
+                        transition={{ type: 'spring', damping: 20, stiffness: 300, delay: 0.05 }}
+                        className="w-full max-w-2xl"
+                      >
                         <FlightCancellationInfo
                           {...message.componentData}
                           sendMessage={sendMessage}
                         />
-                      </div>
+                      </motion.div>
                     )}
-                  </div>
+                  </motion.div>
                 )
               }
 
               // Render text messages
               return (
-                <div
+                <motion.div
                   key={message.id}
+                  initial={{ opacity: 0, y: 10, x: message.type === 'user' ? 20 : -20 }}
+                  animate={{ opacity: 1, y: 0, x: 0 }}
+                  transition={{ type: 'spring', damping: 20, stiffness: 300 }}
                   className={`flex flex-col ${message.type === 'user' ? 'items-end' : 'items-start'}`}
                 >
-                  <div
+                  <motion.div
+                    initial={{ scale: 0.95 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: 'spring', damping: 20, stiffness: 300, delay: 0.05 }}
                     className={`
                       max-w-[85%] px-5 py-3 rounded-2xl
                       ${message.type === 'user'
@@ -382,34 +414,59 @@ export function InlineChat({
                     <div className="text-sm leading-relaxed whitespace-pre-wrap">
                       {message.type === 'user' ? message.content : renderMarkdown(message.content || '')}
                     </div>
-                  </div>
+                  </motion.div>
                   {message.timestamp && (
-                    <span className="text-xs text-gray-500 mt-1 px-2">
+                    <motion.span
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.2 }}
+                      className="text-xs text-gray-500 mt-1 px-2"
+                    >
                       {formatTime(message.timestamp)}
-                    </span>
+                    </motion.span>
                   )}
-                </div>
+                </motion.div>
               )
             })}
             {/* Processing Indicator - shown when processing but no text yet */}
             {isProcessing && !streamingText && !isRecording && (
-              <div className="flex justify-start">
-                <div className="max-w-[85%] px-5 py-3 rounded-2xl bg-[#0E1F34]/50 text-white backdrop-blur-md border border-white/30 shadow-md">
+              <motion.div
+                initial={{ opacity: 0, y: 10, x: -20 }}
+                animate={{ opacity: 1, y: 0, x: 0 }}
+                transition={{ type: 'spring', damping: 20, stiffness: 300 }}
+                className="flex justify-start"
+              >
+                <motion.div
+                  initial={{ scale: 0.95 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: 'spring', damping: 20, stiffness: 300, delay: 0.05 }}
+                  className="max-w-[85%] px-5 py-3 rounded-2xl bg-[#0E1F34]/50 text-white backdrop-blur-md border border-white/30 shadow-md"
+                >
                   <div className="flex items-center gap-3">
                     <div className="relative">
                       <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                     </div>
                     <span className="text-sm text-white/80">Processing your request...</span>
                   </div>
-                </div>
-              </div>
+                </motion.div>
+              </motion.div>
             )}
             {streamingText && !isRecording && isStreaming && (
-              <div className="flex justify-start">
-                <div className="max-w-[85%] px-5 py-3 rounded-2xl bg-[#0E1F34]/50 text-white backdrop-blur-md border border-white/30 shadow-md">
+              <motion.div
+                initial={{ opacity: 0, y: 10, x: -20 }}
+                animate={{ opacity: 1, y: 0, x: 0 }}
+                transition={{ type: 'spring', damping: 20, stiffness: 300 }}
+                className="flex justify-start"
+              >
+                <motion.div
+                  initial={{ scale: 0.95 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: 'spring', damping: 20, stiffness: 300, delay: 0.05 }}
+                  className="max-w-[85%] px-5 py-3 rounded-2xl bg-[#0E1F34]/50 text-white backdrop-blur-md border border-white/30 shadow-md"
+                >
                   <StreamingText text={streamingText} isStreaming={isStreaming} />
-                </div>
-              </div>
+                </motion.div>
+              </motion.div>
             )}
             <div ref={messagesEndRef} />
           </>

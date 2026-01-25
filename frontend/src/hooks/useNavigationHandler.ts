@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useState, useRef } from "react";
 import { useNavigate } from "@tanstack/react-router";
 
 type UIActionEvent = {
@@ -29,6 +29,7 @@ export function useNavigationHandler() {
     isOpen: false,
     modalId: null,
   });
+  const pendingModalRef = useRef<ModalState | null>(null);
 
   const handleUIAction = useCallback(
     (event: UIActionEvent) => {
@@ -63,46 +64,52 @@ export function useNavigationHandler() {
 
         case "OPEN_MODAL": {
           const modalId = payload?.modal_id || event.payload?.modalId;
+          let pendingModal: ModalState | null = null;
+
           if (modalId === "MAP_MODAL") {
-            console.log("[NavigationHandler] Opening map modal");
-            setModalState({
-              isOpen: true,
+            console.log("[NavigationHandler] Queuing map modal (will open when streaming starts)");
+            pendingModal = {
+              isOpen: false,
               modalId: "MAP_MODAL",
               title: payload?.title,
               imageSrc: payload?.imageSrc,
               altText: payload?.altText,
               notes: payload?.notes,
-            });
+            };
           } else if (modalId === "FLIGHT_DETAILS") {
-            console.log("[NavigationHandler] Opening flight details modal");
-            setModalState({
-              isOpen: true,
+            console.log("[NavigationHandler] Queuing flight details modal (will open when streaming starts)");
+            pendingModal = {
+              isOpen: false,
               modalId: "FLIGHT_DETAILS",
               flightData: payload?.flightData,
-            });
+            };
           } else if (modalId === "DESTINATION_INFO") {
-            console.log("[NavigationHandler] Opening destination info modal");
-            setModalState({
-              isOpen: true,
+            console.log("[NavigationHandler] Queuing destination info modal (will open when streaming starts)");
+            pendingModal = {
+              isOpen: false,
               modalId: "DESTINATION_INFO",
               destinationData: payload?.destinationData,
-            });
+            };
           } else if (modalId === "REBOOKING") {
-            console.log("[NavigationHandler] Opening rebooking modal");
-            setModalState({
-              isOpen: true,
+            console.log("[NavigationHandler] Queuing rebooking modal (will open when streaming starts)");
+            pendingModal = {
+              isOpen: false,
               modalId: "REBOOKING",
               rebookingData: payload?.rebookingData,
-            });
+            };
           } else if (modalId === "OVERBOOKING") {
-            console.log("[NavigationHandler] Opening overbooking modal");
-            setModalState({
-              isOpen: true,
+            console.log("[NavigationHandler] Queuing overbooking modal (will open when streaming starts)");
+            pendingModal = {
+              isOpen: false,
               modalId: "OVERBOOKING",
               overbookingOffer: payload?.overbookingOffer,
-            });
+            };
           } else {
             console.warn(`[NavigationHandler] Unknown modal ID: ${modalId}`);
+          }
+
+          if (pendingModal) {
+            pendingModalRef.current = pendingModal;
           }
           break;
         }
@@ -119,11 +126,31 @@ export function useNavigationHandler() {
       isOpen: false,
       modalId: null,
     });
+    pendingModalRef.current = null;
+  }, []);
+
+  // Open pending modal when streaming starts
+  const openPendingModal = useCallback(() => {
+    if (pendingModalRef.current && !modalState.isOpen) {
+      console.log("[NavigationHandler] Opening pending modal:", pendingModalRef.current.modalId);
+      setModalState({
+        ...pendingModalRef.current,
+        isOpen: true,
+      });
+      pendingModalRef.current = null;
+    }
+  }, [modalState.isOpen]);
+
+  // Clear pending modal (e.g., when starting a new request)
+  const clearPendingModal = useCallback(() => {
+    pendingModalRef.current = null;
   }, []);
 
   return {
     handleUIAction,
     modalState,
     closeModal,
+    openPendingModal,
+    clearPendingModal,
   };
 }
