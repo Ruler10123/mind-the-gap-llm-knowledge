@@ -13,7 +13,7 @@ export function QuickActions({ isVisible, onActionClick, isFlightDelayed = false
   const actions = [
     ...(isFlightDelayed ? [{ id: 'delay', label: 'Flight delay info', icon: AlertCircle }] : []),
     { id: 'gate', label: 'Gate navigation', icon: MapPin },
-    { id: 'reschedule', label: 'Reschedule / Rebook', icon: Calendar },
+    { id: 'reschedule', label: 'Flight Info', icon: Calendar },
   ]
 
   return (
