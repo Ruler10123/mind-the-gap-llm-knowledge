@@ -725,7 +725,7 @@ You have access to callable tools (nodes):
 - add, multiply, divide: use for basic arithmetic when the user asks for calculations
 - show_flight_details: use when the user asks about their flight, gate, boarding status, or flight information
 - show_weather: use when the user asks about weather, temperature, or conditions. Location can be "destination"/"LAX"/"Los Angeles" for destination, "here"/"Dallas"/"DFW" for current location, "both" for both, or any city name. When showing destination weather, advice is automatically included.
-- show_map: use when the user asks for directions or where to find gates (A28, B9, C43, D12), restrooms, or customer service. Valid destinations: RESTROOM, CUSTOMER_SERVICE, A28, B9, C43, D12
+- show_map: use when the user asks for directions or where to find gates (A28, B9), restrooms, or customer service. Valid destinations: RESTROOM, CUSTOMER_SERVICE, A28, B9
 - show_destination_info: use when the user asks about specific airport destinations, lounges, restaurants, shops, or terminal information. Valid destinations: ADMIRALS_CLUB, CENTURION_LOUNGE, FOOD_COURT, DUTY_FREE, BAGGAGE_CLAIM, TERMINAL_A, TERMINAL_B, TERMINAL_C
 - show_flight_delay: when user asks about delays or flight timing changes
 - show_flight_cancellation: when user asks about cancellations or their flight is cancelled
