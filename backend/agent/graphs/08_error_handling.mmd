@@ -1,0 +1,20 @@
+flowchart TD
+    A[Exception Caught] --> B{Exception Type?}
+    
+    B -->|LLMParseError| C[Increment attempt]
+    C --> D{attempt < max?}
+    D -->|Yes| E[Add error SystemMessage]
+    E --> F[Yield RetryEvent]
+    F --> G[Retry graph execution]
+    D -->|No| H[Yield ErrorEvent]
+    
+    B -->|ToolExecutionError| I[Increment attempt]
+    I --> J{should_retry?}
+    J -->|Yes| E
+    J -->|No| H
+    
+    B -->|AgentException| H
+    B -->|Other Exception| H
+    
+    H --> K[End processing]
+    G --> A

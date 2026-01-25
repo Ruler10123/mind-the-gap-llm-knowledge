@@ -1,0 +1,15 @@
+graph TD
+    START([START]) --> LLM_CALL[llm_call Node]
+    
+    LLM_CALL --> COND{should_continue?}
+    
+    COND -->|Has tool_calls| TOOL_NODE[tool_node]
+    COND -->|No tool_calls| END_NODE([END])
+    
+    TOOL_NODE --> LLM_CALL
+    
+    style START fill:#90EE90
+    style END_NODE fill:#FFB6C1
+    style LLM_CALL fill:#87CEEB
+    style TOOL_NODE fill:#DDA0DD
+    style COND fill:#FFD700

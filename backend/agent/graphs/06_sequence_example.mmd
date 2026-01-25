@@ -1,0 +1,26 @@
+sequenceDiagram
+    participant User
+    participant Orchestrator
+    participant Graph
+    participant LLM
+    participant Tools
+    
+    User->>Orchestrator: "What's the weather in LA?"
+    Orchestrator->>Graph: astream({messages: [...], llm_calls: 0})
+    
+    Graph->>LLM: llm_call() with system prompt + messages
+    LLM-->>Graph: AIMessage with tool_calls=[show_weather("Los Angeles")]
+    
+    Graph->>Graph: should_continue() → "tool_node"
+    Graph->>Tools: tool_node() → show_weather("Los Angeles")
+    Tools-->>Graph: ToolMessage with component_type="weather"
+    
+    Graph->>LLM: llm_call() with ToolMessage added
+    LLM-->>Graph: AIMessage with text: "Here's the weather in Los Angeles."
+    
+    Graph->>Graph: should_continue() → "__end__"
+    Graph-->>Orchestrator: Stream complete
+    
+    Orchestrator->>Orchestrator: Parse ToolMessage → ComponentEvent
+    Orchestrator->>User: ComponentEvent (weather widget)
+    Orchestrator->>User: Text: "Here's the weather in Los Angeles."

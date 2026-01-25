@@ -1,0 +1,12 @@
+flowchart LR
+    A[Tool Call in AIMessage] --> B[Extract tool name & args]
+    B --> C{Find tool in registry}
+    C -->|Found| D[Invoke tool function]
+    C -->|Not Found| E[Return error ToolMessage]
+    D --> F{Result Type?}
+    F -->|dict| G[JSON serialize]
+    F -->|str| H[Use as-is]
+    G --> I[Create ToolMessage]
+    H --> I
+    I --> J[Add to state messages]
+    E --> J

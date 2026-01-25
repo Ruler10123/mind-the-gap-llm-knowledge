@@ -1,0 +1,44 @@
+classDiagram
+    class MessagesState {
+        +list[BaseMessage] messages
+        +int llm_calls
+    }
+    
+    class AgentState {
+        +str session_id
+        +list[BaseMessage] messages
+        +list[str] reasoning_log
+        +int retry_count
+        +str last_error
+        +int llm_calls
+        +list[dict] current_tool_calls
+    }
+    
+    class BaseMessage {
+        <<abstract>>
+    }
+    
+    class HumanMessage {
+        +str content
+    }
+    
+    class AIMessage {
+        +str content
+        +list tool_calls
+    }
+    
+    class ToolMessage {
+        +str content
+        +str tool_call_id
+    }
+    
+    class SystemMessage {
+        +str content
+    }
+    
+    MessagesState --> BaseMessage
+    AgentState --> BaseMessage
+    BaseMessage <|-- HumanMessage
+    BaseMessage <|-- AIMessage
+    BaseMessage <|-- ToolMessage
+    BaseMessage <|-- SystemMessage

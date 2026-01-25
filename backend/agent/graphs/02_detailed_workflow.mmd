@@ -1,0 +1,36 @@
+stateDiagram-v2
+    [*] --> START
+    
+    START --> LLM_CALL: Initialize MessagesState
+    
+    LLM_CALL: llm_call Node
+    note right of LLM_CALL
+        - Prepends SystemMessage
+        - Invokes LLM with tools bound
+        - Returns AIMessage (may contain tool_calls)
+        - Increments llm_calls counter
+    end note
+    
+    LLM_CALL --> CHECK: AIMessage returned
+    
+    CHECK: should_continue()
+    note right of CHECK
+        Checks if last message:
+        - Is AIMessage
+        - Has tool_calls
+    end note
+    
+    CHECK --> TOOL_NODE: Has tool_calls
+    CHECK --> END: No tool_calls
+    
+    TOOL_NODE: tool_node
+    note right of TOOL_NODE
+        - Extracts tool_calls from AIMessage
+        - Executes each tool
+        - Returns ToolMessage(s) with results
+        - Handles JSON serialization
+    end note
+    
+    TOOL_NODE --> LLM_CALL: ToolMessage(s) added to state
+    
+    END --> [*]

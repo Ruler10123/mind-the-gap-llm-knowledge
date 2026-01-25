@@ -1,0 +1,49 @@
+graph TD
+    USER_INPUT[User Input] --> ORCH[AgentOrchestrator.process]
+    
+    ORCH --> ATTEMPT{Attempt < max_retries?}
+    
+    ATTEMPT -->|Yes| RUN_GRAPH[Run Agent Graph]
+    ATTEMPT -->|No| ERROR[ErrorEvent]
+    
+    RUN_GRAPH --> STREAM[Stream Messages]
+    
+    STREAM --> CHECK_MSG{Message Type?}
+    
+    CHECK_MSG -->|ToolMessage| PARSE_TOOL[Parse Tool Result]
+    CHECK_MSG -->|AIMessage| COLLECT_TEXT[Collect Text]
+    
+    PARSE_TOOL --> COMPONENT{Has component_type?}
+    COMPONENT -->|Yes| BUFFER[Buffer ComponentEvent]
+    COMPONENT -->|No| CHECK_UI{Has ui_action?}
+    CHECK_UI -->|Yes| UI_EVENT[UIActionEvent]
+    CHECK_UI -->|No| CONTINUE[Continue]
+    
+    BUFFER --> YIELD_COMP[Yield ComponentEvent]
+    UI_EVENT --> YIELD_UI[Yield UIActionEvent]
+    COLLECT_TEXT --> YIELD_TEXT[Yield Text]
+    
+    YIELD_COMP --> SUCCESS[Success]
+    YIELD_UI --> SUCCESS
+    YIELD_TEXT --> SUCCESS
+    
+    RUN_GRAPH -->|Exception| CATCH_ERROR{Catch Error}
+    
+    CATCH_ERROR -->|LLMParseError| RETRY_LLM[Retry with Error Message]
+    CATCH_ERROR -->|ToolExecutionError| CHECK_RETRY{should_retry?}
+    CATCH_ERROR -->|AgentException| ERROR
+    CATCH_ERROR -->|Other Exception| ERROR
+    
+    CHECK_RETRY -->|Yes| RETRY_TOOL[Retry with Error Message]
+    CHECK_RETRY -->|No| ERROR
+    
+    RETRY_LLM --> ATTEMPT
+    RETRY_TOOL --> ATTEMPT
+    
+    style USER_INPUT fill:#E6F3FF
+    style ORCH fill:#FFE6CC
+    style RUN_GRAPH fill:#D4EDDA
+    style SUCCESS fill:#90EE90
+    style ERROR fill:#FFB6C1
+    style RETRY_LLM fill:#FFF4E6
+    style RETRY_TOOL fill:#FFF4E6
