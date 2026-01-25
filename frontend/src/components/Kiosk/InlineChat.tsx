@@ -205,7 +205,7 @@ export function InlineChat({
                       max-w-[85%] px-5 py-3 rounded-2xl
                       ${message.type === 'user'
                         ? 'bg-[#C8102E] text-white shadow-lg'
-                        : 'bg-white/30 text-white backdrop-blur-md border border-white/30 shadow-md'}
+                        : 'bg-[#0E1F34]/50 text-white backdrop-blur-md border border-white/30 shadow-md'}
                     `}
                   >
                     <div className="text-sm leading-relaxed">
@@ -222,7 +222,7 @@ export function InlineChat({
             })}
             {streamingText && !isRecording && isStreaming && (
               <div className="flex justify-start">
-                <div className="max-w-[85%] px-5 py-3 rounded-2xl bg-white/30 text-white backdrop-blur-md border border-white/30 shadow-md">
+                <div className="max-w-[85%] px-5 py-3 rounded-2xl bg-[#0E1F34]/50 text-white backdrop-blur-md border border-white/30 shadow-md">
                   <StreamingText text={streamingText} isStreaming={isStreaming} />
                 </div>
               </div>
