@@ -2,6 +2,16 @@ import { useEffect, useState } from 'react'
 import * as THREE from 'three'
 import type { RefObject } from 'react'
 
+/**
+ * Creates and manages a Three.js scene, PerspectiveCamera, and WebGLRenderer bound
+ * to the given canvas. Sets up a transparent background, high-performance renderer
+ * options, and handles window resize. Disposes the renderer on unmount.
+ *
+ * @param canvasRef - Ref to the HTML canvas element that will host the WebGL context
+ * @returns `{ scene, camera, renderer }` — each is `undefined` until the canvas mounts
+ *          and the effect runs. Camera is at z=3; renderer uses device pixel ratio
+ *          (capped at 2) and fills the window.
+ */
 export function useThreeScene(canvasRef: RefObject<HTMLCanvasElement | null>) {
   const [scene, setScene] = useState<THREE.Scene | undefined>(undefined)
   const [camera, setCamera] = useState<THREE.PerspectiveCamera | undefined>(undefined)

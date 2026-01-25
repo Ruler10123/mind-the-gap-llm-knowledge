@@ -1,18 +1,27 @@
 import { useEffect, useState } from 'react'
 import AssistantCanvas from './AssistantCanvas'
-import AssistantInterface from './AssistantInterface'
 import { useAudioAnalyzer } from './hooks/useAudioAnalyzer'
+import type { AssistantCanvasMode } from './types'
 
 interface Assistant3DProps {
-  passiveMode?: boolean
-  hideInterface?: boolean
+  mode: AssistantCanvasMode
+  isRecording?: boolean
 }
 
-export default function Assistant3D({ passiveMode, hideInterface = false }: Assistant3DProps) {
-  const { isActive, error, initAudio, stopAudio, getFrequencyData } =
-    useAudioAnalyzer()
+export default function Assistant3D({ mode, isRecording = false }: Assistant3DProps) {
+  const { getFrequencyData, initAudio, stopAudio, isActive } = useAudioAnalyzer()
   const [webGLSupported, setWebGLSupported] = useState(true)
-  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // Initialize/stop audio analyzer based on recording state
+  useEffect(() => {
+    if (isRecording && !isActive) {
+      console.log('[Assistant3D] Recording started, initializing audio analyzer...')
+      initAudio()
+    } else if (!isRecording && isActive) {
+      console.log('[Assistant3D] Recording stopped, stopping audio analyzer...')
+      stopAudio()
+    }
+  }, [isRecording, isActive, initAudio, stopAudio])
 
   // Check WebGL support
   useEffect(() => {
@@ -23,34 +32,6 @@ export default function Assistant3D({ passiveMode, hideInterface = false }: Assi
       setWebGLSupported(false)
     }
   }, [])
-
-  const handleToggleAudio = () => {
-    if (isActive) {
-      stopAudio()
-    } else {
-      initAudio()
-    }
-  }
-
-  const handleSubmitPrompt = async (text: string) => {
-    if (!text.trim()) return
-    setIsSubmitting(true)
-    // TODO: Connect to backend API
-    console.log('Prompt submitted:', text)
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-    setIsSubmitting(false)
-  }
-
-  // Automatically enable passiveMode (show bubble) when microphone is disabled
-  // unless passiveMode is explicitly set
-  const effectivePassiveMode = passiveMode ?? !isActive
-  console.log('[Assistant3D] Render state', {
-    isActive,
-    passiveMode,
-    effectivePassiveMode,
-    webGLSupported,
-  })
 
   if (!webGLSupported) {
     return (
@@ -67,16 +48,7 @@ export default function Assistant3D({ passiveMode, hideInterface = false }: Assi
 
   return (
     <div className="relative w-full h-full">
-      <AssistantCanvas getFrequencyData={getFrequencyData} passiveMode={effectivePassiveMode} />
-      {!hideInterface && (
-        <AssistantInterface
-          isAudioActive={isActive}
-          onToggleAudio={handleToggleAudio}
-          error={error}
-          onSubmitPrompt={handleSubmitPrompt}
-          isSubmitting={isSubmitting}
-        />
-      )}
+      <AssistantCanvas getFrequencyData={getFrequencyData} mode={mode} />
     </div>
   )
 }

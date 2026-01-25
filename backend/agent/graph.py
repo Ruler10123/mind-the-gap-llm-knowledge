@@ -1,5 +1,6 @@
 """LangGraph agent: general assistant with tool-calling (node) capability."""
 
+import json
 from datetime import datetime, timezone
 from typing import Annotated, Literal
 
@@ -37,7 +38,38 @@ def divide(a: int, b: int) -> float:
     return a / b
 
 
-tools = [get_current_time, add, multiply, divide]
+@tool
+def open_map(destination: str) -> dict:
+    """Open the map modal showing directions to a destination.
+    Use when the user asks for directions or location of gates, restrooms, or services.
+    Valid destinations: RESTROOM, CUSTOMER_SERVICE, A28, B9, C43, D12"""
+    destinations = {
+        "RESTROOM": ("Directions to Restroom", "/RESTROOM.jpg"),
+        "CUSTOMER_SERVICE": ("Directions to Customer Service", "/CUSTOMER_SERVICE.jpg"),
+        "A28": ("Directions to Gate A28", "/A28.jpg"),
+        "B9": ("Directions to Gate B9", "/B9.jpg"),
+        "C43": ("Directions to Gate C43", "/C43.jpg"),
+        "D12": ("Directions to Gate D12", "/D12.jpg"),
+    }
+    key = destination.upper().replace(" ", "_")
+    entry = destinations.get(key)
+    if not entry:
+        return {"ok": False, "error": f"Unknown destination: {destination}"}
+    title, image_src = entry
+    return {
+        "ok": True,
+        "ui_action": "OPEN_MODAL",
+        "modal_id": "MAP_MODAL",
+        "payload": {
+            "title": title,
+            "imageSrc": image_src,
+            "altText": f"{title}. The X marks your current kiosk location.",
+            "notes": ["The X marks your current location. Follow the highlighted path."],
+        },
+    }
+
+
+tools = [get_current_time, add, multiply, divide, open_map]
 tools_by_name = {t.name: t for t in tools}
 
 
@@ -46,13 +78,14 @@ class MessagesState(TypedDict):
     llm_calls: int
 
 
-SYSTEM_PROMPT = """You are a helpful general assistant. You can answer questions, have conversations, and use tools when useful.
+SYSTEM_PROMPT = """You are a helpful airport kiosk assistant. You can answer questions, have conversations, and use tools when useful.
 
 You have access to callable tools (nodes):
 - get_current_time: use when the user asks about the current time, date, or "today"
 - add, multiply, divide: use for basic arithmetic when the user asks for calculations
+- open_map: use when the user asks for directions or where to find gates (A28, B9, C43, D12), restrooms, or customer service. Valid destinations: RESTROOM, CUSTOMER_SERVICE, A28, B9, C43, D12
 
-Call the appropriate tool when it helps answer the user. Otherwise reply directly. Keep replies clear and concise."""
+Call the appropriate tool when it helps answer the user. Otherwise reply directly. Keep replies clear and concise and do not use markdown formatting."""
 
 _agent = None
 
@@ -91,7 +124,9 @@ def _build_agent():
                 result.append(ToolMessage(content=f"Unknown tool: {name}", tool_call_id=tid))
                 continue
             observation = tool_fn.invoke(args)
-            result.append(ToolMessage(content=str(observation), tool_call_id=tid))
+            # Use JSON for dict results, str for others
+            content = json.dumps(observation) if isinstance(observation, dict) else str(observation)
+            result.append(ToolMessage(content=content, tool_call_id=tid))
         return {"messages": result}
 
     def should_continue(state: MessagesState) -> Literal["tool_node", "__end__"]:

@@ -61,3 +61,30 @@ export interface UserProfile {
   initials: string
   timezone: string
 }
+
+export interface FlightDetails {
+  flightNumber: string       // "AA 2451"
+  date: string              // "Jan 24, 2026"
+  departureTime: string     // "3:00 PM"
+  arrivalTime: string       // "5:30 PM"
+  origin: string           // "DFW"
+  destination: string      // "LAX"
+  gate: string            // "D24"
+}
+
+export interface CompensationOffer {
+  type: 'both' | 'choice'          // 'both' = receive both, 'choice' = select one
+  cashAmount?: number              // e.g., 400 (dollars)
+  creditsAmount?: number           // e.g., 600 (airline miles/credits)
+  creditsExpiryMonths?: number     // e.g., 12 months
+}
+
+export interface OverbookingOffer {
+  id: string
+  reason: string                   // "Flight Overbooked"
+  reasonDetail: string             // "More passengers checked in than available seats"
+  originalFlight: FlightDetails
+  newFlight: FlightDetails
+  compensation: CompensationOffer
+  expiresAt?: string              // Optional: ISO date string for urgency
+}
