@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as KioskRouteImport } from './routes/kiosk'
 import { Route as FlightsRouteImport } from './routes/flights'
+import { Route as FlightManagementRouteImport } from './routes/flight-management'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as RebookingIndexRouteImport } from './routes/rebooking/index'
 import { Route as PathfindingIndexRouteImport } from './routes/pathfinding/index'
@@ -23,6 +24,11 @@ const KioskRoute = KioskRouteImport.update({
 const FlightsRoute = FlightsRouteImport.update({
   id: '/flights',
   path: '/flights',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FlightManagementRoute = FlightManagementRouteImport.update({
+  id: '/flight-management',
+  path: '/flight-management',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -43,6 +49,7 @@ const PathfindingIndexRoute = PathfindingIndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/flight-management': typeof FlightManagementRoute
   '/flights': typeof FlightsRoute
   '/kiosk': typeof KioskRoute
   '/pathfinding/': typeof PathfindingIndexRoute
@@ -50,6 +57,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/flight-management': typeof FlightManagementRoute
   '/flights': typeof FlightsRoute
   '/kiosk': typeof KioskRoute
   '/pathfinding': typeof PathfindingIndexRoute
@@ -58,6 +66,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/flight-management': typeof FlightManagementRoute
   '/flights': typeof FlightsRoute
   '/kiosk': typeof KioskRoute
   '/pathfinding/': typeof PathfindingIndexRoute
@@ -65,14 +74,34 @@ export interface FileRoutesById {
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/flights' | '/kiosk' | '/pathfinding/' | '/rebooking/'
+  fullPaths:
+    | '/'
+    | '/flight-management'
+    | '/flights'
+    | '/kiosk'
+    | '/pathfinding/'
+    | '/rebooking/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/flights' | '/kiosk' | '/pathfinding' | '/rebooking'
-  id: '__root__' | '/' | '/flights' | '/kiosk' | '/pathfinding/' | '/rebooking/'
+  to:
+    | '/'
+    | '/flight-management'
+    | '/flights'
+    | '/kiosk'
+    | '/pathfinding'
+    | '/rebooking'
+  id:
+    | '__root__'
+    | '/'
+    | '/flight-management'
+    | '/flights'
+    | '/kiosk'
+    | '/pathfinding/'
+    | '/rebooking/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  FlightManagementRoute: typeof FlightManagementRoute
   FlightsRoute: typeof FlightsRoute
   KioskRoute: typeof KioskRoute
   PathfindingIndexRoute: typeof PathfindingIndexRoute
@@ -93,6 +122,13 @@ declare module '@tanstack/react-router' {
       path: '/flights'
       fullPath: '/flights'
       preLoaderRoute: typeof FlightsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/flight-management': {
+      id: '/flight-management'
+      path: '/flight-management'
+      fullPath: '/flight-management'
+      preLoaderRoute: typeof FlightManagementRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -121,6 +157,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  FlightManagementRoute: FlightManagementRoute,
   FlightsRoute: FlightsRoute,
   KioskRoute: KioskRoute,
   PathfindingIndexRoute: PathfindingIndexRoute,

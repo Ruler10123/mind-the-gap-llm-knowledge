@@ -22,6 +22,7 @@ export default defineConfig({
   },
   server: {
     proxy: {
+      '/api': { target: 'http://localhost:8000' },
       '/ws': { target: 'http://localhost:8000', ws: true },
       '/health': { target: 'http://localhost:8000' },
     },

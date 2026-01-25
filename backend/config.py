@@ -49,6 +49,10 @@ class Settings(BaseSettings):
     auth_temp_dir: Path = Field(default=Path("temp"), description="Temp files for auth")
     auth_qr_dir: Path = Field(default=Path("qr_codes"), description="QR code storage")
 
+    # Flight Management Settings (reuses auth_mongo_uri for same cluster)
+    flights_database_name: str = Field(default="flights", description="Flights database name")
+    flights_collection_name: str = Field(default="flights_collection", description="Flights collection name")
+
     def api_key_elevenlabs(self) -> str:
         return self.elevenlabs_api_key
 
