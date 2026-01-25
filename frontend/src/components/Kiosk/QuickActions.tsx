@@ -17,7 +17,7 @@ export function QuickActions({ isVisible, onActionClick, isFlightDelayed = false
   ]
 
   return (
-    <div className="flex items-center justify-center gap-4 mt-6 animate-fade-in">
+    <div className="flex items-center justify-center gap-4 mt-6 animate-fade-in pointer-events-auto">
       {actions.map((action) => {
         const Icon = action.icon
         return (
