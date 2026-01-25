@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import * as THREE from 'three'
 import { ANIMATION_CONSTANTS } from '../constants/animationConstants'
 import type { ParticleSphereEntity } from '../entities/ParticleSphereEntity'
+import type { OrbitalPlanesEntity } from '../entities/OrbitalPlanesEntity'
 import type { PostProcessingManager } from '../entities/PostProcessing'
 import type { AssistantCanvasMode } from '../types'
 
@@ -39,6 +40,7 @@ export type DragStateRef = {
  * @param getFrequencyData - Callback returning current frequency data or null
  * @param dragStateRef - Mutable drag state (isDragging, manualRotation, velocity, targetRotation)
  * @param mode - AssistantCanvasMode; passive uses zoomed top layout; processing unimplemented
+ * @param orbitalPlanes - OrbitalPlanesEntity to update each frame (optional)
  */
 export function useAssistantAnimation(
   scene: THREE.Scene | undefined,
@@ -48,6 +50,7 @@ export function useAssistantAnimation(
   getFrequencyData: () => Uint8Array<ArrayBuffer> | null,
   dragStateRef: DragStateRef,
   mode: AssistantCanvasMode,
+  orbitalPlanes: OrbitalPlanesEntity | null = null,
 ) {
   const currentScaleRef = useRef(new THREE.Vector3(1, 1, 1))
   const currentPositionRef = useRef(new THREE.Vector3(0, 0, 0))
@@ -145,6 +148,13 @@ export function useAssistantAnimation(
         }
       }
 
+      // Update orbital planes
+      if (orbitalPlanes) {
+        const shouldAutoRotate = !d.isDragging && Math.abs(d.velocity.y) <= ANIMATION_CONSTANTS.dragRotation.minVelocity
+        orbitalPlanes.setAutoRotation(shouldAutoRotate)
+        orbitalPlanes.update()
+      }
+
       const useProcessing = mode === 'processing'
       entity.update(frequencyData, usePassiveLayout, useProcessing)
 
@@ -163,5 +173,6 @@ export function useAssistantAnimation(
     getFrequencyData,
     dragStateRef,
     mode,
+    orbitalPlanes,
   ])
 }
