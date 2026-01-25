@@ -21,6 +21,7 @@ type ModalState = {
     alternatives: any[];
   };
   overbookingOffer?: any;
+  flightProgressData?: any; // For flight progress modal
 };
 
 export function useNavigationHandler() {

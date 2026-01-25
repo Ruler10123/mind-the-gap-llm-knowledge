@@ -138,7 +138,7 @@ export function InlineChat({
                         transition={{ type: 'spring', damping: 20, stiffness: 300, delay: 0.05 }}
                         className="w-full max-w-2xl"
                       >
-                        <FlightDetailsCard />
+                        <FlightDetailsCard flightData={message.componentData} />
                       </motion.div>
                     )}
                     {message.componentType === 'weather' && (
@@ -359,7 +359,7 @@ export function InlineChat({
                             </div>
                           )}
                         </div>
-                      </motion.div>
+                      </div>
                     )}
                     {message.componentType === 'flight_delay' && message.componentData && (
                       <motion.div

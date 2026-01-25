@@ -1,4 +1,4 @@
-import { Plane, Clock, CheckCircle, Users, Briefcase, Coffee, Luggage, DoorOpen, MapPin } from 'lucide-react'
+import { Plane, CheckCircle, Users, Coffee, Luggage, DoorOpen, MapPin } from 'lucide-react'
 
 interface SimplifiedFlight {
   flightNumber: string
@@ -16,9 +16,10 @@ interface FlightProgressBarProps {
   flight: SimplifiedFlight
   isCompact?: boolean
   onClick?: () => void
+  showProgressOnly?: boolean
 }
 
-export function FlightProgressBar({ flight, isCompact = false, onClick }: FlightProgressBarProps) {
+export function FlightProgressBar({ flight, isCompact = false, onClick, showProgressOnly = false }: FlightProgressBarProps) {
   const phases = [
     { id: 'checkin', label: 'Check-in', icon: Users },
     { id: 'security', label: 'Security', icon: CheckCircle },
@@ -34,30 +35,34 @@ export function FlightProgressBar({ flight, isCompact = false, onClick }: Flight
   return (
     <div
       onClick={onClick}
-      className={`w-full pointer-events-auto transition-all duration-300 ${isCompact ? 'py-0' : 'py-3 px-6'}`}
+      className={`w-full pointer-events-auto transition-all duration-300 ${onClick ? 'cursor-pointer hover:opacity-90' : ''} ${isCompact ? 'py-0' : 'py-3 px-6'}`}
     >
       <div className={`${isCompact ? '' : 'max-w-7xl mx-auto'} flex items-center ${isCompact ? 'gap-6' : 'gap-4'}`}>
-        {/* Flight Info - Compact Inline (always show in header) */}
-        <div className="flex items-center gap-4 min-w-fit">
-          <div className="text-left">
-            <h2 className={`${isCompact ? 'text-lg' : 'text-xl'} font-medium text-[#0E1F34]`}>{flight.flightNumber}</h2>
-            <p className={`${isCompact ? 'text-xs' : 'text-xs'} text-gray-600`}>{flight.origin} → {flight.destination}</p>
-          </div>
-          <div className={`${isCompact ? 'h-8' : 'h-8'} w-px bg-white/20`} />
-          <div className="flex items-center gap-3">
-            <div className="text-left">
-              <p className={`${isCompact ? 'text-[10px]' : 'text-[9px]'} text-gray-500 uppercase`}>Boarding</p>
-              <p className={`${isCompact ? 'text-sm' : 'text-sm'} font-medium text-[#0E1F34]`}>{flight.boardingTime}</p>
+        {!showProgressOnly && (
+          <>
+            {/* Flight Info - Compact Inline (always show in header) */}
+            <div className="flex items-center gap-4 min-w-fit">
+              <div className="text-left">
+                <h2 className={`${isCompact ? 'text-lg' : 'text-xl'} font-medium text-[#0E1F34]`}>{flight.flightNumber}</h2>
+                <p className={`${isCompact ? 'text-xs' : 'text-xs'} text-gray-600`}>{flight.origin} → {flight.destination}</p>
+              </div>
+              <div className={`${isCompact ? 'h-8' : 'h-8'} w-px bg-white/20`} />
+              <div className="flex items-center gap-3">
+                <div className="text-left">
+                  <p className={`${isCompact ? 'text-[10px]' : 'text-[9px]'} text-gray-500 uppercase`}>Boarding</p>
+                  <p className={`${isCompact ? 'text-sm' : 'text-sm'} font-medium text-[#0E1F34]`}>{flight.boardingTime}</p>
+                </div>
+                <div className="text-left">
+                  <p className={`${isCompact ? 'text-[10px]' : 'text-[9px]'} text-gray-500 uppercase`}>Departure</p>
+                  <p className={`${isCompact ? 'text-sm' : 'text-sm'} font-medium text-[#0E1F34]`}>{flight.departureTime}</p>
+                </div>
+              </div>
             </div>
-            <div className="text-left">
-              <p className={`${isCompact ? 'text-[10px]' : 'text-[9px]'} text-gray-500 uppercase`}>Departure</p>
-              <p className={`${isCompact ? 'text-sm' : 'text-sm'} font-medium text-[#0E1F34]`}>{flight.departureTime}</p>
-            </div>
-          </div>
-        </div>
+          </>
+        )}
 
         {/* Progress Track - Horizontal */}
-        <div className="flex-1 flex items-center gap-1">
+        <div className={`${showProgressOnly ? 'w-full' : 'flex-1'} flex items-center gap-1`}>
           {phases.map((phase, index) => {
             const isComplete = index < currentPhaseIndex
             const isCurrent = index === currentPhaseIndex

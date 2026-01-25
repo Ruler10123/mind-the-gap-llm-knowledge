@@ -1,5 +1,4 @@
 import { useCallback, useRef, useState, useEffect } from "react";
-import ReconnectingWebSocket from "reconnecting-websocket";
 
 // In development, use the proxy. In production, use the actual backend URL
 const getBaseUrl = () => {
@@ -28,7 +27,7 @@ const checkBackendHealth = async (): Promise<boolean> => {
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 5000);
-    
+
     const response = await fetch(healthUrl, {
       method: "GET",
       headers: {
@@ -36,14 +35,14 @@ const checkBackendHealth = async (): Promise<boolean> => {
       },
       signal: controller.signal,
     });
-    
+
     clearTimeout(timeoutId);
-    
+
     if (!response.ok) {
       console.warn("[VoiceWebSocket] Health check failed:", response.status, response.statusText);
       return false;
     }
-    
+
     const data = await response.json();
     return data.status === "ok";
   } catch (error) {
@@ -60,28 +59,44 @@ export function useVoiceWebSocket(onMessage?: (data: string) => void) {
   const [status, setStatus] = useState("");
   const [connected, setConnected] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const wsRef = useRef<ReconnectingWebSocket | null>(null);
+  const wsRef = useRef<WebSocket | null>(null);
   const explicitCloseRef = useRef(false);
   const onMessageRef = useRef(onMessage);
   const connectionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const reconnectAttemptsRef = useRef(0);
 
   // Keep the onMessage ref up to date
   useEffect(() => {
     onMessageRef.current = onMessage;
   }, [onMessage]);
 
+  const attemptReconnect = useCallback(() => {
+    if (explicitCloseRef.current) return;
+
+    reconnectAttemptsRef.current++;
+    const delay = Math.min(1000 * Math.pow(1.3, reconnectAttemptsRef.current), 10000);
+
+    console.log(`[VoiceWebSocket] Attempting reconnect in ${delay}ms (attempt ${reconnectAttemptsRef.current})`);
+    setStatus("reconnecting...");
+
+    reconnectTimeoutRef.current = setTimeout(() => {
+      connect();
+    }, delay);
+  }, []);
+
   const connect = useCallback(async () => {
-    if (wsRef.current) {
+    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
       return;
     }
-    
+
     console.log("[VoiceWebSocket] connect() called, checking backend health first...");
     setStatus("checking backend...");
     setError(null);
-    
+
     // Check backend health before attempting WebSocket connection
     const isHealthy = await checkBackendHealth();
-    
+
     if (!isHealthy) {
       const errorMsg = "Backend is not available. Please ensure the backend server is running on port 8000.";
       console.error("[VoiceWebSocket]", errorMsg);
@@ -89,11 +104,11 @@ export function useVoiceWebSocket(onMessage?: (data: string) => void) {
       setStatus("error");
       return;
     }
-    
+
     console.log("[VoiceWebSocket] Backend health check passed, connecting to:", wsUrl);
     explicitCloseRef.current = false;
     setStatus("connecting...");
-    
+
     // Clear any existing timeout
     if (connectionTimeoutRef.current) {
       clearTimeout(connectionTimeoutRef.current);
@@ -112,20 +127,15 @@ export function useVoiceWebSocket(onMessage?: (data: string) => void) {
         wsRef.current = null;
       }
     }, 10000);
-    
-    // Configure ReconnectingWebSocket with options
-    const ws = new ReconnectingWebSocket(wsUrl, [], {
-      maxReconnectionDelay: 10000,
-      minReconnectionDelay: 1000,
-      reconnectionDelayGrowFactor: 1.3,
-      maxRetries: Infinity,
-      connectionTimeout: 4000,
-      debug: true, // Enable debug logging
-    });
+
+    // Create native WebSocket
+    const ws = new WebSocket(wsUrl);
     wsRef.current = ws;
 
     ws.onopen = () => {
       console.log("[VoiceWebSocket] WebSocket connected successfully");
+      reconnectAttemptsRef.current = 0; // Reset reconnect attempts
+
       // Clear timeout on successful connection
       if (connectionTimeoutRef.current) {
         clearTimeout(connectionTimeoutRef.current);
@@ -143,7 +153,7 @@ export function useVoiceWebSocket(onMessage?: (data: string) => void) {
         wasClean: event.wasClean,
         explicitClose: explicitCloseRef.current,
       });
-      
+
       // Clear timeout
       if (connectionTimeoutRef.current) {
         clearTimeout(connectionTimeoutRef.current);
@@ -151,7 +161,7 @@ export function useVoiceWebSocket(onMessage?: (data: string) => void) {
       }
 
       setConnected(false);
-      
+
       if (explicitCloseRef.current) {
         wsRef.current = null;
         explicitCloseRef.current = false;
@@ -181,15 +191,16 @@ export function useVoiceWebSocket(onMessage?: (data: string) => void) {
         if (errorMessage) {
           setError(errorMessage);
           setStatus("error");
-        } else {
-          setStatus("reconnecting...");
         }
+
+        // Attempt to reconnect
+        attemptReconnect();
       }
     };
 
-    ws.onerror = (error) => {
-      console.error("[VoiceWebSocket] WebSocket error:", error);
-      
+    ws.onerror = (event) => {
+      console.error("[VoiceWebSocket] WebSocket error:", event);
+
       // Clear timeout
       if (connectionTimeoutRef.current) {
         clearTimeout(connectionTimeoutRef.current);
@@ -197,10 +208,7 @@ export function useVoiceWebSocket(onMessage?: (data: string) => void) {
       }
 
       setStatus("error");
-      // Only set error if we don't already have one (onclose might set it)
-      if (!error) {
-        setError("WebSocket connection error: Failed to establish connection. Please check if the backend is running.");
-      }
+      setError("WebSocket connection error: Failed to establish connection. Please check if the backend is running.");
     };
 
     ws.onmessage = (e) => {
@@ -209,13 +217,16 @@ export function useVoiceWebSocket(onMessage?: (data: string) => void) {
         onMessageRef.current(e.data);
       }
     };
-  }, []);
+  }, [attemptReconnect]);
 
-  // Cleanup timeout on unmount
+  // Cleanup timeouts on unmount
   useEffect(() => {
     return () => {
       if (connectionTimeoutRef.current) {
         clearTimeout(connectionTimeoutRef.current);
+      }
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
       }
     };
   }, []);
@@ -223,6 +234,10 @@ export function useVoiceWebSocket(onMessage?: (data: string) => void) {
   const disconnect = useCallback(() => {
     if (wsRef.current) {
       explicitCloseRef.current = true;
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+        reconnectTimeoutRef.current = null;
+      }
       wsRef.current.close();
     }
   }, []);
