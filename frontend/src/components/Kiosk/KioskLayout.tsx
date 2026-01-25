@@ -5,6 +5,9 @@ import { WelcomeMessage } from './WelcomeMessage'
 import { QuickActions } from './QuickActions'
 import { ActionButtons } from './ActionButtons'
 import { InlineChat } from './InlineChat'
+import MapModal from '../MapModal/MapModal'
+import { FlightDetailsCard } from '../FlightDetailsCard'
+import DestinationInfoModal from '../DestinationInfoModal'
 import { useVoiceAssistantState } from '@/hooks/useVoiceAssistantState'
 import type { UserProfile } from './types'
 import type { AssistantCanvasMode } from '../Assistant3D/types'
@@ -52,6 +55,8 @@ export function KioskLayout({ user, flight }: KioskLayoutProps) {
     handleMute,
     handleUnmute,
     handleInputChange,
+    modalState,
+    closeModal,
   } = useVoiceAssistantState()
 
   const [currentTime, setCurrentTime] = useState(new Date())
@@ -209,6 +214,26 @@ export function KioskLayout({ user, flight }: KioskLayoutProps) {
         {/* Hidden Audio Element */}
         <audio ref={audioElRef} style={{ display: 'none' }} />
       </div>
+
+      {/* Modals */}
+      {modalState?.isOpen && modalState.modalId === 'MAP_MODAL' && (
+        <MapModal
+          isOpen={modalState.isOpen}
+          onClose={closeModal}
+          title={modalState.title || ''}
+          imageSrc={modalState.imageSrc || ''}
+          altText={modalState.altText || ''}
+          notes={modalState.notes}
+        />
+      )}
+
+      {modalState?.isOpen && modalState.modalId === 'DESTINATION_INFO' && (
+        <DestinationInfoModal
+          isOpen={modalState.isOpen}
+          onClose={closeModal}
+          destination={modalState.destinationData || {}}
+        />
+      )}
     </div>
   )
 }
