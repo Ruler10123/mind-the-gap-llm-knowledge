@@ -1,6 +1,12 @@
 {
   "permissions": {
     "allow": [
+      "Bash(uv python install:*)",
+      "Bash(uv add:*)",
+      "Bash(uv python pin:*)",
+      "Bash(uv pip list:*)",
+      "Bash(uv run:*)",
+      "Bash(uv init:*)"
       "Bash(pnpm add:*)",
       "Bash(pnpm build:*)",
       "Bash(pnpm lint:*)",

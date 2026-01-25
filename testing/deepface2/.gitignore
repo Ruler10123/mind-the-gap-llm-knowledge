@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+
+# Face photos
+faces/*.jpg
+faces/*.png
+!faces/.gitkeep
+
+# DeepFace cache
+*.pkl
+.deepface/
+
+# IDE
+.vscode/
+.idea/
