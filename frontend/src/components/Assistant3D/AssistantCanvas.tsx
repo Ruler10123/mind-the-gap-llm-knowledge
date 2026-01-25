@@ -1,8 +1,14 @@
 import { useEffect, useRef, useState } from 'react'
 import { useThreeScene } from './hooks/useThreeScene'
 import { useAssistantAnimation } from './hooks/useAssistantAnimation'
-import { LiquidGlassEntity } from './entities/LiquidGlassEntity'
+import {
+  ParticleSphereEntity
+  
+} from './entities/ParticleSphereEntity'
 import { PostProcessingManager } from './entities/PostProcessing'
+import { ANIMATION_CONSTANTS } from './constants/animationConstants'
+// DEPRECATED: Mode system removed - only uniform white sphere mode now
+// import type {SphereMode} from './entities/ParticleSphereEntity';
 
 interface AssistantCanvasProps {
   getFrequencyData: () => Uint8Array<ArrayBuffer> | null
@@ -12,10 +18,24 @@ export default function AssistantCanvas({
   getFrequencyData,
 }: AssistantCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
-  const [entity, setEntity] = useState<LiquidGlassEntity | null>(null)
+  const [entity, setEntity] = useState<ParticleSphereEntity | null>(null)
   const [postProcessing, setPostProcessing] =
     useState<PostProcessingManager | null>(null)
   const [isReady, setIsReady] = useState(false)
+  const [passiveMode, setPassiveMode] = useState(false)
+  // DEPRECATED: Mode system removed
+  // const [mode, setMode] = useState<SphereMode>('earth')
+
+  // Mouse drag rotation state
+  const isDraggingRef = useRef(false)
+  const lastMousePosRef = useRef({ x: 0, y: 0 })
+  const lastMouseTimeRef = useRef(0)
+  const manualRotationRef = useRef({ x: 0, y: 0 })
+  const velocityRef = useRef({ x: 0, y: 0 })
+  const targetRotationRef = useRef({ x: 0, y: 0 })
+  const velocityHistoryRef = useRef<
+    Array<{ x: number; y: number; time: number }>
+  >([])
 
   const { scene, camera, renderer } = useThreeScene(canvasRef)
 
@@ -25,13 +45,19 @@ export default function AssistantCanvas({
 
     try {
       // Create entity
-      const liquidGlass = new LiquidGlassEntity()
-      scene.add(liquidGlass.mesh)
-      setEntity(liquidGlass)
+      const particleSphere = new ParticleSphereEntity()
+      scene.add(particleSphere.mesh)
+      setEntity(particleSphere)
 
       // Create post-processing
       const postProc = new PostProcessingManager(renderer, scene, camera)
       setPostProcessing(postProc)
+
+      // Force initial render to ensure sphere is visible immediately
+      // Update entity once to initialize positions
+      particleSphere.update(null)
+      // Render immediately
+      postProc.render(0)
 
       // Handle resize for post-processing
       const handleResize = () => {
@@ -43,17 +69,158 @@ export default function AssistantCanvas({
 
       return () => {
         window.removeEventListener('resize', handleResize)
-        liquidGlass.dispose()
+        particleSphere.dispose()
         postProc.dispose()
-        scene.remove(liquidGlass.mesh)
+        scene.remove(particleSphere.mesh)
       }
     } catch (error) {
       console.error('Failed to initialize 3D scene:', error)
     }
   }, [scene, camera, renderer])
 
+  // Sync manual rotation with entity rotation when auto-rotation is active
+  useEffect(() => {
+    if (!entity) return
+
+    const interval = setInterval(() => {
+      if (!isDraggingRef.current) {
+        // Sync manual rotation with entity rotation when not dragging
+        manualRotationRef.current = {
+          x: entity.mesh.rotation.x,
+          y: entity.mesh.rotation.y,
+        }
+      }
+    }, 16) // ~60fps sync
+
+    return () => clearInterval(interval)
+  }, [entity])
+
+  // DEPRECATED: Mode switching removed - only uniform white sphere mode
+  // useEffect(() => {
+  //   if (!entity) return
+  //   entity.setMode(mode)
+  // }, [entity, mode])
+
+  // const handleToggleMode = () => {
+  //   setMode((prev) => (prev === 'earth' ? 'default' : 'earth'))
+  // }
+
+  // Mouse drag handlers for rotation
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas || !entity) return
+
+    const handleMouseDown = (e: MouseEvent) => {
+      isDraggingRef.current = true
+      lastMousePosRef.current = { x: e.clientX, y: e.clientY }
+      lastMouseTimeRef.current = performance.now()
+      velocityRef.current = { x: 0, y: 0 } // Reset velocity on new drag
+      velocityHistoryRef.current = [] // Clear velocity history
+      targetRotationRef.current = {
+        x: entity.mesh.rotation.x,
+        y: entity.mesh.rotation.y,
+      }
+      manualRotationRef.current = {
+        x: entity.mesh.rotation.x,
+        y: entity.mesh.rotation.y,
+      }
+      canvas.style.cursor = 'grabbing'
+      entity.setAutoRotation(false) // Disable auto-rotation while dragging
+    }
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isDraggingRef.current) return
+
+      const now = performance.now()
+      const deltaTime = (now - lastMouseTimeRef.current) / 1000 // Convert to seconds
+      const deltaX = e.clientX - lastMousePosRef.current.x
+      const deltaY = e.clientY - lastMousePosRef.current.y
+
+      // Update target rotation (smooth accumulation) - only horizontal (y-axis)
+      targetRotationRef.current.y +=
+        deltaX * ANIMATION_CONSTANTS.dragRotation.speed
+      // X-axis rotation is not affected by mouse drag
+
+      // Calculate instantaneous velocity for momentum (only horizontal)
+      if (deltaTime > 0 && deltaTime < 0.1) {
+        // Only use recent, valid time deltas
+        const instantVelocityY =
+          (deltaX * ANIMATION_CONSTANTS.dragRotation.speed) / deltaTime
+        const instantVelocityX = 0 // No vertical rotation from mouse
+
+        // Store velocity history (keep last 5 samples for smoothing)
+        velocityHistoryRef.current.push({
+          x: instantVelocityX,
+          y: instantVelocityY,
+          time: now,
+        })
+
+        // Keep only recent history (last 100ms)
+        const cutoffTime = now - 100
+        velocityHistoryRef.current = velocityHistoryRef.current.filter(
+          (v) => v.time > cutoffTime,
+        )
+
+        // Calculate smoothed velocity from history
+        if (velocityHistoryRef.current.length > 0) {
+          const avgVelocity = velocityHistoryRef.current.reduce(
+            (acc, v) => ({
+              x: acc.x + v.x,
+              y: acc.y + v.y,
+            }),
+            { x: 0, y: 0 },
+          )
+          const count = velocityHistoryRef.current.length
+          velocityRef.current = {
+            x: avgVelocity.x / count,
+            y: avgVelocity.y / count,
+          }
+        }
+      }
+
+      lastMousePosRef.current = { x: e.clientX, y: e.clientY }
+      lastMouseTimeRef.current = now
+    }
+
+    const handleMouseUp = () => {
+      isDraggingRef.current = false
+      canvas.style.cursor = 'grab'
+      // Keep velocity for momentum, don't re-enable auto-rotation yet
+    }
+
+    const handleMouseLeave = () => {
+      isDraggingRef.current = false
+      canvas.style.cursor = 'grab'
+      entity.setAutoRotation(true) // Re-enable auto-rotation when mouse leaves
+    }
+
+    canvas.style.cursor = 'grab'
+    canvas.addEventListener('mousedown', handleMouseDown)
+    window.addEventListener('mousemove', handleMouseMove)
+    window.addEventListener('mouseup', handleMouseUp)
+    canvas.addEventListener('mouseleave', handleMouseLeave)
+
+    return () => {
+      canvas.removeEventListener('mousedown', handleMouseDown)
+      window.removeEventListener('mousemove', handleMouseMove)
+      window.removeEventListener('mouseup', handleMouseUp)
+      canvas.removeEventListener('mouseleave', handleMouseLeave)
+    }
+  }, [entity])
+
   // Animation loop
-  useAssistantAnimation(scene, camera, entity, postProcessing, getFrequencyData)
+  useAssistantAnimation(
+    scene,
+    camera,
+    entity,
+    postProcessing,
+    getFrequencyData,
+    velocityRef,
+    manualRotationRef,
+    targetRotationRef,
+    isDraggingRef,
+    passiveMode,
+  )
 
   return (
     <>
@@ -63,6 +230,15 @@ export default function AssistantCanvas({
           <div className="text-white text-lg">Loading 3D Assistant...</div>
         </div>
       )}
+      {/* Passive mode toggle */}
+      <div className="absolute bottom-4 left-4 flex gap-2">
+        <button
+          onClick={() => setPassiveMode((prev) => !prev)}
+          className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg backdrop-blur-sm transition-colors border border-white/20"
+        >
+          Mode: {passiveMode ? 'Passive' : 'Normal'}
+        </button>
+      </div>
     </>
   )
 }
