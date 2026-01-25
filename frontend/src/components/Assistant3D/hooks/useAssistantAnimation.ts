@@ -81,12 +81,14 @@ export function useAssistantAnimation(
       const sphereTop30Width = 2 * Math.sqrt(1 - 0.4 * 0.4)
 
       // Scale to make top 30% width match screen width
-      const scale = visibleWidth / sphereTop30Width
+      // Apply 1.5x multiplier to make it bigger in passive mode
+      let scale = (visibleWidth / sphereTop30Width) * 1.3
 
       // Move sphere down so only top 30% is visible
       // Position so that y=0.7*scale aligns with bottom of visible area
-      const y = -scale * 1.3
+      const y = -scale * 1.1
 
+      // scale = scale * 1.3;
       return { scale, y }
     }
 

@@ -21,17 +21,6 @@ export function ActionButtons({
 }: ActionButtonsProps) {
   return (
     <div className={`absolute bottom-8 right-8 flex flex-col gap-3 z-30 ${className}`}>
-      {/* Close Chat Button (when chat is open) */}
-      {showChat && onClose && (
-        <button
-          onClick={onClose}
-          className="p-4 rounded-full bg-[#C8102E] backdrop-blur-xl shadow-lg hover:bg-[#a00d26] hover:shadow-2xl hover:scale-110 hover:-translate-y-1 active:scale-95 transition-all duration-300 group"
-          aria-label="Close chat"
-          title="Close chat"
-        >
-          <X className="w-6 h-6 text-white transition-transform duration-300 group-hover:rotate-90" />
-        </button>
-      )}
 
       {/* Mute/Unmute Button */}
       <button
@@ -47,6 +36,19 @@ export function ActionButtons({
         )}
       </button>
 
+      
+      {/* Close Chat Button (when chat is open) */}
+      {showChat && onClose && (
+        <button
+          onClick={onClose}
+          className="p-4 rounded-full bg-[#C8102E] backdrop-blur-xl shadow-lg hover:bg-[#a00d26] hover:shadow-2xl hover:scale-110 hover:-translate-y-1 active:scale-95 transition-all duration-300 group"
+          aria-label="Close chat"
+          title="Close chat"
+        >
+          <X className="w-6 h-6 text-white transition-transform duration-300 group-hover:rotate-90" />
+        </button>
+      )}
+
       {/* Type/Keyboard Toggle (only when chat is closed) */}
       {!showChat && onType && (
         <button
@@ -58,6 +60,10 @@ export function ActionButtons({
           <Keyboard className="w-6 h-6 text-[#0E1F34] transition-transform duration-300 group-hover:scale-110" />
         </button>
       )}
+
+      
+
+      
     </div>
   )
 }

@@ -94,7 +94,12 @@ export function KioskLayout({ user, flight }: KioskLayoutProps) {
       : 'passive'
 
   return (
-    <div className="h-screen overflow-hidden flex flex-col bg-gradient-to-br from-white to-[rgba(51,67,87,0.8)]">
+    <div className="h-screen overflow-hidden flex flex-col bg-gradient-to-br from-white to-[rgba(51,67,87,0.8)] relative">
+      {/* 3D Assistant Globe - Fixed background like index.tsx */}
+      <div className="fixed inset-0 z-0">
+        <Assistant3D mode={assistantMode} isRecording={isRecording} />
+      </div>
+
       {/* Header with embedded progress bar */}
       <KioskHeader
         user={user}
@@ -104,18 +109,7 @@ export function KioskLayout({ user, flight }: KioskLayoutProps) {
       />
 
       {/* Main Container */}
-      <div className="flex-1 relative overflow-hidden">
-        {/* 3D Assistant Globe - Centered, moves lower and to left when chat opens */}
-        <div className={`
-          absolute z-10
-          transition-all duration-700 ease-out
-          ${showChat
-            ? 'left-0 bottom-0 translate-y-1/2 w-[1600px] h-[1600px] -translate-x-1/2 opacity-50'
-            : 'left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] opacity-100'}
-        `}>
-          <Assistant3D mode={assistantMode} isRecording={isRecording} />
-        </div>
-
+      <div className="flex-1 relative overflow-hidden z-10">
         {/* Center Content Area - Chat or Welcome (same space) */}
         <div className="absolute inset-0 flex items-center justify-center z-20 px-6 md:px-12 lg:px-16 py-8">
           {/* Welcome + Quick Actions - Animate Out */}

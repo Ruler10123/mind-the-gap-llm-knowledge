@@ -116,19 +116,16 @@ export function InlineChat({
       <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-6 space-y-4">
         {messages.length === 0 && !streamingText ? (
           <div className="h-full flex flex-col items-center justify-center text-center">
-            <div className={`
-              w-20 h-20 rounded-full mb-6 flex items-center justify-center
-              ${isRecording ? 'bg-[#C8102E] animate-pulse' : 'bg-white/20'}
-              transition-all duration-300
-            `}>
-              <Mic className={`w-10 h-10 ${isRecording ? 'text-white' : 'text-gray-400'}`} />
-            </div>
-            <p className="text-gray-600 text-lg font-light mb-2">
-              {isRecording ? 'Listening...' : connected ? 'Voice-First Assistant' : 'Connecting...'}
-            </p>
-            <p className="text-gray-500 text-sm">
-              {!connected ? status : 'Tap the microphone or type to start'}
-            </p>
+            {!isRecording && (
+              <>
+                <p className="text-gray-600 text-lg font-light mb-2">
+                  {connected ? 'Voice-First Assistant' : 'Connecting...'}
+                </p>
+                <p className="text-gray-500 text-sm">
+                  {!connected ? status : 'Tap the microphone or type to start'}
+                </p>
+              </>
+            )}
             {error && (
               <p className="text-red-500 text-xs mt-2 max-w-md">{error}</p>
             )}
