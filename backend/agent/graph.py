@@ -83,7 +83,43 @@ def show_map(destination: str) -> dict:
     }
 
 
-tools = [get_current_time, add, multiply, divide, show_flight_details, show_map]
+# Global RAG service (injected at startup)
+_rag_service = None
+
+
+def set_rag_service(rag_service):
+    """Set the RAG service for the search_knowledge_base tool."""
+    global _rag_service
+    _rag_service = rag_service
+
+
+@tool
+def search_knowledge_base(query: str) -> str:
+    """Search airport knowledge base for policies, procedures, services, and facilities information.
+    Use this when the user asks about airport rules, baggage policies, security procedures, available services, or facility information."""
+    if _rag_service is None:
+        return "Knowledge base not available."
+
+    try:
+        import asyncio
+        loop = asyncio.get_event_loop()
+        citations = loop.run_until_complete(_rag_service.retrieve(query))
+
+        if not citations:
+            return "No relevant information found in the knowledge base."
+
+        # Format citations for LLM context
+        formatted_results = []
+        for citation in citations:
+            formatted_results.append(f"[Source: {citation.source}]\n{citation.content}")
+
+        return "\n\n---\n\n".join(formatted_results)
+    except Exception as e:
+        logger.error(f"Knowledge base search error: {str(e)}")
+        return f"Unable to search knowledge base: {str(e)}"
+
+
+tools = [get_current_time, add, multiply, divide, show_flight_details, show_map, search_knowledge_base]
 tools_by_name = {t.name: t for t in tools}
 
 
@@ -99,6 +135,7 @@ You have access to callable tools (nodes):
 - add, multiply, divide: use for basic arithmetic when the user asks for calculations
 - show_flight_details: use when the user asks about their flight, gate, boarding status, or flight information
 - show_map: use when the user asks for directions or where to find gates (A28, B9, C43, D12), restrooms, or customer service. Valid destinations: RESTROOM, CUSTOMER_SERVICE, A28, B9, C43, D12
+- search_knowledge_base: use when the user asks about airport policies, procedures, baggage rules, security guidelines, available services, or facility information
 
 CRITICAL: After calling show_flight_details or show_map, you MUST provide a brief spoken response (1-2 sentences) to accompany the visual component.
 For example: "Here are your flight details" or "Here are directions to Gate A28. Follow the highlighted path."

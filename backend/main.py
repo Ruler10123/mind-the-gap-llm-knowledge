@@ -17,11 +17,17 @@ auth_qr_service: QRService = None
 # Global flights service instance
 flights_db_service: FlightsDatabaseService = None
 
+# Global RAG service instances
+rag_db_service = None
+rag_embedding_service = None
+rag_service = None
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Manage application lifecycle."""
     global auth_db_service, auth_face_service, auth_qr_service, flights_db_service
+    global rag_db_service, rag_embedding_service, rag_service
 
     # Initialize auth services
     try:
@@ -59,6 +65,22 @@ async def lifespan(app: FastAPI):
         print(f"Error initializing flights services: {e}")
         raise
 
+    # Initialize RAG services
+    try:
+        from rag.database import RAGDatabaseService
+        from rag.embeddings import EmbeddingService
+        from rag.service import RAGService
+        from agent.graph import set_rag_service
+
+        rag_db_service = RAGDatabaseService()
+        rag_embedding_service = EmbeddingService()
+        rag_service = RAGService(rag_db_service, rag_embedding_service)
+        set_rag_service(rag_service)
+        print("RAG services initialized successfully")
+    except Exception as e:
+        print(f"Warning: RAG initialization failed: {e}")
+        print("Agent will continue without knowledge base search capability")
+
     yield
 
     # Shutdown
@@ -66,6 +88,8 @@ async def lifespan(app: FastAPI):
         auth_db_service.close()
     if flights_db_service:
         flights_db_service.close()
+    if rag_db_service:
+        rag_db_service.close()
 
 
 app = FastAPI(title="AI Assistant API", lifespan=lifespan)
