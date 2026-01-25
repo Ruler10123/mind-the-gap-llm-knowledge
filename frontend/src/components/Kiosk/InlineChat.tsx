@@ -4,6 +4,7 @@ import { Send, Mic, MapPin, Info, Clock, Navigation } from 'lucide-react'
 import { StreamingText } from '../StreamingText'
 import { FlightDetailsCard } from '../FlightDetailsCard'
 import { WeatherWidget } from '../WeatherWidget'
+import { renderMarkdown } from '@/utils/markdown'
 
 interface InlineChatProps {
   isVisible: boolean
@@ -30,36 +31,6 @@ interface InlineChatProps {
   }>
 }
 
-// Simple markdown renderer for basic formatting
-function renderMarkdown(text: string): React.ReactNode {
-  const parts: React.ReactNode[] = []
-  let key = 0
-
-  const segments = text.split(/(\*\*.*?\*\*|__.*?__|(?<!\*)\*(?!\*).*?(?<!\*)\*(?!\*)|_.*?_|`.*?`)/g)
-
-  segments.forEach((segment) => {
-    if (!segment) return
-
-    if (segment.match(/^\*\*.*\*\*$/) || segment.match(/^__.*__$/)) {
-      const content = segment.slice(2, -2)
-      parts.push(<strong key={key++}>{content}</strong>)
-    } else if (segment.match(/^(?<!\*)\*(?!\*).*(?<!\*)\*(?!\*)$/) || segment.match(/^_.*_$/)) {
-      const content = segment.slice(1, -1)
-      parts.push(<em key={key++}>{content}</em>)
-    } else if (segment.match(/^`.*`$/)) {
-      const content = segment.slice(1, -1)
-      parts.push(
-        <code key={key++} className="px-1.5 py-0.5 bg-gray-200 rounded text-xs font-mono">
-          {content}
-        </code>
-      )
-    } else {
-      parts.push(segment)
-    }
-  })
-
-  return parts.length > 0 ? parts : text
-}
 
 function formatTime(date?: Date): string {
   if (!date) return ''
@@ -242,7 +213,9 @@ export function InlineChat({
                                       {i === 0 ? '📍' : i}
                                     </div>
                                     <div className="flex-1 text-sm text-gray-700 leading-relaxed pt-0.5">
-                                      {renderMarkdown(note)}
+                                      {renderMarkdown(note, {
+                                        codeClassName: "px-1.5 py-0.5 bg-gray-200 rounded text-xs font-mono"
+                                      })}
                                     </div>
                                   </div>
                                 ))}
