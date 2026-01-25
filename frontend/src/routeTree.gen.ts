@@ -11,7 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as KioskRouteImport } from './routes/kiosk'
 import { Route as FlightsRouteImport } from './routes/flights'
-import { Route as FlightManagementRouteImport } from './routes/flight-management'
+import { Route as FlightPreviewRouteImport } from './routes/flight-preview'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as RebookingIndexRouteImport } from './routes/rebooking/index'
 import { Route as PathfindingIndexRouteImport } from './routes/pathfinding/index'
@@ -26,9 +26,9 @@ const FlightsRoute = FlightsRouteImport.update({
   path: '/flights',
   getParentRoute: () => rootRouteImport,
 } as any)
-const FlightManagementRoute = FlightManagementRouteImport.update({
-  id: '/flight-management',
-  path: '/flight-management',
+const FlightPreviewRoute = FlightPreviewRouteImport.update({
+  id: '/flight-preview',
+  path: '/flight-preview',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -49,7 +49,7 @@ const PathfindingIndexRoute = PathfindingIndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/flight-management': typeof FlightManagementRoute
+  '/flight-preview': typeof FlightPreviewRoute
   '/flights': typeof FlightsRoute
   '/kiosk': typeof KioskRoute
   '/pathfinding/': typeof PathfindingIndexRoute
@@ -57,7 +57,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/flight-management': typeof FlightManagementRoute
+  '/flight-preview': typeof FlightPreviewRoute
   '/flights': typeof FlightsRoute
   '/kiosk': typeof KioskRoute
   '/pathfinding': typeof PathfindingIndexRoute
@@ -66,7 +66,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/flight-management': typeof FlightManagementRoute
+  '/flight-preview': typeof FlightPreviewRoute
   '/flights': typeof FlightsRoute
   '/kiosk': typeof KioskRoute
   '/pathfinding/': typeof PathfindingIndexRoute
@@ -76,7 +76,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/flight-management'
+    | '/flight-preview'
     | '/flights'
     | '/kiosk'
     | '/pathfinding/'
@@ -84,7 +84,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/flight-management'
+    | '/flight-preview'
     | '/flights'
     | '/kiosk'
     | '/pathfinding'
@@ -92,7 +92,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
-    | '/flight-management'
+    | '/flight-preview'
     | '/flights'
     | '/kiosk'
     | '/pathfinding/'
@@ -101,7 +101,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  FlightManagementRoute: typeof FlightManagementRoute
+  FlightPreviewRoute: typeof FlightPreviewRoute
   FlightsRoute: typeof FlightsRoute
   KioskRoute: typeof KioskRoute
   PathfindingIndexRoute: typeof PathfindingIndexRoute
@@ -124,11 +124,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FlightsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/flight-management': {
-      id: '/flight-management'
-      path: '/flight-management'
-      fullPath: '/flight-management'
-      preLoaderRoute: typeof FlightManagementRouteImport
+    '/flight-preview': {
+      id: '/flight-preview'
+      path: '/flight-preview'
+      fullPath: '/flight-preview'
+      preLoaderRoute: typeof FlightPreviewRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -157,7 +157,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  FlightManagementRoute: FlightManagementRoute,
+  FlightPreviewRoute: FlightPreviewRoute,
   FlightsRoute: FlightsRoute,
   KioskRoute: KioskRoute,
   PathfindingIndexRoute: PathfindingIndexRoute,

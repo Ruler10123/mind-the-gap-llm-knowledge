@@ -6,6 +6,7 @@ import { useCallback, useRef, useState } from "react";
 export function useAudioPlayback() {
   const audioElRef = useRef<HTMLAudioElement | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const currentUrlRef = useRef<string | null>(null);
 
   const playAudio = useCallback(
     (
@@ -19,7 +20,14 @@ export function useAudioPlayback() {
         return Promise.reject(new Error("Audio element not available"));
       }
 
+      // Stop any currently playing audio first
+      if (currentUrlRef.current && audio.src) {
+        audio.pause();
+        audio.currentTime = 0;
+      }
+
       audio.src = url;
+      currentUrlRef.current = url;
       setIsPlaying(true);
 
       if (onTimeUpdate) {
@@ -31,6 +39,7 @@ export function useAudioPlayback() {
           audio.onplay = null;
           audio.ontimeupdate = null;
           setIsPlaying(false);
+          currentUrlRef.current = null;
           onEnded();
         };
       }
@@ -38,6 +47,7 @@ export function useAudioPlayback() {
       return audio.play().catch((e: Error) => {
         console.error("[useAudioPlayback] Playback failed:", e);
         setIsPlaying(false);
+        currentUrlRef.current = null;
         throw e;
       });
     },
@@ -47,12 +57,17 @@ export function useAudioPlayback() {
   const stopAudio = useCallback(() => {
     const audio = audioElRef.current;
     if (audio) {
+      console.log("[useAudioPlayback] Stopping audio playback");
       audio.pause();
       audio.currentTime = 0;
       audio.onplay = null;
       audio.ontimeupdate = null;
       audio.onended = null;
+      // Clear the src to fully stop playback
+      audio.src = "";
+      audio.load(); // Reset the audio element
       setIsPlaying(false);
+      currentUrlRef.current = null;
     }
   }, []);
 

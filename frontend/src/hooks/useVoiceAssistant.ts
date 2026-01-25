@@ -52,7 +52,8 @@ export function useVoiceAssistant() {
 
   // Expose clear methods for external use - stops audio and clears all buffers
   const clearAllBuffers = useCallback(() => {
-    stopAudio(); // Stop any currently playing audio
+    console.log("[VoiceAssistant] clearAllBuffers called - stopping all audio and clearing state");
+    stopAudio(); // Stop any currently playing audio (this also revokes blob URLs)
     clearText(); // Clear revealed text
     clearQueue(); // Clear audio queue and alignment
     setIsProcessing(false); // Reset processing state

@@ -17,6 +17,7 @@ export function useAudioReveal() {
   const { audioElRef, playAudio, stopAudio, isPlaying } = useAudioPlayback();
   const [revealedText, setRevealedText] = useState("");
   const lastCharIndexRef = useRef(-1);
+  const currentAudioUrlRef = useRef<string | null>(null);
 
   const playWithReveal = useCallback(
     (audioChunks: string[], alignment: CharacterAlignment | null) => {
@@ -26,7 +27,14 @@ export function useAudioReveal() {
       }
 
       try {
+        // Revoke previous URL if it exists
+        if (currentAudioUrlRef.current) {
+          revokeAudioUrl(currentAudioUrlRef.current);
+          currentAudioUrlRef.current = null;
+        }
+
         const url = createAudioBlobUrl(audioChunks);
+        currentAudioUrlRef.current = url;
         lastCharIndexRef.current = -1;
         setRevealedText("");
 
@@ -55,12 +63,18 @@ export function useAudioReveal() {
           if (alignment?.characters.length) {
             setRevealedText(getFullText(alignment));
           }
-          revokeAudioUrl(url);
+          if (currentAudioUrlRef.current) {
+            revokeAudioUrl(currentAudioUrlRef.current);
+            currentAudioUrlRef.current = null;
+          }
         };
 
         playAudio(url, handleTimeUpdate, handleEnded).catch((e) => {
           console.error("[useAudioReveal] Playback error:", e);
-          revokeAudioUrl(url);
+          if (currentAudioUrlRef.current) {
+            revokeAudioUrl(currentAudioUrlRef.current);
+            currentAudioUrlRef.current = null;
+          }
         });
       } catch (e) {
         console.error("[useAudioReveal] Failed to create audio:", e);
@@ -74,12 +88,23 @@ export function useAudioReveal() {
     lastCharIndexRef.current = -1;
   }, []);
 
+  const stopAudioAndCleanup = useCallback(() => {
+    console.log("[useAudioReveal] Stopping audio and cleaning up");
+    stopAudio();
+    // Revoke blob URL if it exists
+    if (currentAudioUrlRef.current) {
+      revokeAudioUrl(currentAudioUrlRef.current);
+      currentAudioUrlRef.current = null;
+    }
+    clearText();
+  }, [stopAudio, clearText]);
+
   return {
     audioElRef,
     revealedText,
     isRevealing: isPlaying,
     playWithReveal,
-    stopAudio,
+    stopAudio: stopAudioAndCleanup,
     clearText,
   };
 }
