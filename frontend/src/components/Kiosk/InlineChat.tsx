@@ -1,7 +1,12 @@
 import { useRef, useEffect } from 'react'
-import { Send, Mic, MapPin } from 'lucide-react'
+import { motion } from 'framer-motion'
+import { Send, Mic, MapPin, Info, Clock, Navigation } from 'lucide-react'
 import { StreamingText } from '../StreamingText'
 import { FlightDetailsCard } from '../FlightDetailsCard'
+import { WeatherWidget } from '../WeatherWidget'
+import FlightDelayInfo from './FlightDelayInfo'
+import FlightCancellationInfo from './FlightCancellationInfo'
+import { renderMarkdown } from '@/utils/markdown'
 
 interface InlineChatProps {
   isVisible: boolean
@@ -28,36 +33,6 @@ interface InlineChatProps {
   }>
 }
 
-// Simple markdown renderer for basic formatting
-function renderMarkdown(text: string): React.ReactNode {
-  const parts: React.ReactNode[] = []
-  let key = 0
-
-  const segments = text.split(/(\*\*.*?\*\*|__.*?__|(?<!\*)\*(?!\*).*?(?<!\*)\*(?!\*)|_.*?_|`.*?`)/g)
-
-  segments.forEach((segment) => {
-    if (!segment) return
-
-    if (segment.match(/^\*\*.*\*\*$/) || segment.match(/^__.*__$/)) {
-      const content = segment.slice(2, -2)
-      parts.push(<strong key={key++}>{content}</strong>)
-    } else if (segment.match(/^(?<!\*)\*(?!\*).*(?<!\*)\*(?!\*)$/) || segment.match(/^_.*_$/)) {
-      const content = segment.slice(1, -1)
-      parts.push(<em key={key++}>{content}</em>)
-    } else if (segment.match(/^`.*`$/)) {
-      const content = segment.slice(1, -1)
-      parts.push(
-        <code key={key++} className="px-1.5 py-0.5 bg-gray-200 rounded text-xs font-mono">
-          {content}
-        </code>
-      )
-    } else {
-      parts.push(segment)
-    }
-  })
-
-  return parts.length > 0 ? parts : text
-}
 
 function formatTime(date?: Date): string {
   if (!date) return ''
@@ -149,77 +124,349 @@ export function InlineChat({
               // Render component messages
               if (message.type === 'component') {
                 return (
-                  <div key={message.id} className="flex justify-start w-full">
+                  <motion.div
+                    key={message.id}
+                    initial={{ opacity: 0, y: 10, x: -20 }}
+                    animate={{ opacity: 1, y: 0, x: 0 }}
+                    transition={{ type: 'spring', damping: 20, stiffness: 300 }}
+                    className="flex justify-start w-full"
+                  >
                     {message.componentType === 'flight_details' && (
-                      <div className="w-full max-w-2xl">
+                      <motion.div
+                        initial={{ scale: 0.95 }}
+                        animate={{ scale: 1 }}
+                        transition={{ type: 'spring', damping: 20, stiffness: 300, delay: 0.05 }}
+                        className="w-full max-w-2xl"
+                      >
                         <FlightDetailsCard />
-                      </div>
+                      </motion.div>
+                    )}
+                    {message.componentType === 'weather' && (
+                      <motion.div
+                        initial={{ scale: 0.95 }}
+                        animate={{ scale: 1 }}
+                        transition={{ type: 'spring', damping: 20, stiffness: 300, delay: 0.05 }}
+                        className="w-full max-w-2xl space-y-4"
+                      >
+                        {message.componentData?.locations ? (
+                          // Multiple locations (e.g., "both")
+                          message.componentData.locations.map((loc: any, idx: number) => (
+                            <WeatherWidget
+                              key={idx}
+                              location={loc.location}
+                              temp={loc.temp}
+                              condition={loc.condition}
+                              high={loc.high}
+                              low={loc.low}
+                              humidity={loc.humidity}
+                              windSpeed={loc.windSpeed}
+                              visibility={loc.visibility}
+                              uvIndex={loc.uvIndex}
+                              icon={loc.icon}
+                              description={loc.description}
+                              advice={loc.advice}
+                              isMinimized={false}
+                            />
+                          ))
+                        ) : (
+                          // Single location
+                          <WeatherWidget
+                            location={message.componentData?.location ?? 'Dallas'}
+                            temp={message.componentData?.temp}
+                            condition={message.componentData?.condition}
+                            high={message.componentData?.high}
+                            low={message.componentData?.low}
+                            humidity={message.componentData?.humidity}
+                            windSpeed={message.componentData?.windSpeed}
+                            visibility={message.componentData?.visibility}
+                            uvIndex={message.componentData?.uvIndex}
+                            icon={message.componentData?.icon}
+                            description={message.componentData?.description}
+                            advice={message.componentData?.advice}
+                            isMinimized={false}
+                          />
+                        )}
+                      </motion.div>
                     )}
                     {message.componentType === 'map' && message.componentData && (
-                      <div className="w-full max-w-2xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-400">
-                        <div className="backdrop-blur-xl bg-white/95 rounded-2xl shadow-2xl border border-white/40 overflow-hidden">
-                          <div className="bg-gradient-to-r from-[#0E1F34] to-[#1a3350] p-4 text-white">
-                            <div className="flex items-center gap-2">
-                              <MapPin className="w-5 h-5" />
-                              <h3 className="font-semibold">{message.componentData.title}</h3>
+                      <motion.div
+                        initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        transition={{ duration: 0.4, ease: "easeOut" }}
+                        className="w-full max-w-2xl mx-auto"
+                      >
+                        <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+                          {/* Header */}
+                          <div className="px-6 py-4 border-b border-gray-100">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-lg bg-[#0E1F34] flex items-center justify-center flex-shrink-0">
+                                <Navigation className="w-5 h-5 text-white" />
+                              </div>
+                              <div className="flex-1">
+                                <h3 className="font-semibold text-gray-900 text-lg">{message.componentData.title}</h3>
+                                <p className="text-sm text-gray-500">Navigation directions</p>
+                              </div>
                             </div>
                           </div>
-                          <div className="p-4">
-                            <img
-                              src={message.componentData.imageSrc}
-                              alt={message.componentData.altText}
-                              className="w-full rounded-lg"
-                            />
-                            {message.componentData.notes && message.componentData.notes.length > 0 && (
-                              <div className="mt-4 space-y-2">
+
+                          {/* Map Image */}
+                          <div className="p-6 bg-gray-50">
+                            <div className="relative rounded-lg overflow-hidden shadow-md border border-gray-200">
+                              <img
+                                src={message.componentData.imageSrc}
+                                alt={message.componentData.altText}
+                                className="w-full"
+                              />
+                            </div>
+                          </div>
+
+                          {/* Directions */}
+                          {message.componentData.notes && message.componentData.notes.length > 0 && (
+                            <div className="px-6 py-5">
+                              <h4 className="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-4">Step-by-step directions</h4>
+                              <div className="space-y-3">
                                 {message.componentData.notes.map((note: string, i: number) => (
-                                  <p key={i} className="text-sm text-gray-700 flex items-start gap-2">
-                                    <span className="text-[#C8102E]">•</span>
-                                    <span>{note}</span>
-                                  </p>
+                                  <div key={i} className="flex items-start gap-3">
+                                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-[#0E1F34] text-white flex items-center justify-center text-xs font-medium mt-0.5">
+                                      {i === 0 ? '📍' : i}
+                                    </div>
+                                    <div className="flex-1 text-sm text-gray-700 leading-relaxed pt-0.5">
+                                      {renderMarkdown(note, {
+                                        codeClassName: "px-1.5 py-0.5 bg-gray-200 rounded text-xs font-mono"
+                                      })}
+                                    </div>
+                                  </div>
                                 ))}
                               </div>
-                            )}
+                            </div>
+                          )}
+                        </div>
+                      </motion.div>
+                    )}
+                    {message.componentType === 'destination_info' && message.componentData && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        transition={{ duration: 0.4, ease: "easeOut" }}
+                        className="w-full max-w-2xl mx-auto"
+                      >
+                        <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+                          {/* Header */}
+                          <div className="px-6 py-4 border-b border-gray-100">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-lg bg-[#0E1F34] flex items-center justify-center flex-shrink-0">
+                                <MapPin className="w-5 h-5 text-white" />
+                              </div>
+                              <div className="flex-1">
+                                <h3 className="font-semibold text-gray-900 text-lg">{message.componentData.name}</h3>
+                                <p className="text-sm text-gray-500">{message.componentData.description}</p>
+                              </div>
+                            </div>
                           </div>
+
+                          {/* Location Info Grid */}
+                          {(message.componentData.location || message.componentData.terminal || message.componentData.gate || message.componentData.estimatedWalkTime || message.componentData.hours) && (
+                            <div className="px-6 py-5 bg-gray-50 border-b border-gray-100">
+                              <div className="grid grid-cols-2 gap-4">
+                                {message.componentData.terminal && (
+                                  <div className="flex items-start gap-3">
+                                    <div className="w-8 h-8 rounded-lg bg-white border border-gray-200 flex items-center justify-center flex-shrink-0">
+                                      <span className="text-sm font-semibold text-[#0E1F34]">T</span>
+                                    </div>
+                                    <div>
+                                      <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Terminal</p>
+                                      <p className="text-sm font-medium text-gray-900 mt-0.5">{message.componentData.terminal}</p>
+                                    </div>
+                                  </div>
+                                )}
+                                {message.componentData.location && (
+                                  <div className="flex items-start gap-3">
+                                    <div className="w-8 h-8 rounded-lg bg-white border border-gray-200 flex items-center justify-center flex-shrink-0">
+                                      <MapPin className="w-4 h-4 text-[#0E1F34]" />
+                                    </div>
+                                    <div>
+                                      <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Location</p>
+                                      <p className="text-sm font-medium text-gray-900 mt-0.5">{message.componentData.location}</p>
+                                    </div>
+                                  </div>
+                                )}
+                                {message.componentData.gate && (
+                                  <div className="flex items-start gap-3">
+                                    <div className="w-8 h-8 rounded-lg bg-white border border-gray-200 flex items-center justify-center flex-shrink-0">
+                                      <span className="text-sm font-semibold text-[#0E1F34]">G</span>
+                                    </div>
+                                    <div>
+                                      <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Near Gate</p>
+                                      <p className="text-sm font-medium text-gray-900 mt-0.5">{message.componentData.gate}</p>
+                                    </div>
+                                  </div>
+                                )}
+                                {message.componentData.estimatedWalkTime && (
+                                  <div className="flex items-start gap-3">
+                                    <div className="w-8 h-8 rounded-lg bg-white border border-gray-200 flex items-center justify-center flex-shrink-0">
+                                      <Clock className="w-4 h-4 text-[#0E1F34]" />
+                                    </div>
+                                    <div>
+                                      <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Walk Time</p>
+                                      <p className="text-sm font-medium text-gray-900 mt-0.5">{message.componentData.estimatedWalkTime}</p>
+                                    </div>
+                                  </div>
+                                )}
+                                {message.componentData.hours && (
+                                  <div className="flex items-start gap-3 col-span-2">
+                                    <div className="w-8 h-8 rounded-lg bg-white border border-gray-200 flex items-center justify-center flex-shrink-0">
+                                      <Clock className="w-4 h-4 text-[#0E1F34]" />
+                                    </div>
+                                    <div>
+                                      <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Hours</p>
+                                      <p className="text-sm font-medium text-gray-900 mt-0.5">{message.componentData.hours}</p>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Amenities */}
+                          {message.componentData.amenities && message.componentData.amenities.length > 0 && (
+                            <div className="px-6 py-5 border-b border-gray-100">
+                              <h4 className="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-4">Amenities & Services</h4>
+                              <div className="grid grid-cols-2 gap-3">
+                                {message.componentData.amenities.map((amenity: string, i: number) => (
+                                  <div key={i} className="flex items-center gap-2">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-[#C8102E] flex-shrink-0" />
+                                    <span className="text-sm text-gray-700">{amenity}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Directions */}
+                          {message.componentData.directions && message.componentData.directions.length > 0 && (
+                            <div className="px-6 py-5">
+                              <h4 className="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-4">How to Get There</h4>
+                              <div className="space-y-3">
+                                {message.componentData.directions.map((direction: string, i: number) => (
+                                  <div key={i} className="flex items-start gap-3">
+                                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-[#0E1F34] text-white flex items-center justify-center text-xs font-medium mt-0.5">
+                                      {i + 1}
+                                    </div>
+                                    <p className="flex-1 text-sm text-gray-700 leading-relaxed pt-0.5">{direction}</p>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </div>
                     )}
-                  </div>
+                    {message.componentType === 'flight_delay' && message.componentData && (
+                      <motion.div
+                        initial={{ scale: 0.95 }}
+                        animate={{ scale: 1 }}
+                        transition={{ type: 'spring', damping: 20, stiffness: 300, delay: 0.05 }}
+                        className="w-full max-w-2xl"
+                      >
+                        <FlightDelayInfo
+                          {...message.componentData}
+                          sendMessage={sendMessage}
+                        />
+                      </motion.div>
+                    )}
+                    {message.componentType === 'flight_cancellation' && message.componentData && (
+                      <motion.div
+                        initial={{ scale: 0.95 }}
+                        animate={{ scale: 1 }}
+                        transition={{ type: 'spring', damping: 20, stiffness: 300, delay: 0.05 }}
+                        className="w-full max-w-2xl"
+                      >
+                        <FlightCancellationInfo
+                          {...message.componentData}
+                          sendMessage={sendMessage}
+                        />
+                      </motion.div>
+                    )}
+                  </motion.div>
                 )
               }
 
               // Render text messages
               return (
-                <div
+                <motion.div
                   key={message.id}
+                  initial={{ opacity: 0, y: 10, x: message.type === 'user' ? 20 : -20 }}
+                  animate={{ opacity: 1, y: 0, x: 0 }}
+                  transition={{ type: 'spring', damping: 20, stiffness: 300 }}
                   className={`flex flex-col ${message.type === 'user' ? 'items-end' : 'items-start'}`}
                 >
-                  <div
+                  <motion.div
+                    initial={{ scale: 0.95 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: 'spring', damping: 20, stiffness: 300, delay: 0.05 }}
                     className={`
                       max-w-[85%] px-5 py-3 rounded-2xl
                       ${message.type === 'user'
                         ? 'bg-[#C8102E] text-white shadow-lg'
-                        : 'bg-white/30 text-white backdrop-blur-md border border-white/30 shadow-md'}
+                        : 'bg-[#0E1F34]/50 text-white backdrop-blur-md border border-white/30 shadow-md'}
                     `}
                   >
-                    <div className="text-sm leading-relaxed">
+                    <div className="text-sm leading-relaxed whitespace-pre-wrap">
                       {message.type === 'user' ? message.content : renderMarkdown(message.content || '')}
                     </div>
-                  </div>
+                  </motion.div>
                   {message.timestamp && (
-                    <span className="text-xs text-gray-500 mt-1 px-2">
+                    <motion.span
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.2 }}
+                      className="text-xs text-gray-500 mt-1 px-2"
+                    >
                       {formatTime(message.timestamp)}
-                    </span>
+                    </motion.span>
                   )}
-                </div>
+                </motion.div>
               )
             })}
+            {/* Processing Indicator - shown when processing but no text yet */}
+            {isProcessing && !streamingText && !isRecording && (
+              <motion.div
+                initial={{ opacity: 0, y: 10, x: -20 }}
+                animate={{ opacity: 1, y: 0, x: 0 }}
+                transition={{ type: 'spring', damping: 20, stiffness: 300 }}
+                className="flex justify-start"
+              >
+                <motion.div
+                  initial={{ scale: 0.95 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: 'spring', damping: 20, stiffness: 300, delay: 0.05 }}
+                  className="max-w-[85%] px-5 py-3 rounded-2xl bg-[#0E1F34]/50 text-white backdrop-blur-md border border-white/30 shadow-md"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="relative">
+                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    </div>
+                    <span className="text-sm text-white/80">Processing your request...</span>
+                  </div>
+                </motion.div>
+              </motion.div>
+            )}
             {streamingText && !isRecording && isStreaming && (
-              <div className="flex justify-start">
-                <div className="max-w-[85%] px-5 py-3 rounded-2xl bg-white/30 text-white backdrop-blur-md border border-white/30 shadow-md">
+              <motion.div
+                initial={{ opacity: 0, y: 10, x: -20 }}
+                animate={{ opacity: 1, y: 0, x: 0 }}
+                transition={{ type: 'spring', damping: 20, stiffness: 300 }}
+                className="flex justify-start"
+              >
+                <motion.div
+                  initial={{ scale: 0.95 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: 'spring', damping: 20, stiffness: 300, delay: 0.05 }}
+                  className="max-w-[85%] px-5 py-3 rounded-2xl bg-[#0E1F34]/50 text-white backdrop-blur-md border border-white/30 shadow-md"
+                >
                   <StreamingText text={streamingText} isStreaming={isStreaming} />
-                </div>
-              </div>
+                </motion.div>
+              </motion.div>
             )}
             <div ref={messagesEndRef} />
           </>
@@ -272,10 +519,14 @@ export function InlineChat({
               <button
                 onClick={handleSend}
                 disabled={isProcessing}
-                className="p-2 rounded-full bg-[#C8102E] hover:bg-[#a00d26] transition-all active:scale-95 disabled:opacity-50"
-                title="Send message"
+                className="p-2 rounded-full bg-[#C8102E] hover:bg-[#a00d26] transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center min-w-[2.5rem]"
+                title={isProcessing ? "Processing..." : "Send message"}
               >
-                <Send className="w-4 h-4 text-white" />
+                {isProcessing ? (
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                ) : (
+                  <Send className="w-4 h-4 text-white" />
+                )}
               </button>
             )}
           </div>

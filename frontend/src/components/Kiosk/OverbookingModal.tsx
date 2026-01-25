@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import {
   X,
   AlertTriangle,
@@ -15,8 +16,8 @@ import type { OverbookingOffer, FlightDetails } from './types'
 interface OverbookingModalProps {
   isOpen: boolean
   offer: OverbookingOffer | null
-  onAccept: (offerId: string, selectedCompensation?: 'cash' | 'credits') => void
-  onDecline: (offerId: string) => void
+  onAccept: (offerId?: string, selectedCompensation?: 'cash' | 'credits') => void
+  onDecline: (offerId?: string) => void
   onClose: () => void
 }
 
@@ -116,23 +117,27 @@ export function OverbookingModal({
   }
 
   return (
-    <>
-      {/* Backdrop */}
-      <div
-        className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 animate-fade-in"
-        onClick={onClose}
-      />
+    <AnimatePresence>
+      {isOpen && (
+        <>
+          {/* Backdrop */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40"
+            onClick={onClose}
+          />
 
-      {/* Modal Container */}
-      <div
-        className={`
-          fixed inset-4
-          bg-white/10 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20
-          z-50
-          overflow-hidden
-          ${isOpen ? 'animate-slide-up' : 'animate-slide-down-out'}
-        `}
-      >
+          {/* Modal Container */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+            className="fixed inset-4 bg-white/10 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 z-50 overflow-hidden"
+          >
         <div className="flex flex-col h-full">
           {/* Header */}
           <div className="p-6 border-b border-white/20">
@@ -307,7 +312,9 @@ export function OverbookingModal({
             </div>
           </div>
         </div>
-      </div>
+      </motion.div>
     </>
+      )}
+    </AnimatePresence>
   )
 }

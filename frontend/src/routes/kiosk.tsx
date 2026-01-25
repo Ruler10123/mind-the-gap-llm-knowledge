@@ -1,8 +1,19 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, redirect } from '@tanstack/react-router'
 import { KioskLayout } from '@/components/Kiosk/KioskLayout'
 import type { UserProfile } from '@/components/Kiosk/types'
+import { isAuthenticated, getAuthenticatedUser, transformToUserProfile } from '@/utils/auth'
 
 export const Route = createFileRoute('/kiosk')({
+  beforeLoad: async ({ location }) => {
+    if (!isAuthenticated()) {
+      throw redirect({
+        to: '/login',
+        search: {
+          redirect: location.href,
+        },
+      })
+    }
+  },
   component: KioskRoute,
 })
 
@@ -26,9 +37,16 @@ const mockFlight = {
 }
 
 function KioskRoute() {
+  // Get authenticated user from localStorage
+  const storedUser = getAuthenticatedUser()
+  const user = storedUser ? transformToUserProfile(storedUser) : mockUser
+
+  // Keep mock flight data for now (future: fetch from API)
+  const flight = mockFlight
+
   return (
     <div className="fixed inset-0 z-50">
-      <KioskLayout user={mockUser} flight={mockFlight} />
+      <KioskLayout user={user} flight={flight} />
     </div>
   )
 }

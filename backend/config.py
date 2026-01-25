@@ -17,6 +17,7 @@ class Settings(BaseSettings):
     vultr_model: str = "llama-3.1-70b-instruct-fp8"  # Default model
     elevenlabs_api_key: str = ""
     elevenlabs_voice_id: str = ""
+    openweather_api_key: str = ""
 
     # MongoDB
     mongodb_uri: str = "mongodb://localhost:27017"
@@ -34,7 +35,16 @@ class Settings(BaseSettings):
 
     # RAG
     rag_top_k: int = 5
-    embedding_model: str = "all-MiniLM-L6-v2"
+    embedding_model: str = Field(
+        default="all-mpnet-base-v2",
+        description="Sentence-transformers model. Must match Atlas index numDimensions: all-mpnet-base-v2=768, all-MiniLM-L6-v2=384.",
+    )
+    rag_mongo_uri: str = Field(default="", description="MongoDB URI for RAG (uses auth_mongo_uri if empty)")
+    rag_database_name: str = Field(default="RAG", description="RAG database name")
+    rag_collection_name: str = Field(default="RAG_collection", description="RAG collection name")
+    rag_vector_index_name: str = Field(default="RAG_vector_index", description="Vector search index name")
+    rag_chunk_size: int = Field(default=500, description="Document chunk size")
+    rag_chunk_overlap: int = Field(default=50, description="Chunk overlap")
 
     # Authentication Settings
     auth_mongo_uri: str = Field(

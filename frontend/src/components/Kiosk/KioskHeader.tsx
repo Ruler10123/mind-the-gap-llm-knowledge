@@ -1,6 +1,8 @@
 import { Globe, Clock } from 'lucide-react'
+import { useNavigate } from '@tanstack/react-router'
 import type { UserProfile } from './types'
 import { FlightProgressBar } from './FlightProgressBar'
+import { clearAuthentication } from '@/utils/auth'
 
 interface SimplifiedFlight {
   flightNumber: string
@@ -22,6 +24,8 @@ interface KioskHeaderProps {
 }
 
 export function KioskHeader({ user, currentTime, flight, className = '' }: KioskHeaderProps) {
+  const navigate = useNavigate()
+
   const formatTime = (date: Date) => {
     const timeStr = date.toLocaleTimeString('en-US', {
       hour: 'numeric',
@@ -29,6 +33,11 @@ export function KioskHeader({ user, currentTime, flight, className = '' }: Kiosk
       hour12: true
     })
     return timeStr
+  }
+
+  const handleLogout = () => {
+    clearAuthentication()
+    navigate({ to: '/login' })
   }
 
   return (
@@ -67,10 +76,12 @@ export function KioskHeader({ user, currentTime, flight, className = '' }: Kiosk
 
             {/* Profile Circle */}
             <button
+              onClick={handleLogout}
               className="w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 hover:shadow-xl active:scale-95"
               style={{
                 background: 'linear-gradient(135deg, #ED7B7B 0%, #A01D22 100%)'
               }}
+              title="Logout"
             >
               <span className="text-white text-sm font-normal">{user.initials}</span>
             </button>
