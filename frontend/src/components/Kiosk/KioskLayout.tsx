@@ -103,7 +103,7 @@ export function KioskLayout({ user, flight }: KioskLayoutProps) {
           inset-0
         `}
       >
-        <Assistant3D passiveMode={isIdle} hideInterface={true} />
+        <Assistant3D passiveMode={isIdle} />
       </div>
 
       {/* Action Buttons (Mute/Type) - Fixed bottom right */}
