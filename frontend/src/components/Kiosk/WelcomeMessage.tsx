@@ -12,7 +12,7 @@ export function WelcomeMessage({ userName, isVisible }: WelcomeMessageProps) {
         <img
           src="/CLOVER.svg"
           alt=""
-          className="h-[2rem] md:h-[2.5rem] lg:h-[3rem] w-auto mb-2 md:mb-3 lg:mb-4"
+          className="h-[2rem] md:h-[2.5rem] lg:h-[3rem] w-auto relative top-0.5 md:top-1 lg:top-[-0.0rem]"
           style={{ color: '#0E1F34' }}
         />
         <h1 className="text-4xl md:text-5xl lg:text-6xl font-light text-[#0E1F34] leading-none">

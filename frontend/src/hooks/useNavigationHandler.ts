@@ -13,6 +13,7 @@ type ModalState = {
   imageSrc?: string;
   altText?: string;
   notes?: string[];
+  flightData?: any; // For flight details modal
 };
 
 export function useNavigationHandler() {
@@ -64,6 +65,13 @@ export function useNavigationHandler() {
               imageSrc: payload?.imageSrc,
               altText: payload?.altText,
               notes: payload?.notes,
+            });
+          } else if (modalId === "FLIGHT_DETAILS") {
+            console.log("[NavigationHandler] Opening flight details modal");
+            setModalState({
+              isOpen: true,
+              modalId: "FLIGHT_DETAILS",
+              flightData: payload?.flightData,
             });
           } else {
             console.warn(`[NavigationHandler] Unknown modal ID: ${modalId}`);

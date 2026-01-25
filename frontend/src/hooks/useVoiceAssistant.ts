@@ -9,7 +9,7 @@ export function useVoiceAssistant() {
   const [isProcessing, setIsProcessing] = useState(false);
   const { audioElRef, revealedText, isRevealing, playWithReveal, clearText, stopAudio } =
     useAudioReveal();
-  const { handleUIAction } = useNavigationHandler();
+  const { handleUIAction, modalState, closeModal } = useNavigationHandler();
 
   const handleDone = useCallback(() => {
     console.log("[VoiceAssistant] Done message received, playing all chunks");
@@ -154,5 +154,7 @@ export function useVoiceAssistant() {
     sendMessage,
     audioElRef,
     clearAllBuffers,
+    modalState,
+    closeModal,
   };
 }
