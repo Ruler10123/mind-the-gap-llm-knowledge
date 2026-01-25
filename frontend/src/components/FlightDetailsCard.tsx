@@ -1,24 +1,49 @@
 import { ChevronRight, ChevronDown, ChevronUp } from 'lucide-react'
+import { FlightProgressBar } from './Kiosk/FlightProgressBar'
 
 interface FlightDetailsCardProps {
   onClose?: () => void
   isMinimized?: boolean
   onToggleMinimize?: () => void
+  flightData?: {
+    flightNumber?: string
+    origin?: string
+    destination?: string
+    gate?: string
+    boardingTime?: string
+    departureTime?: string
+    status?: string
+    progress?: number
+    currentPhase?: 'checkin' | 'security' | 'lounge' | 'gate' | 'boarding' | 'departed' | 'arrived'
+  }
 }
 
-export function FlightDetailsCard({ onClose, isMinimized = false, onToggleMinimize }: FlightDetailsCardProps) {
-  // Dummy flight data - will be replaced with real data
+export function FlightDetailsCard({ onClose, isMinimized = false, onToggleMinimize, flightData }: FlightDetailsCardProps) {
+  // Use provided flight data or fallback to defaults
   const flight = {
-    flightNumber: 'AA 2847',
-    origin: { code: 'DFW', city: 'Dallas', gate: 'D23' },
-    destination: { code: 'LAX', city: 'Los Angeles' },
-    departureTime: '2:45 PM',
+    flightNumber: flightData?.flightNumber || 'AA 2847',
+    origin: { code: flightData?.origin || 'DFW', city: 'Dallas', gate: flightData?.gate || 'D23' },
+    destination: { code: flightData?.destination || 'LAX', city: 'Los Angeles' },
+    departureTime: flightData?.departureTime || '2:45 PM',
     arrivalTime: '4:15 PM',
-    status: 'On Time',
+    status: flightData?.status || 'On Time',
     boardingGroup: '3',
-    boardingTime: '2:15 PM',
+    boardingTime: flightData?.boardingTime || '2:15 PM',
     seat: '12F',
     bagsChecked: 2,
+  }
+
+  // Flight data for FlightProgressBar
+  const progressBarFlight = {
+    flightNumber: flight.flightNumber,
+    origin: flight.origin.code,
+    destination: flight.destination.code,
+    gate: flight.origin.gate,
+    boardingTime: flight.boardingTime,
+    departureTime: flight.departureTime,
+    status: flight.status,
+    progress: flightData?.progress ?? 50,
+    currentPhase: flightData?.currentPhase || 'gate',
   }
 
   if (isMinimized) {
@@ -126,6 +151,10 @@ export function FlightDetailsCard({ onClose, isMinimized = false, onToggleMinimi
 
         {/* Bottom Half - Glass Theme */}
         <div className="backdrop-blur-3xl bg-white/20 border-t border-white/30 p-10">
+          {/* Flight Progress Bar */}
+          <div className="mb-10">
+            <FlightProgressBar flight={progressBarFlight} showProgressOnly={true} />
+          </div>
 
           {/* Key Info Grid - No Boxes */}
           <div className="grid grid-cols-3 gap-8">

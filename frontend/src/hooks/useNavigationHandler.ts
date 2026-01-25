@@ -15,6 +15,7 @@ type ModalState = {
   notes?: string[];
   flightData?: any; // For flight details modal
   destinationData?: any; // For destination info modal
+  flightProgressData?: any; // For flight progress modal
 };
 
 export function useNavigationHandler() {

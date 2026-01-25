@@ -49,6 +49,14 @@ def show_flight_details(flight_number: str = "AA 2847") -> dict:
         "component_type": "flight_details",
         "data": {
             "flightNumber": flight_number,
+            "origin": "DFW",
+            "destination": "LAX",
+            "gate": "D23",
+            "boardingTime": "2:15 PM",
+            "departureTime": "2:45 PM",
+            "status": "On Time",
+            "progress": 50,
+            "currentPhase": "gate",
         }
     }
 

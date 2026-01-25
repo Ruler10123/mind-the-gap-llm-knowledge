@@ -154,7 +154,7 @@ export function InlineChat({
                   <div key={message.id} className="flex justify-start w-full">
                     {message.componentType === 'flight_details' && (
                       <div className="w-full max-w-2xl">
-                        <FlightDetailsCard />
+                        <FlightDetailsCard flightData={message.componentData} />
                       </div>
                     )}
                     {message.componentType === 'weather' && (
