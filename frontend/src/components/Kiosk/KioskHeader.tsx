@@ -48,9 +48,9 @@ export function KioskHeader({ user, currentTime, flight, className = '' }: Kiosk
           <img
             src="/americanairlineslogo.png"
             alt="American Airlines"
-            className="h-20 md:h-24 lg:h-28 object-contain"
+            className="h-28 md:h-32 lg:h-36 object-contain"
           />
-          <span className="text-2xl md:text-3xl font-light text-[#0E1F34]">
+          <span className="text-xl md:text-2xl font-light text-[#0E1F34]">
             Aria
           </span>
         </div>

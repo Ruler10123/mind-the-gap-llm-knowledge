@@ -6,6 +6,7 @@ import { FlightDetailsCard } from '../FlightDetailsCard'
 import { WeatherWidget } from '../WeatherWidget'
 import FlightDelayInfo from './FlightDelayInfo'
 import FlightCancellationInfo from './FlightCancellationInfo'
+import OverbookingInfo from './OverbookingInfo'
 import { renderMarkdown } from '@/utils/markdown'
 
 interface InlineChatProps {
@@ -383,6 +384,19 @@ export function InlineChat({
                       >
                         <FlightCancellationInfo
                           {...message.componentData}
+                          sendMessage={sendMessage}
+                        />
+                      </motion.div>
+                    )}
+                    {message.componentType === 'overbooking_offer' && message.componentData && (
+                      <motion.div
+                        initial={{ scale: 0.95 }}
+                        animate={{ scale: 1 }}
+                        transition={{ type: 'spring', damping: 20, stiffness: 300, delay: 0.05 }}
+                        className="w-full max-w-2xl"
+                      >
+                        <OverbookingInfo
+                          offer={message.componentData}
                           sendMessage={sendMessage}
                         />
                       </motion.div>

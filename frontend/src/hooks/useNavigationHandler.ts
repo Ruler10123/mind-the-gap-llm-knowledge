@@ -15,11 +15,6 @@ type ModalState = {
   notes?: string[];
   flightData?: any; // For flight details modal
   destinationData?: any; // For destination info modal
-  rebookingData?: {
-    currentFlight: any;
-    isRefundable: boolean;
-    alternatives: any[];
-  };
   overbookingOffer?: any;
   flightProgressData?: any; // For flight progress modal
 };
@@ -49,7 +44,6 @@ export function useNavigationHandler() {
             home: "/",
             kiosk: "/kiosk",
             flights: "/flights",
-            rebooking: "/rebooking",
             pathfinding: "/pathfinding",
           };
 
@@ -90,13 +84,6 @@ export function useNavigationHandler() {
               isOpen: false,
               modalId: "DESTINATION_INFO",
               destinationData: payload?.destinationData,
-            };
-          } else if (modalId === "REBOOKING") {
-            console.log("[NavigationHandler] Queuing rebooking modal (will open when streaming starts)");
-            pendingModal = {
-              isOpen: false,
-              modalId: "REBOOKING",
-              rebookingData: payload?.rebookingData,
             };
           } else if (modalId === "OVERBOOKING") {
             console.log("[NavigationHandler] Queuing overbooking modal (will open when streaming starts)");

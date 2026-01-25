@@ -8,6 +8,35 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Global subtle scrollbar styling */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(14, 31, 52, 0.2) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: rgba(14, 31, 52, 0.2);
+  border-radius: 3px;
+  transition: background 0.2s ease;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: rgba(14, 31, 52, 0.35);
+}
+
+*::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
 code {
   font-family:
     source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;

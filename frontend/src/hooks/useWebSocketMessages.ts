@@ -97,23 +97,10 @@ export function useWebSocketMessages(handlers: MessageHandlers) {
               data
             );
 
-            // Trigger modals for certain component types
-            if (componentType === "rebooking_options") {
-              handlers.onUIAction?.({
-                action: "OPEN_MODAL",
-                payload: {
-                  modal_id: "REBOOKING",
-                  rebookingData: data,
-                },
-              });
-            } else if (componentType === "overbooking_offer") {
-              handlers.onUIAction?.({
-                action: "OPEN_MODAL",
-                payload: {
-                  modal_id: "OVERBOOKING",
-                  overbookingOffer: data,
-                },
-              });
+            // Render all special components inline
+            if (componentType === "overbooking_offer") {
+              // Render overbooking inline as a component
+              handlers.onComponent?.({ componentType, data });
             } else {
               // Regular component rendering
               handlers.onComponent?.({ componentType, data });
