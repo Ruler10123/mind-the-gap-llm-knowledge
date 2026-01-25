@@ -7,7 +7,7 @@ import { useNavigationHandler } from "./useNavigationHandler";
 
 export function useVoiceAssistant() {
   const [isProcessing, setIsProcessing] = useState(false);
-  const { audioElRef, revealedText, isRevealing, playWithReveal, clearText } =
+  const { audioElRef, revealedText, isRevealing, playWithReveal, clearText, stopAudio } =
     useAudioReveal();
   const { handleUIAction } = useNavigationHandler();
 
@@ -34,6 +34,14 @@ export function useVoiceAssistant() {
       onError: handleError,
       onUIAction: handleUIAction,
     });
+
+  // Expose clear methods for external use - stops audio and clears all buffers
+  const clearAllBuffers = useCallback(() => {
+    stopAudio(); // Stop any currently playing audio
+    clearText(); // Clear revealed text
+    clearQueue(); // Clear audio queue and alignment
+    setIsProcessing(false); // Reset processing state
+  }, [stopAudio, clearText, clearQueue]);
 
   const {
     connected,
@@ -113,9 +121,11 @@ export function useVoiceAssistant() {
     toggleMic(handleMicComplete);
   }, [isRecording, micSupported, connected, toggleMic, handleMicComplete]);
 
+  // Only show revealed text (assistant responses), not mic transcript
+  // Mic transcript should only appear in the input field
   const displayText = useMemo(
-    () => (isRecording ? micTranscript : revealedText),
-    [isRecording, micTranscript, revealedText]
+    () => revealedText,
+    [revealedText]
   );
 
   const isStreaming = useMemo(
@@ -143,5 +153,6 @@ export function useVoiceAssistant() {
     isProcessing,
     sendMessage,
     audioElRef,
+    clearAllBuffers,
   };
 }

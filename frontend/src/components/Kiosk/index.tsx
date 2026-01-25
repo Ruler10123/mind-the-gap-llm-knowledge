@@ -1,7 +1,6 @@
 export { KioskLayout } from './KioskLayout'
 export { KioskHeader } from './KioskHeader'
 export { ActionButtons } from './ActionButtons'
-export { ConversationPanel } from './ConversationPanel'
 export { OverbookingModal } from './OverbookingModal'
 export { FlightProgressBar } from './FlightProgressBar'
 export { QuickActions } from './QuickActions'

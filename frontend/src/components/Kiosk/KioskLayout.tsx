@@ -5,7 +5,7 @@ import { WelcomeMessage } from './WelcomeMessage'
 import { QuickActions } from './QuickActions'
 import { ActionButtons } from './ActionButtons'
 import { InlineChat } from './InlineChat'
-import { useVoiceAssistant } from '@/hooks/useVoiceAssistant'
+import { useVoiceAssistantState } from '@/hooks/useVoiceAssistantState'
 import type { UserProfile } from './types'
 import type { AssistantCanvasMode } from '../Assistant3D/types'
 
@@ -37,25 +37,24 @@ export function KioskLayout({ user, flight }: KioskLayoutProps) {
     streamingText,
     isStreaming,
     isProcessing,
-    sendMessage,
     audioElRef,
     connect,
     disconnect,
-    micTranscript,
-  } = useVoiceAssistant()
+    showChat,
+    isMuted,
+    input,
+    messages,
+    voiceState,
+    handleVoiceActivate,
+    handleType,
+    handleSend,
+    handleClose,
+    handleMute,
+    handleUnmute,
+    handleInputChange,
+  } = useVoiceAssistantState()
 
-  const [showChat, setShowChat] = useState(false)
-  const [isMuted, setIsMuted] = useState(false)
   const [currentTime, setCurrentTime] = useState(new Date())
-
-  // Derive voice state from useVoiceAssistant
-  const voiceState = isRecording
-    ? 'listening'
-    : isProcessing
-      ? 'processing'
-      : streamingText
-        ? 'speaking'
-        : 'idle'
 
   // Connect voice assistant on mount
   useEffect(() => {
@@ -72,15 +71,6 @@ export function KioskLayout({ user, flight }: KioskLayoutProps) {
     }, 60000)
     return () => clearInterval(interval)
   }, [])
-
-  // Handlers
-  const handleVoiceActivate = () => {
-    if (!connected) return
-    if (!showChat) {
-      setShowChat(true)
-    }
-    toggleMic()
-  }
 
   const isIdle = voiceState === 'idle'
   const showWelcome = isIdle && !showChat
@@ -145,7 +135,7 @@ export function KioskLayout({ user, flight }: KioskLayoutProps) {
             <div className="w-full max-w-3xl h-full">
               <InlineChat
                 isVisible={showChat}
-                onClose={() => setShowChat(false)}
+                onClose={handleClose}
                 connected={connected}
                 status={status}
                 error={error}
@@ -155,8 +145,10 @@ export function KioskLayout({ user, flight }: KioskLayoutProps) {
                 streamingText={streamingText}
                 isStreaming={isStreaming}
                 isProcessing={isProcessing}
-                sendMessage={sendMessage}
-                micTranscript={micTranscript}
+                sendMessage={handleSend}
+                input={input}
+                onInputChange={handleInputChange}
+                messages={messages}
               />
             </div>
           </div>
@@ -165,11 +157,11 @@ export function KioskLayout({ user, flight }: KioskLayoutProps) {
         {/* Action Buttons - Right Side */}
         <ActionButtons
           isMuted={isMuted}
-          onMute={() => setIsMuted(true)}
-          onUnmute={() => setIsMuted(false)}
-          onType={() => setShowChat(true)}
+          onMute={handleMute}
+          onUnmute={handleUnmute}
+          onType={handleType}
           showChat={showChat}
-          onClose={() => setShowChat(false)}
+          onClose={handleClose}
         />
 
         {/* Hidden Audio Element */}
