@@ -379,7 +379,7 @@ export function InlineChat({
                         : 'bg-[#0E1F34]/50 text-white backdrop-blur-md border border-white/30 shadow-md'}
                     `}
                   >
-                    <div className="text-sm leading-relaxed">
+                    <div className="text-sm leading-relaxed whitespace-pre-wrap">
                       {message.type === 'user' ? message.content : renderMarkdown(message.content || '')}
                     </div>
                   </div>
@@ -391,6 +391,19 @@ export function InlineChat({
                 </div>
               )
             })}
+            {/* Processing Indicator - shown when processing but no text yet */}
+            {isProcessing && !streamingText && !isRecording && (
+              <div className="flex justify-start">
+                <div className="max-w-[85%] px-5 py-3 rounded-2xl bg-[#0E1F34]/50 text-white backdrop-blur-md border border-white/30 shadow-md">
+                  <div className="flex items-center gap-3">
+                    <div className="relative">
+                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    </div>
+                    <span className="text-sm text-white/80">Processing your request...</span>
+                  </div>
+                </div>
+              </div>
+            )}
             {streamingText && !isRecording && isStreaming && (
               <div className="flex justify-start">
                 <div className="max-w-[85%] px-5 py-3 rounded-2xl bg-[#0E1F34]/50 text-white backdrop-blur-md border border-white/30 shadow-md">
@@ -449,10 +462,14 @@ export function InlineChat({
               <button
                 onClick={handleSend}
                 disabled={isProcessing}
-                className="p-2 rounded-full bg-[#C8102E] hover:bg-[#a00d26] transition-all active:scale-95 disabled:opacity-50"
-                title="Send message"
+                className="p-2 rounded-full bg-[#C8102E] hover:bg-[#a00d26] transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center min-w-[2.5rem]"
+                title={isProcessing ? "Processing..." : "Send message"}
               >
-                <Send className="w-4 h-4 text-white" />
+                {isProcessing ? (
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                ) : (
+                  <Send className="w-4 h-4 text-white" />
+                )}
               </button>
             )}
           </div>
