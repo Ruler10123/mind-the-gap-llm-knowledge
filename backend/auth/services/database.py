@@ -19,8 +19,14 @@ class DatabaseService:
 
     def _connect(self):
         """Establish connection to MongoDB."""
+        uri = (self.settings.auth_mongo_uri or "").strip()
+        if not uri:
+            raise ConnectionError(
+                "AUTH_MONGO_URI is not set or is empty. "
+                "Add it to .env (see .env.example), e.g. mongodb://localhost:27017 for local dev."
+            )
         try:
-            self.client = MongoClient(self.settings.auth_mongo_uri)
+            self.client = MongoClient(uri)
             self.db = self.client[self.settings.auth_database_name]
             self.collection = self.db[self.settings.auth_collection_name]
 

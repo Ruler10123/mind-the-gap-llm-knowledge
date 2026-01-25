@@ -5,6 +5,7 @@ from typing import Any
 from tools.base import BaseTool
 from tools.implementations.time_tool import TimeTool
 from tools.implementations.arithmetic_tools import AddTool, MultiplyTool, DivideTool
+from tools.implementations.page_filter_tool import PageFilterTool
 
 
 class ToolRegistry:
@@ -20,6 +21,7 @@ class ToolRegistry:
         self.register(AddTool())
         self.register(MultiplyTool())
         self.register(DivideTool())
+        self.register(PageFilterTool())
 
     def register(self, tool: BaseTool) -> None:
         """Register a tool."""
