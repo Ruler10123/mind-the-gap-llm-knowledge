@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pnpm install:*)",
+      "Bash(pnpm dev)",
+      "Bash(uv run:*)",
+      "Bash(python main.py:*)"
+    ]
+  }
+}
