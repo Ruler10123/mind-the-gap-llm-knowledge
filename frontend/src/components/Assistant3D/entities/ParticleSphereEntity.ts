@@ -529,7 +529,7 @@ export class ParticleSphereEntity {
     this.geometry.attributes.color.needsUpdate = true
   }
 
-  update(frequencyData: Uint8Array<ArrayBuffer> | null) {
+  update(frequencyData: Uint8Array<ArrayBuffer> | null, passiveMode: boolean = false) {
     // Update base positions with smooth transitions between modes
     this.updateBasePositions()
 
@@ -569,10 +569,17 @@ export class ParticleSphereEntity {
           ANIMATION_CONSTANTS.audioSmoothing.factor
       }
 
-      // Deformation intensity based on vocal range
+      // Deformation intensity based on vocal range - use passive mode constants if enabled
+      const intensityMult = passiveMode
+        ? ANIMATION_CONSTANTS.deformation.passiveIntensityMultiplier
+        : ANIMATION_CONSTANTS.deformation.intensityMultiplier
+      const volumeMult = passiveMode
+        ? ANIMATION_CONSTANTS.deformation.passiveVolumeMultiplier
+        : ANIMATION_CONSTANTS.deformation.volumeMultiplier
+
       const deformationIntensity = Math.max(
-        midFreq * ANIMATION_CONSTANTS.deformation.intensityMultiplier,
-        volume * ANIMATION_CONSTANTS.deformation.volumeMultiplier,
+        midFreq * intensityMult,
+        volume * volumeMult,
       )
 
       // Create spike centers distributed across the sphere based on frequency bands
@@ -658,12 +665,14 @@ export class ParticleSphereEntity {
           }
         }
 
-        // Apply displacement
+        // Apply displacement - use passive mode max height if enabled
         if (totalSpikeInfluence > 0) {
           this.tempVector3.normalize()
           const displacementAmount =
             totalSpikeInfluence * ANIMATION_CONSTANTS.spikes.heightMultiplier
-          const maxSpikeHeight = ANIMATION_CONSTANTS.spikes.maxHeight
+          const maxSpikeHeight = passiveMode
+            ? ANIMATION_CONSTANTS.deformation.passiveMaxDisplacement
+            : ANIMATION_CONSTANTS.spikes.maxHeight
           const displacement = Math.min(displacementAmount, maxSpikeHeight)
 
           positions[i3] = baseX + normal.x * displacement

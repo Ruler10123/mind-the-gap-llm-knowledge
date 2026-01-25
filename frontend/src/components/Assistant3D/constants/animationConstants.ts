@@ -46,6 +46,10 @@ export const ANIMATION_CONSTANTS = {
     maxDisplacement: 0.08,
     intensityMultiplier: 1.5,
     volumeMultiplier: 0.8,
+    // Passive mode - less aggressive vibrations
+    passiveMaxDisplacement: 0.03,
+    passiveIntensityMultiplier: 0.5,
+    passiveVolumeMultiplier: 0.3,
   },
 
   // Continent sampling

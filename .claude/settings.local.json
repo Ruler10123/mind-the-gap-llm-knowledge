@@ -4,7 +4,12 @@
       "Bash(pnpm install:*)",
       "Bash(pnpm dev)",
       "Bash(uv run:*)",
-      "Bash(python main.py:*)"
+      "Bash(python main.py:*)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)",
+      "Bash(pnpm exec tsc:*)",
+      "Bash(tree:*)",
+      "Bash(ls:*)"
     ]
   }
 }
