@@ -5,7 +5,7 @@ from collections.abc import AsyncIterator
 from langchain_core.messages import BaseMessage, HumanMessage, SystemMessage, AIMessage, ToolMessage
 
 from config import settings
-from core.events import BaseEvent, RetryEvent, ErrorEvent, UIActionEvent
+from core.events import BaseEvent, RetryEvent, ErrorEvent, UIActionEvent, ComponentEvent
 from core.exceptions import LLMParseError, ToolExecutionError, AgentException
 from agent.strategies import RetryStrategy
 from agent.graph import get_agent
@@ -40,12 +40,23 @@ class AgentOrchestrator:
                     {"messages": messages, "llm_calls": 0},
                     stream_mode="messages",
                 ):
-                    # Check for UI action in ToolMessage results
+                    # Check for component or UI action in ToolMessage results
                     if isinstance(msg_chunk, ToolMessage):
                         try:
                             content = msg_chunk.content
                             if isinstance(content, str) and content.startswith("{"):
                                 data = json.loads(content)
+
+                                # Check for component
+                                component_type = data.get("component_type")
+                                if component_type:
+                                    yield ComponentEvent(
+                                        component_type=component_type,
+                                        data=data.get("data", {}),
+                                    )
+                                    continue
+
+                                # Legacy: Check for UI action
                                 ui_action = data.get("ui_action")
                                 if ui_action in ("OPEN_MODAL", "NAVIGATE"):
                                     yield UIActionEvent(

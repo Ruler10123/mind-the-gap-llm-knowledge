@@ -39,35 +39,19 @@ def divide(a: int, b: int) -> float:
 
 
 @tool
-def suggest_page_navigation(page: str, reason: str = "") -> dict:
-    """Suggest navigating to a specific page in the UI when it adds clear value (e.g., showing dashboard, results, settings).
-    Available pages: home (assistant), kiosk (kiosk interface), flights (flight info), rebooking (flight rebooking), pathfinding (airport navigation)."""
-    allowed_pages = {"home", "kiosk", "flights", "rebooking", "pathfinding"}
-    page_lower = page.lower()
-
-    if page_lower not in allowed_pages:
-        return {
-            "ui_action": "NAVIGATE",
-            "payload": {
-                "page": None,
-                "error": f"Unknown page '{page}'. Available: {', '.join(allowed_pages)}",
-                "reason": reason,
-            }
-        }
-
+def show_flight_details(flight_number: str = "AA 2847") -> dict:
+    """Show flight details card in chat when user asks about their flight, gate, boarding, or flight status."""
     return {
-        "ui_action": "NAVIGATE",
-        "payload": {
-            "page": page_lower,
-            "reason": reason,
+        "component_type": "flight_details",
+        "data": {
+            "flightNumber": flight_number,
         }
     }
 
 
 @tool
-def open_map(destination: str) -> dict:
-    """Open the map modal showing directions to a destination.
-    Use when the user asks for directions or location of gates, restrooms, or services.
+def show_map(destination: str) -> dict:
+    """Show map directions in chat when user asks for directions or location of gates, restrooms, or services.
     Valid destinations: RESTROOM, CUSTOMER_SERVICE, A28, B9, C43, D12"""
     destinations = {
         "RESTROOM": ("Directions to Restroom", "/RESTROOM.jpg"),
@@ -84,9 +68,8 @@ def open_map(destination: str) -> dict:
     title, image_src = entry
     return {
         "ok": True,
-        "ui_action": "OPEN_MODAL",
-        "modal_id": "MAP_MODAL",
-        "payload": {
+        "component_type": "map",
+        "data": {
             "title": title,
             "imageSrc": image_src,
             "altText": f"{title}. The X marks your current kiosk location.",
@@ -95,7 +78,7 @@ def open_map(destination: str) -> dict:
     }
 
 
-tools = [get_current_time, add, multiply, divide, suggest_page_navigation, open_map]
+tools = [get_current_time, add, multiply, divide, show_flight_details, show_map]
 tools_by_name = {t.name: t for t in tools}
 
 
@@ -109,8 +92,8 @@ SYSTEM_PROMPT = """You are a helpful airport kiosk assistant. You can answer que
 You have access to callable tools (nodes):
 - get_current_time: use when the user asks about the current time, date, or "today"
 - add, multiply, divide: use for basic arithmetic when the user asks for calculations
-- suggest_page_navigation: use to navigate to different pages (home, kiosk, flights, rebooking, pathfinding) when it would help the user
-- open_map: use when the user asks for directions or where to find gates (A28, B9, C43, D12), restrooms, or customer service. Valid destinations: RESTROOM, CUSTOMER_SERVICE, A28, B9, C43, D12
+- show_flight_details: use when the user asks about their flight, gate, boarding status, or flight information
+- show_map: use when the user asks for directions or where to find gates (A28, B9, C43, D12), restrooms, or customer service. Valid destinations: RESTROOM, CUSTOMER_SERVICE, A28, B9, C43, D12
 
 Call the appropriate tool when it helps answer the user. Otherwise reply directly. Keep replies clear and concise and do not use markdown formatting."""
 

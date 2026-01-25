@@ -12,7 +12,13 @@ export function useVoiceAssistantState() {
   const [showChat, setShowChat] = useState(false)
   const [isMuted, setIsMuted] = useState(false)
   const [input, setInput] = useState('')
-  const [messages, setMessages] = useState<Array<{ id: string; type: 'user' | 'assistant'; content: string }>>([])
+  const [messages, setMessages] = useState<Array<{
+    id: string;
+    type: 'user' | 'assistant' | 'component';
+    content?: string;
+    componentType?: string;
+    componentData?: Record<string, any>;
+  }>>([])
 
   // Derive voice state from voice assistant
   const voiceState = useMemo(() => {
@@ -21,6 +27,24 @@ export function useVoiceAssistantState() {
     if (voiceAssistant.streamingText) return 'speaking'
     return 'idle'
   }, [voiceAssistant.isRecording, voiceAssistant.isProcessing, voiceAssistant.streamingText])
+
+  // Merge component messages into messages array
+  const lastComponentIdRef = useRef<string>('')
+  useEffect(() => {
+    if (voiceAssistant.componentMessages && voiceAssistant.componentMessages.length > 0) {
+      const newComponentMsg = voiceAssistant.componentMessages[voiceAssistant.componentMessages.length - 1]
+
+      if (newComponentMsg.id !== lastComponentIdRef.current && !isClosingRef.current) {
+        lastComponentIdRef.current = newComponentMsg.id
+        setMessages(prev => [...prev, {
+          id: newComponentMsg.id,
+          type: 'component',
+          componentType: newComponentMsg.componentType,
+          componentData: newComponentMsg.data,
+        }])
+      }
+    }
+  }, [voiceAssistant.componentMessages])
 
   // Sync input with microphone transcript when recording
   useEffect(() => {
@@ -84,23 +108,24 @@ export function useVoiceAssistantState() {
   const handleClose = useCallback(() => {
     // Set closing flag to prevent adding messages
     isClosingRef.current = true
-    
+
     // Stop recording if active (this may send the transcript, but we'll clear UI anyway)
     if (voiceAssistant.isRecording) {
       voiceAssistant.toggleMic()
     }
-    
+
     // Clear all buffers and state - this stops audio, clears queue, resets processing
     if (voiceAssistant.clearAllBuffers) {
       voiceAssistant.clearAllBuffers()
     }
-    
+
     // Clear UI state
     setShowChat(false)
     setInput('')
     setMessages([])
     lastSentTranscriptRef.current = ''
-    
+    lastComponentIdRef.current = ''
+
     // Reset closing flag after a brief delay to allow any pending operations to complete
     setTimeout(() => {
       isClosingRef.current = false

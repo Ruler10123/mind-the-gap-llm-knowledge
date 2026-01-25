@@ -7,6 +7,11 @@ import { useNavigationHandler } from "./useNavigationHandler";
 
 export function useVoiceAssistant() {
   const [isProcessing, setIsProcessing] = useState(false);
+  const [componentMessages, setComponentMessages] = useState<Array<{
+    id: string;
+    componentType: string;
+    data: Record<string, any>;
+  }>>([]);
   const { audioElRef, revealedText, isRevealing, playWithReveal, clearText, stopAudio } =
     useAudioReveal();
   const { handleUIAction, modalState, closeModal } = useNavigationHandler();
@@ -28,11 +33,21 @@ export function useVoiceAssistant() {
     setIsProcessing(false);
   }, []);
 
+  const handleComponent = useCallback((event: { componentType: string; data: Record<string, any> }) => {
+    console.log("[VoiceAssistant] Component received:", event);
+    setComponentMessages(prev => [...prev, {
+      id: Date.now().toString(),
+      componentType: event.componentType,
+      data: event.data,
+    }]);
+  }, []);
+
   const { handleMessage, clearQueue, getQueuedChunks, getAlignment } =
     useWebSocketMessages({
       onDone: handleDone,
       onError: handleError,
       onUIAction: handleUIAction,
+      onComponent: handleComponent,
     });
 
   // Expose clear methods for external use - stops audio and clears all buffers
@@ -41,6 +56,7 @@ export function useVoiceAssistant() {
     clearText(); // Clear revealed text
     clearQueue(); // Clear audio queue and alignment
     setIsProcessing(false); // Reset processing state
+    setComponentMessages([]); // Clear component messages
   }, [stopAudio, clearText, clearQueue]);
 
   const {
@@ -156,5 +172,6 @@ export function useVoiceAssistant() {
     clearAllBuffers,
     modalState,
     closeModal,
+    componentMessages,
   };
 }

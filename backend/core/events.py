@@ -84,3 +84,11 @@ class UIActionEvent(BaseEvent):
     action: str  # e.g. "OPEN_MODAL"
     modal_id: str
     payload: dict[str, Any]
+
+
+class ComponentEvent(BaseEvent):
+    """Component to be rendered inline in chat."""
+
+    type: Literal["component"] = "component"
+    component_type: str  # e.g. "flight_details", "map", "rebooking_offer"
+    data: dict[str, Any]

@@ -1,6 +1,7 @@
 import { useRef, useEffect } from 'react'
-import { Send, Mic } from 'lucide-react'
+import { Send, Mic, MapPin } from 'lucide-react'
 import { StreamingText } from '../StreamingText'
+import { FlightDetailsCard } from '../FlightDetailsCard'
 
 interface InlineChatProps {
   isVisible: boolean
@@ -17,7 +18,13 @@ interface InlineChatProps {
   sendMessage: (text: string) => void
   input: string
   onInputChange: (value: string) => void
-  messages: Array<{ id: string; type: 'user' | 'assistant'; content: string }>
+  messages: Array<{
+    id: string;
+    type: 'user' | 'assistant' | 'component';
+    content?: string;
+    componentType?: string;
+    componentData?: Record<string, any>;
+  }>
 }
 
 export function InlineChat({
@@ -101,23 +108,68 @@ export function InlineChat({
           </div>
         ) : (
           <>
-            {messages.map((message) => (
-              <div
-                key={message.id}
-                className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
-              >
+            {messages.map((message) => {
+              // Render component messages
+              if (message.type === 'component') {
+                return (
+                  <div key={message.id} className="flex justify-start w-full">
+                    {message.componentType === 'flight_details' && (
+                      <div className="w-full max-w-2xl">
+                        <FlightDetailsCard />
+                      </div>
+                    )}
+                    {message.componentType === 'map' && message.componentData && (
+                      <div className="w-full max-w-2xl mx-auto">
+                        <div className="backdrop-blur-xl bg-white/95 rounded-2xl shadow-2xl border border-white/40 overflow-hidden">
+                          <div className="bg-gradient-to-r from-[#0E1F34] to-[#1a3350] p-4 text-white">
+                            <div className="flex items-center gap-2">
+                              <MapPin className="w-5 h-5" />
+                              <h3 className="font-semibold">{message.componentData.title}</h3>
+                            </div>
+                          </div>
+                          <div className="p-4">
+                            <img
+                              src={message.componentData.imageSrc}
+                              alt={message.componentData.altText}
+                              className="w-full rounded-lg"
+                            />
+                            {message.componentData.notes && message.componentData.notes.length > 0 && (
+                              <div className="mt-4 space-y-2">
+                                {message.componentData.notes.map((note: string, i: number) => (
+                                  <p key={i} className="text-sm text-gray-700 flex items-start gap-2">
+                                    <span className="text-[#C8102E]">•</span>
+                                    <span>{note}</span>
+                                  </p>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )
+              }
+
+              // Render text messages
+              return (
                 <div
-                  className={`
-                    max-w-[85%] px-5 py-3 rounded-2xl
-                    ${message.type === 'user'
-                      ? 'bg-[#C8102E] text-white shadow-lg'
-                      : 'bg-white/20 text-gray-800 backdrop-blur-md border border-white/30 shadow-md'}
-                  `}
+                  key={message.id}
+                  className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
-                  <p className="text-sm leading-relaxed">{message.content}</p>
+                  <div
+                    className={`
+                      max-w-[85%] px-5 py-3 rounded-2xl
+                      ${message.type === 'user'
+                        ? 'bg-[#C8102E] text-white shadow-lg'
+                        : 'bg-white/20 text-gray-800 backdrop-blur-md border border-white/30 shadow-md'}
+                    `}
+                  >
+                    <p className="text-sm leading-relaxed">{message.content}</p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              )
+            })}
             {streamingText && !isRecording && (
               <div className="flex justify-start">
                 <div className="max-w-[85%] px-5 py-3 rounded-2xl bg-white/20 text-gray-800 backdrop-blur-md border border-white/30 shadow-md">

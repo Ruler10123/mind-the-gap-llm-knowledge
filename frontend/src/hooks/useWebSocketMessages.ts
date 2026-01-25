@@ -12,6 +12,8 @@ type WebSocketMessage = {
   action?: string;
   modal_id?: string;
   payload?: Record<string, any>;
+  component_type?: string;
+  data?: Record<string, any>;
 };
 
 type MessageHandlers = {
@@ -20,6 +22,7 @@ type MessageHandlers = {
   onDone?: () => void;
   onError?: (message: string) => void;
   onUIAction?: (event: { action: string; payload: Record<string, any> }) => void;
+  onComponent?: (event: { componentType: string; data: Record<string, any> }) => void;
 };
 
 /**
@@ -83,6 +86,17 @@ export function useWebSocketMessages(handlers: MessageHandlers) {
               payload
             );
             handlers.onUIAction?.({ action, payload });
+            break;
+          }
+          case "component": {
+            const componentType = msg.component_type ?? "";
+            const data = msg.data ?? {};
+            console.log(
+              "[useWebSocketMessages] Component received:",
+              componentType,
+              data
+            );
+            handlers.onComponent?.({ componentType, data });
             break;
           }
           default:
