@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { renderMarkdown } from "@/utils/markdown";
 
 type Props = {
   text: string;
@@ -8,12 +9,13 @@ type Props = {
 /**
  * Displays text with a blinking cursor when streaming.
  * Text reveal is handled by useAudioReveal hook, this component just displays.
+ * Supports markdown rendering for **bold**, *italic*, and `code`.
  */
 export function StreamingText({ text, isStreaming }: Props) {
   return (
     <div className="text-sm leading-relaxed text-white whitespace-pre-wrap">
       <span className="inline">
-        {text}
+        {renderMarkdown(text)}
         {isStreaming && (
           <motion.span
             initial={{ opacity: 1 }}
