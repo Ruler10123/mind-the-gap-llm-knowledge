@@ -1,6 +1,6 @@
 # AI Assistant API
 
-FastAPI backend for an agentic AI assistant using LangGraph (Gemini) and ElevenLabs TTS. Exposes a WebSocket endpoint that streams text and audio.
+FastAPI backend for an agentic AI assistant using LangGraph (Vultr Serverless Inference) and ElevenLabs TTS. Exposes a WebSocket endpoint that streams text and audio.
 
 ## Setup
 
@@ -16,11 +16,12 @@ uv sync
 
 | Variable | Required | Description |
 |----------|----------|-------------|
-| `GOOGLE_API_KEY` or `GEMINI_API_KEY` | Yes | Gemini API key ([Google AI Studio](https://aistudio.google.com/apikey)) |
+| `VULTR_API_KEY` | Yes | Vultr Serverless Inference API key |
+| `VULTR_MODEL` | No | Vultr model name (defaults to `llama-3.1-70b-instruct-fp8`) |
 | `ELEVENLABS_API_KEY` | Yes | ElevenLabs API key |
-| `ELEVENLABS_VOICE_ID` | No | Voice ID (default: `JBFqnCBsd6RMkjVDRZzb`) |
+| `ELEVENLABS_VOICE_ID` | Yes | ElevenLabs voice ID |
 
-Create a `.env` in `backend/` or export these before running.
+Copy `.env.example` to `.env`, fill in your keys, then run. Or export the variables before running.
 
 ## Run
 
@@ -41,8 +42,8 @@ uv run main.py
 
 - **Client → server:** `{"message": "user prompt"}`
 - **Server → client:**
-  - `{"type": "text", "content": "..."}` — streamed LLM tokens
-  - `{"type": "audio", "chunk": "<base64>"}` — TTS MP3 chunks
+  - `{"type": "audio", "chunk": "<base64>"}` — TTS MP3 chunks (stream-with-timestamps)
+  - `{"type": "alignment", "characters": [...], "character_start_times_seconds": [...], "character_end_times_seconds": [...]}` — per-character timings for sync’d text reveal
   - `{"type": "done"}` — turn complete
   - `{"type": "error", "message": "..."}` — error
 

@@ -1,24 +1,69 @@
 """FastAPI app: CORS, /health, WebSocket /ws for AI assistant."""
 
-import base64
-import json
-
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from contextlib import asynccontextmanager
+from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
-from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
 
-from agent.graph import get_agent
-from tts.elevenlabs_client import stream_tts
+from transport.websocket_handler import WebSocketHandler
+from auth import auth_router, DatabaseService, FaceRecognitionService, QRService
+from config import settings
 
-app = FastAPI(title="AI Assistant API")
+# Global auth service instances
+auth_db_service: DatabaseService = None
+auth_face_service: FaceRecognitionService = None
+auth_qr_service: QRService = None
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Manage application lifecycle."""
+    global auth_db_service, auth_face_service, auth_qr_service
+
+    # Initialize auth services
+    try:
+        # Create runtime directories
+        settings.auth_temp_dir.mkdir(parents=True, exist_ok=True)
+        settings.auth_qr_dir.mkdir(parents=True, exist_ok=True)
+
+        # Initialize services
+        auth_db_service = DatabaseService()
+        auth_face_service = FaceRecognitionService()
+        auth_qr_service = QRService()
+
+        # Inject services into router
+        from auth import routes
+        routes.db_service = auth_db_service
+        routes.face_service = auth_face_service
+        routes.qr_service = auth_qr_service
+
+        print("Auth services initialized successfully")
+
+    except Exception as e:
+        print(f"Error initializing auth services: {e}")
+        raise
+
+    yield
+
+    # Shutdown
+    if auth_db_service:
+        auth_db_service.close()
+
+
+app = FastAPI(title="AI Assistant API", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
-    allow_credentials=True,
+    allow_origins=["*"],  # local dev: file://, localhost:*, 127.0.0.1:*
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Initialize WebSocket handler
+ws_handler = WebSocketHandler()
+
+# Include auth router
+app.include_router(auth_router, prefix="/api")
 
 
 @app.get("/health")
@@ -28,58 +73,7 @@ def health() -> dict[str, str]:
 
 @app.websocket("/ws")
 async def websocket_assistant(websocket: WebSocket) -> None:
-    await websocket.accept()
-    messages: list[BaseMessage] = []
-
-    async def send(msg: dict) -> None:
-        await websocket.send_text(json.dumps(msg))
-
-    try:
-        while True:
-            data = await websocket.receive_json()
-            raw = data.get("message") if isinstance(data, dict) else None
-            if not isinstance(raw, str) or not raw.strip():
-                await send({"type": "error", "message": "Missing or empty 'message' field."})
-                continue
-
-            messages.append(HumanMessage(content=raw.strip()))
-            full_text_parts: list[str] = []
-
-            try:
-                async for msg_chunk, metadata in get_agent().astream(
-                    {"messages": messages, "llm_calls": 0},
-                    stream_mode="messages",
-                ):
-                    if not getattr(msg_chunk, "content", None):
-                        continue
-                    text = msg_chunk.content if isinstance(msg_chunk.content, str) else ""
-                    if not text:
-                        continue
-                    full_text_parts.append(text)
-                    await send({"type": "text", "content": text})
-            except Exception as e:
-                await send({"type": "error", "message": str(e)})
-                continue
-
-            full_text = "".join(full_text_parts)
-            if full_text.strip():
-                try:
-                    async for audio_chunk in stream_tts(full_text):
-                        b64 = base64.b64encode(audio_chunk).decode("ascii")
-                        await send({"type": "audio", "chunk": b64})
-                except Exception as e:
-                    await send({"type": "error", "message": f"TTS failed: {e}"})
-
-            messages.append(AIMessage(content=full_text))
-            await send({"type": "done"})
-
-    except WebSocketDisconnect:
-        pass
-    except Exception as e:
-        try:
-            await send({"type": "error", "message": str(e)})
-        except Exception:
-            pass
+    await ws_handler.handle(websocket)
 
 
 if __name__ == "__main__":

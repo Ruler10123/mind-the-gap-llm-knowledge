@@ -1,15 +1,18 @@
 {
   "permissions": {
     "allow": [
-      "Bash(pnpm install:*)",
-      "Bash(pnpm dev)",
+      "Bash(uv python install:*)",
+      "Bash(uv add:*)",
+      "Bash(uv python pin:*)",
+      "Bash(uv pip list:*)",
       "Bash(uv run:*)",
-      "Bash(python main.py:*)",
-      "Bash(netstat:*)",
-      "Bash(findstr:*)",
-      "Bash(pnpm exec tsc:*)",
-      "Bash(tree:*)",
-      "Bash(ls:*)"
+      "Bash(uv init:*)",
+      "Bash(pnpm add:*)",
+      "Bash(pnpm build:*)",
+      "Bash(pnpm lint:*)",
+      "Bash(pnpm tsc:*)",
+      "Bash(pnpm run check:*)",
+      "Bash(git -C /c/Users/zanbo/Documents/Projects/Hackathons/TAMUHack26 log --oneline --graph --all -20)"
     ]
   }
 }
