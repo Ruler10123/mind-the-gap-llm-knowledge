@@ -150,7 +150,9 @@ export function useAssistantAnimation(
 
       // Update orbital planes
       if (orbitalPlanes) {
-        const shouldAutoRotate = !d.isDragging && Math.abs(d.velocity.y) <= ANIMATION_CONSTANTS.dragRotation.minVelocity
+        // In passive mode, always show orbital planes
+        // Otherwise, show them when auto-rotation is active (not dragging and velocity is low)
+        const shouldAutoRotate = usePassiveLayout || (!d.isDragging && Math.abs(d.velocity.y) <= ANIMATION_CONSTANTS.dragRotation.minVelocity)
         orbitalPlanes.setAutoRotation(shouldAutoRotate)
         orbitalPlanes.update()
       }

@@ -200,7 +200,7 @@ export default function AssistantCanvas({
     getFrequencyData,
     dragStateRef,
     mode,
-    null,
+    orbitalPlanes,
   )
 
   return (

@@ -8,6 +8,9 @@ interface Airplane {
   tiltAngle: number
   currentAngle: number
   tiltAxis: THREE.Vector3
+  orbitNormal: THREE.Vector3 // Random normal vector for orbital plane
+  orbitRight: THREE.Vector3 // Right vector in orbital plane
+  orbitUp: THREE.Vector3 // Up vector in orbital plane
   positionHistory: THREE.Vector3[]
   trail: THREE.Line
   trailGeometry: THREE.BufferGeometry
@@ -40,8 +43,8 @@ export class OrbitalPlanesEntity {
     this.trailMaterial = new THREE.LineBasicMaterial({
       color: 0xffffff,
       transparent: true,
-      opacity: 0,
-      blending: THREE.AdditiveBlending,
+      opacity: 1,
+      blending: THREE.NormalBlending,
     })
 
     const {
@@ -76,6 +79,26 @@ export class OrbitalPlanesEntity {
         Math.sin(axisThetaOffset),
       ).normalize()
 
+      // Generate random orbital plane normal (truly random direction)
+      const orbitNormal = new THREE.Vector3(
+        (Math.random() - 0.5) * 2,
+        (Math.random() - 0.5) * 2,
+        (Math.random() - 0.5) * 2,
+      ).normalize()
+
+      // Create orthonormal basis for the orbital plane
+      // Use a random vector that's not parallel to orbitNormal
+      const tempVec = new THREE.Vector3(1, 0, 0)
+      if (Math.abs(orbitNormal.dot(tempVec)) > 0.9) {
+        tempVec.set(0, 1, 0)
+      }
+      const orbitRight = new THREE.Vector3()
+        .crossVectors(orbitNormal, tempVec)
+        .normalize()
+      const orbitUp = new THREE.Vector3()
+        .crossVectors(orbitRight, orbitNormal)
+        .normalize()
+
       // Phase offset for varied starting positions
       const currentAngle = (i * Math.PI) / 3.5
 
@@ -93,6 +116,9 @@ export class OrbitalPlanesEntity {
         tiltAngle,
         currentAngle,
         tiltAxis,
+        orbitNormal,
+        orbitRight,
+        orbitUp,
         positionHistory,
         trail,
         trailGeometry,
@@ -147,29 +173,41 @@ export class OrbitalPlanesEntity {
     this.targetOpacity = this.autoRotationActive ? maxOpacity : 0.0
     this.currentOpacity += (this.targetOpacity - this.currentOpacity) * fadeSpeed
     this.airplaneMaterial.opacity = this.currentOpacity
-    this.trailMaterial.opacity = this.currentOpacity * trailOpacity
+    // Trails are always visible at full opacity
+    this.trailMaterial.opacity = maxOpacity * trailOpacity
 
     // Update each airplane's position and rotation
     for (const airplane of this.airplanes) {
       // Increment orbit angle
       airplane.currentAngle += airplane.orbitSpeed
 
-      // Calculate basic orbit position
-      const x = Math.cos(airplane.currentAngle) * airplane.orbitRadius
-      const z = Math.sin(airplane.currentAngle) * airplane.orbitRadius
-      const y = 0
-
-      // Apply tilt
-      this.tempVector1.set(x, y, z)
-      this.tempVector1.applyAxisAngle(airplane.tiltAxis, airplane.tiltAngle)
+      // Calculate orbit position in the random orbital plane
+      const cosAngle = Math.cos(airplane.currentAngle)
+      const sinAngle = Math.sin(airplane.currentAngle)
+      
+      // Position in orbital plane using the orthonormal basis
+      this.tempVector1
+        .copy(airplane.orbitRight)
+        .multiplyScalar(cosAngle * airplane.orbitRadius)
+        .add(
+          airplane.orbitUp.clone().multiplyScalar(sinAngle * airplane.orbitRadius)
+        )
+      
       airplane.group.position.copy(this.tempVector1)
 
-      // Calculate direction of travel for orientation
+      // Calculate direction of travel for orientation (tangent to orbit)
       const nextAngle = airplane.currentAngle + 0.01
-      const nextX = Math.cos(nextAngle) * airplane.orbitRadius
-      const nextZ = Math.sin(nextAngle) * airplane.orbitRadius
-      const directionVector = new THREE.Vector3(nextX - x, 0, nextZ - z)
-      directionVector.applyAxisAngle(airplane.tiltAxis, airplane.tiltAngle)
+      const nextCos = Math.cos(nextAngle)
+      const nextSin = Math.sin(nextAngle)
+      const nextPos = new THREE.Vector3()
+        .copy(airplane.orbitRight)
+        .multiplyScalar(nextCos * airplane.orbitRadius)
+        .add(
+          airplane.orbitUp.clone().multiplyScalar(nextSin * airplane.orbitRadius)
+        )
+      const directionVector = new THREE.Vector3()
+        .subVectors(nextPos, airplane.group.position)
+        .normalize()
 
       // Orient airplane to face direction of travel
       const targetPosition = new THREE.Vector3().addVectors(

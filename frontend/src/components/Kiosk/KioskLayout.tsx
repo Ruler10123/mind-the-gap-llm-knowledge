@@ -79,6 +79,20 @@ export function KioskLayout({ user, flight }: KioskLayoutProps) {
     return () => clearInterval(interval)
   }, [])
 
+  // Handle ESC key to exit chat mode
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && showChat) {
+        handleClose()
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [showChat, handleClose])
+
   const isIdle = voiceState === 'idle'
   const showWelcome = isIdle && !showChat
   const isFlightDelayed = flight.status !== 'On Time'

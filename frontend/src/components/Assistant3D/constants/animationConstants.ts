@@ -68,7 +68,7 @@ export const ANIMATION_CONSTANTS = {
   orbitalPlanes: {
     count: 70,
     minOrbitRadius: 1.05,
-    maxOrbitRadius: 1.1,
+    maxOrbitRadius: 1.2,
     minOrbitSpeed: 0.0002,
     maxOrbitSpeed: 0.0005,
     fadeSpeed: 0.05,
