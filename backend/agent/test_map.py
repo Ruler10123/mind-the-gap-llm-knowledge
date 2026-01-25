@@ -25,11 +25,6 @@ def resolve_destination(text: str) -> str | None:
         return "A28"
     if "b9" in t or "b 9" in t:
         return "B9"
-    if "c43" in t or "c 43" in t:
-        return "C43"
-    if "d12" in t or "d 12" in t:
-        return "D12"
-
 
     return None
 

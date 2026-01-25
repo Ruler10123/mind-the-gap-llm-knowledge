@@ -55,30 +55,68 @@ def show_flight_details(flight_number: str = "AA 2847") -> dict:
 @tool
 def show_map(destination: str) -> dict:
     """Show map directions in chat when user asks for directions or location of gates, restrooms, or services.
-    Valid destinations: RESTROOM, CUSTOMER_SERVICE, A28, B9, C43, D12.
+    Valid destinations: RESTROOM, CUSTOMER_SERVICE, A28, B9.
     IMPORTANT: After calling this tool, you MUST provide a brief spoken response (1-2 sentences)
     acknowledging what you're showing them. For example: 'Here are directions to Gate A28. Follow the highlighted path from your current location.'"""
     destinations = {
-        "RESTROOM": ("Directions to Restroom", "/RESTROOM.jpg"),
-        "CUSTOMER_SERVICE": ("Directions to Customer Service", "/CUSTOMER_SERVICE.jpg"),
-        "A28": ("Directions to Gate A28", "/A28.jpg"),
-        "B9": ("Directions to Gate B9", "/B9.jpg"),
-        "C43": ("Directions to Gate C43", "/C43.jpg"),
-        "D12": ("Directions to Gate D12", "/D12.jpg"),
+        "RESTROOM": (
+            "Directions to Restroom",
+            "/RESTROOM.png",
+            [
+                "The Location Marker marks your current location (YOU ARE HERE).",
+                "1. You're next to the TerminalLink Station in Terminal C. Walk south (down on the map) toward the TSA Pre / Lower Level area.",
+                "2. At the first corner, turn right (east).",
+                "3. Take the next right (south) around the edge of the TSA Pre block.",
+                "4. Continue straight and the **restroom will be on your right**.",
+            ],
+        ),
+        "CUSTOMER_SERVICE": (
+            "Directions to Customer Service",
+            "/CUSTOMER_SERVICE.png",
+            [
+                "The Location Marker marks your current location (YOU ARE HERE).",
+                "1. From your spot by the **TerminalLink Station** in **Terminal C**, walk **right (east)** to the main hallway.",
+                "2. Turn **left (north)** and go up to the junction by gates **C23/C24**.",
+                "3. Turn **left (west)** into the North Concourse hallway. **Customer Service** is right along that corridor where the red line ends.",
+            ],
+        ),
+        "B9": (
+            "Directions to Gate B9",
+            "/B9.png",
+            [
+                "The Location Marker marks your current location (YOU ARE HERE).",
+                "1. From the **TerminalLink area** in **Terminal B** (near the B85–B88 side), walk **south (down)** into the main concourse.",
+                "2. Turn **right (east)** toward the **B1–B12** gate pier.",
+                "3. Continue **down** the pier until you reach **B9** (on the right side of that pier, where it's marked in red).",
+            ],
+        ),
+        "A28": (
+            "Directions to Gate A28",
+            "/A28.png",
+            [
+                "The Location Marker marks your current location (YOU ARE HERE).",
+                "1. From your location in **Terminal C**, walk **south (down)** to the **TerminalLink Station**.",
+                "2. Take the **TerminalLink train** to **Terminal A**.",
+                "3. Exit at **Terminal A Station** (near the A7 area on the map).",
+                "4. Walk **south (down)** into **Terminal A South Concourse**.",
+                "5. Follow the concourse toward gates **A27–A30**.",
+                "6. **A28** is in that row (between **A27** and **A29**).",
+            ],
+        ),
     }
     key = destination.upper().replace(" ", "_")
     entry = destinations.get(key)
     if not entry:
         return {"ok": False, "error": f"Unknown destination: {destination}"}
-    title, image_src = entry
+    title, image_src, notes = entry
     return {
         "ok": True,
         "component_type": "map",
         "data": {
             "title": title,
             "imageSrc": image_src,
-            "altText": f"{title}. The X marks your current kiosk location.",
-            "notes": ["The X marks your current location. Follow the highlighted path."],
+            "altText": f"{title}. The Location Marker marks your current location.",
+            "notes": notes,
         },
     }
 
