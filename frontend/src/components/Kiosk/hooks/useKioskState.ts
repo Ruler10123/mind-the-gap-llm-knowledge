@@ -44,14 +44,6 @@ export function useKioskState() {
     setIsMuted(false)
   }
 
-  const handleProcessing = () => {
-    setVoiceState('processing')
-  }
-
-  const handleSpeaking = () => {
-    setVoiceState('speaking')
-  }
-
   return {
     voiceState,
     showChat,
@@ -63,7 +55,5 @@ export function useKioskState() {
     handleClose,
     handleMute,
     handleUnmute,
-    handleProcessing,
-    handleSpeaking,
   }
 }

@@ -1,9 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState, useEffect, type ChangeEvent, type KeyboardEvent } from 'react'
 import Assistant3D from '@/components/Assistant3D'
-import UserNameDisplay from '@/components/UserNameDisplay'
 import { StreamingText } from '@/components/StreamingText'
 import { useVoiceAssistant } from '@/hooks/useVoiceAssistant'
+import type { AssistantCanvasMode } from '@/components/Assistant3D/types'
 
 export const Route = createFileRoute('/')({
   component: HomePage,
@@ -11,6 +11,8 @@ export const Route = createFileRoute('/')({
 
 function HomePage() {
   const [input, setInput] = useState('')
+  const [debugMode, setDebugMode] = useState(false)
+  const [debugModeSelection, setDebugModeSelection] = useState<AssistantCanvasMode>('passive')
   const {
     connected,
     status,
@@ -20,6 +22,7 @@ function HomePage() {
     toggleMic,
     streamingText,
     isStreaming,
+    isProcessing,
     sendMessage,
     audioElRef,
     connect,
@@ -55,14 +58,63 @@ function HomePage() {
     }
   }
 
+  // Determine the mode to use
+  const assistantMode: AssistantCanvasMode = debugMode
+    ? debugModeSelection
+    : isRecording
+      ? 'active'
+      : isProcessing
+        ? 'processing'
+        : 'passive'
+
   return (
     <div className="fixed inset-0 bg-black">
-      <Assistant3D mode={isRecording ? 'active' : 'passive'} />
+      <Assistant3D mode={assistantMode} isRecording={isRecording} />
       {/* <LoginButtons /> */}
       {/* <UserNameDisplay /> */}
 
       {/* Voice Assistant UI */}
       <div className="fixed inset-0 pointer-events-none z-10">
+        {/* Debug Mode Toggle - Top Left */}
+        <div className="absolute top-6 left-6 pointer-events-auto">
+          <div className="backdrop-blur-xl bg-black/40 border border-white/20 rounded-lg shadow-2xl p-4 min-w-[200px]">
+            <div className="flex items-center justify-between mb-3">
+              <label className="text-white text-sm font-medium">Debug Mode</label>
+              <button
+                onClick={() => setDebugMode(!debugMode)}
+                className={`
+                  relative inline-flex h-6 w-11 items-center rounded-full transition-colors
+                  ${debugMode ? 'bg-cyan-500' : 'bg-gray-600'}
+                `}
+              >
+                <span
+                  className={`
+                    inline-block h-4 w-4 transform rounded-full bg-white transition-transform
+                    ${debugMode ? 'translate-x-6' : 'translate-x-1'}
+                  `}
+                />
+              </button>
+            </div>
+            {debugMode && (
+              <div className="space-y-2">
+                <label className="text-white/70 text-xs block">Mode:</label>
+                <select
+                  value={debugModeSelection}
+                  onChange={(e) => setDebugModeSelection(e.target.value as AssistantCanvasMode)}
+                  className="w-full px-3 py-2 rounded-lg bg-white/10 border border-white/20 text-white text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
+                >
+                  <option value="passive">Passive</option>
+                  <option value="active">Active</option>
+                  <option value="processing">Processing</option>
+                </select>
+                <div className="text-white/50 text-xs mt-2">
+                  Current: <span className="text-cyan-400">{assistantMode}</span>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
         {/* Connection Status - Top Right */}
         <div className="absolute top-6 right-6 pointer-events-auto flex gap-2 items-center">
           {!micSupported && (

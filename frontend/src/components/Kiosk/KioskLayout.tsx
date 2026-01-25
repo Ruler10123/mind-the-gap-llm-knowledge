@@ -150,7 +150,15 @@ export function KioskLayout({ user, flight }: KioskLayoutProps) {
           inset-0
         `}
       >
-        <Assistant3D mode={isIdle ? 'passive' : 'active'} />
+        <Assistant3D 
+          mode={
+            isIdle 
+              ? 'passive' 
+              : voiceState === 'processing' 
+                ? 'processing' 
+                : 'active'
+          } 
+        />
       </div>
 
       {/* Action Buttons (Mute/Type) - Fixed bottom right */}

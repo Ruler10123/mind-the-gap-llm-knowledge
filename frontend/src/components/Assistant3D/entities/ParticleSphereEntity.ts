@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import { average, noise3D } from '../utils/noiseUtils'
+import { average } from '../utils/noiseUtils'
 import { ANIMATION_CONSTANTS } from '../constants/animationConstants'
 
 export class ParticleSphereEntity {
@@ -369,24 +369,56 @@ export class ParticleSphereEntity {
   }
 
   /**
-   * Processing mode: slow, continuous noise displacement. No audio reactivity.
-   * Noise sampling position drifts and rotates over time.
+   * Processing mode: spike-based displacement similar to active mode, but without voice input.
+   * Uses time-based varying spike intensities to create distinct spikes that rotate slowly.
    */
   private applyProcessingNoiseDisplacement(): void {
-    const cfg = ANIMATION_CONSTANTS.processingMode
-    const t = performance.now() * 0.001
-    const driftX = Math.sin(t * cfg.driftSpeed) * 2
-    const driftY = Math.cos(t * cfg.driftSpeed * 0.87) * 2
-    const driftZ = t * 0.3
-    const rotY = t * cfg.rotateSpeed
-    const rotX = t * cfg.rotateSpeed * 0.7
-    const cy = Math.cos(rotY)
-    const sy = Math.sin(rotY)
-    const cx = Math.cos(rotX)
-    const sx = Math.sin(rotX)
-    const scale = cfg.noiseScale
-    const amp = cfg.displacementAmplitude
+    // Update spike rotation time for processing mode
+    const baseRotationSpeed = ANIMATION_CONSTANTS.spikeRotation.baseSpeed * 0.5 // Slower rotation
+    this.spikeRotationTime += baseRotationSpeed
 
+    // Create time-based varying spike intensities (no frequency data)
+    const t = performance.now() * 0.001
+    const baseIntensity = 0.2 // Base intensity for spikes (scaled up since no voice input)
+    const intensityVariation = 0.3 // Variation amount
+    const intensityScale = 1.2 // Scale multiplier to make spikes more distinct
+
+    // Create spike centers distributed across the sphere (same as active mode)
+    const numSpikes = ANIMATION_CONSTANTS.spikes.count
+    const spikeCenters: Array<{ pos: THREE.Vector3; intensity: number }> = []
+
+    // Use Fibonacci sphere distribution for even spacing (same as active mode)
+    const goldenAngle = Math.PI * (3 - Math.sqrt(5)) // Golden angle
+
+    for (let i = 0; i < numSpikes; i++) {
+      // Fibonacci sphere distribution for even coverage
+      const y = 1 - (i / (numSpikes - 1)) * 2 // y goes from 1 to -1
+      const radius = Math.sqrt(1 - y * y)
+      const theta = goldenAngle * i + this.spikeRotationTime // Rotate spike positions over time
+      const spikeX = Math.cos(theta) * radius
+      const spikeY = y
+      const spikeZ = Math.sin(theta) * radius
+
+      // Also rotate around Y axis for more complex rotation
+      const rotationY = this.spikeRotationTime * 0.7
+      const rotatedX =
+        spikeX * Math.cos(rotationY) - spikeZ * Math.sin(rotationY)
+      const rotatedZ =
+        spikeX * Math.sin(rotationY) + spikeZ * Math.cos(rotationY)
+
+      // Time-based varying intensity per spike (creates pulsing effect)
+      const timeOffset = i * 0.3 // Offset each spike's animation
+      const intensityWave = Math.sin(t * 0.5 + timeOffset) * 0.5 + 0.5 // 0 to 1
+      const spikeIntensity =
+        (baseIntensity + intensityWave * intensityVariation) * intensityScale
+
+      spikeCenters.push({
+        pos: new THREE.Vector3(rotatedX, spikeY, rotatedZ),
+        intensity: spikeIntensity,
+      })
+    }
+
+    // Update particle positions to create smooth spikes (same logic as active mode)
     const positions = this.geometry.attributes.position.array as Float32Array
     for (let i = 0; i < this.particleCount; i++) {
       const i3 = i * 3
@@ -394,26 +426,65 @@ export class ParticleSphereEntity {
       const baseY = this.basePositions[i3 + 1]
       const baseZ = this.basePositions[i3 + 2]
 
+      // Use reusable vectors to reduce GC pressure
       this.tempVector1.set(baseX, baseY, baseZ)
       const normal = this.tempVector2.copy(this.tempVector1).normalize()
 
-      const x1 = baseX * cy - baseZ * sy
-      const z1 = baseX * sy + baseZ * cy
-      const y1 = baseY
-      const y2 = y1 * cx - z1 * sx
-      const z2 = y1 * sx + z1 * cx
-      const x2 = x1
+      let totalSpikeInfluence = 0.0
+      this.tempVector3.set(0, 0, 0) // weightedDirection
 
-      const nx = x2 * scale + driftX
-      const ny = y2 * scale + driftY
-      const nz = z2 * scale + driftZ
-      const n = noise3D(nx, ny, nz)
-      const displacement = (n * 0.5 + 0.5) * amp
+      for (const spike of spikeCenters) {
+        if (spike.intensity < 0.01) continue
 
-      positions[i3] = baseX + normal.x * displacement
-      positions[i3 + 1] = baseY + normal.y * displacement
-      positions[i3 + 2] = baseZ + normal.z * displacement
+        // Calculate angular distance using dot product
+        const dot = normal.dot(spike.pos)
+        const angularDistance = Math.acos(Math.max(-1, Math.min(1, dot)))
+
+        // Smooth falloff function
+        const spikeRadius = ANIMATION_CONSTANTS.spikes.radius
+        const normalizedDist = angularDistance / spikeRadius
+        let falloff = 0
+        if (normalizedDist < 1) {
+          falloff =
+            1 - normalizedDist * normalizedDist * (3 - 2 * normalizedDist)
+        }
+
+        const spikeInfluence = spike.intensity * falloff
+
+        if (spikeInfluence > 0) {
+          // Calculate direction to spike and add to weighted direction
+          const dx = spike.pos.x - baseX
+          const dy = spike.pos.y - baseY
+          const dz = spike.pos.z - baseZ
+          const len = Math.sqrt(dx * dx + dy * dy + dz * dz)
+          if (len > 0) {
+            this.tempVector3.x += (dx / len) * spikeInfluence
+            this.tempVector3.y += (dy / len) * spikeInfluence
+            this.tempVector3.z += (dz / len) * spikeInfluence
+          }
+          totalSpikeInfluence += spikeInfluence
+        }
+      }
+
+      // Apply displacement - scaled up for processing mode
+      if (totalSpikeInfluence > 0) {
+        this.tempVector3.normalize()
+        const displacementAmount =
+          totalSpikeInfluence * ANIMATION_CONSTANTS.spikes.heightMultiplier
+        // Use max height from active mode (scaled up for processing)
+        const maxSpikeHeight = ANIMATION_CONSTANTS.spikes.maxHeight * 1.2
+        const displacement = Math.min(displacementAmount, maxSpikeHeight)
+
+        positions[i3] = baseX + normal.x * displacement
+        positions[i3 + 1] = baseY + normal.y * displacement
+        positions[i3 + 2] = baseZ + normal.z * displacement
+      } else {
+        positions[i3] = baseX
+        positions[i3 + 1] = baseY
+        positions[i3 + 2] = baseZ
+      }
     }
+
     this.geometry.attributes.position.needsUpdate = true
     this.material.size = ANIMATION_CONSTANTS.particles.baseSize
   }
