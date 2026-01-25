@@ -158,11 +158,25 @@ export function InlineChat({
                       </div>
                     )}
                     {message.componentType === 'weather' && (
-                      <div className="w-full max-w-2xl">
-                        <WeatherWidget
-                          location={message.componentData?.location ?? 'Dallas'}
-                          isMinimized={false}
-                        />
+                      <div className="w-full max-w-2xl space-y-4">
+                        {message.componentData?.locations ? (
+                          // Multiple locations (e.g., "both")
+                          message.componentData.locations.map((loc: { location: string; advice?: string | null }, idx: number) => (
+                            <WeatherWidget
+                              key={idx}
+                              location={loc.location}
+                              advice={loc.advice}
+                              isMinimized={false}
+                            />
+                          ))
+                        ) : (
+                          // Single location
+                          <WeatherWidget
+                            location={message.componentData?.location ?? 'Dallas'}
+                            advice={message.componentData?.advice}
+                            isMinimized={false}
+                          />
+                        )}
                       </div>
                     )}
                     {message.componentType === 'map' && message.componentData && (
