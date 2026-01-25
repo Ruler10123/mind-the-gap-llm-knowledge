@@ -359,7 +359,7 @@ export function InlineChat({
                             </div>
                           )}
                         </div>
-                      </div>
+                      </motion.div>
                     )}
                     {message.componentType === 'flight_delay' && message.componentData && (
                       <motion.div
