@@ -1,10 +1,11 @@
 """Agent orchestrator with self-correcting loop."""
 
+import json
 from collections.abc import AsyncIterator
-from langchain_core.messages import BaseMessage, HumanMessage, SystemMessage, AIMessage
+from langchain_core.messages import BaseMessage, HumanMessage, SystemMessage, AIMessage, ToolMessage
 
 from config import settings
-from core.events import BaseEvent, RetryEvent, ErrorEvent
+from core.events import BaseEvent, RetryEvent, ErrorEvent, UIActionEvent
 from core.exceptions import LLMParseError, ToolExecutionError, AgentException
 from agent.strategies import RetryStrategy
 from agent.graph import get_agent
@@ -39,6 +40,22 @@ class AgentOrchestrator:
                     {"messages": messages, "llm_calls": 0},
                     stream_mode="messages",
                 ):
+                    # Check for UI action in ToolMessage results
+                    if isinstance(msg_chunk, ToolMessage):
+                        try:
+                            content = msg_chunk.content
+                            if isinstance(content, str) and content.startswith("{"):
+                                data = json.loads(content)
+                                if data.get("ui_action") == "OPEN_MODAL":
+                                    yield UIActionEvent(
+                                        action=data["ui_action"],
+                                        modal_id=data.get("modal_id", ""),
+                                        payload=data.get("payload", {}),
+                                    )
+                        except (json.JSONDecodeError, KeyError):
+                            pass
+                        continue
+
                     if not getattr(msg_chunk, "content", None):
                         continue
                     text = msg_chunk.content if isinstance(msg_chunk.content, str) else ""
