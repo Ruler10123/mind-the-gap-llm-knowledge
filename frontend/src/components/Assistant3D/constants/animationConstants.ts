@@ -63,4 +63,18 @@ export const ANIMATION_CONSTANTS = {
     driftSpeed: 0.2,
     rotateSpeed: 0.12,
   },
+
+  // Orbital planes (airplanes)
+  orbitalPlanes: {
+    count: 70,
+    minOrbitRadius: 1.05,
+    maxOrbitRadius: 1.1,
+    minOrbitSpeed: 0.0002,
+    maxOrbitSpeed: 0.0005,
+    fadeSpeed: 0.05,
+    maxOpacity: 0.4,
+    tiltAngles: [0, 15, 30, 45, 60, 75, 90],
+    trailLength: 500,
+    trailOpacity: 1,
+  },
 } as const

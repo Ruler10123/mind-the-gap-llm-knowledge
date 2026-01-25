@@ -75,7 +75,7 @@ function FlightCard({ title, flight, variant }: FlightCardProps) {
           <div>
             <div className="text-xs text-white/60 uppercase tracking-wide mb-1">Route</div>
             <div className="text-lg font-semibold text-white">
-              {flight.origin} → {flight.destination}
+              {typeof flight.origin === 'object' && flight.origin !== null ? flight.origin.code : flight.origin} → {typeof flight.destination === 'object' && flight.destination !== null ? flight.destination.code : flight.destination}
             </div>
           </div>
         </div>

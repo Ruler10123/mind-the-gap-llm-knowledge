@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useThreeScene } from './hooks/useThreeScene'
 import { useAssistantAnimation } from './hooks/useAssistantAnimation'
 import { ParticleSphereEntity } from './entities/ParticleSphereEntity'
+import { OrbitalPlanesEntity } from './entities/OrbitalPlanesEntity'
 import { PostProcessingManager } from './entities/PostProcessing'
 import { ANIMATION_CONSTANTS } from './constants/animationConstants'
 import type { AssistantCanvasMode } from './types'
@@ -17,6 +18,7 @@ export default function AssistantCanvas({
 }: AssistantCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const [entity, setEntity] = useState<ParticleSphereEntity | null>(null)
+  const [orbitalPlanes, setOrbitalPlanes] = useState<OrbitalPlanesEntity | null>(null)
   const [postProcessing, setPostProcessing] =
     useState<PostProcessingManager | null>(null)
   const [isReady, setIsReady] = useState(false)
@@ -54,6 +56,13 @@ export default function AssistantCanvas({
       setEntity(particleSphere)
       console.log('[AssistantCanvas] Entity created and added to scene')
 
+      // Create orbital planes (as child of particle sphere for transform inheritance)
+      console.log('[AssistantCanvas] Creating OrbitalPlanesEntity...')
+      const planes = new OrbitalPlanesEntity()
+      particleSphere.mesh.add(planes.group)
+      setOrbitalPlanes(planes)
+      console.log('[AssistantCanvas] Orbital planes created and added as child of sphere')
+
       // Create post-processing
       console.log('[AssistantCanvas] Creating PostProcessingManager...')
       const postProc = new PostProcessingManager(renderer, scene, camera)
@@ -80,7 +89,9 @@ export default function AssistantCanvas({
 
       return () => {
         window.removeEventListener('resize', handleResize)
+        particleSphere.mesh.remove(planes.group)
         particleSphere.dispose()
+        planes.dispose()
         postProc.dispose()
         scene.remove(particleSphere.mesh)
       }
@@ -119,6 +130,7 @@ export default function AssistantCanvas({
       d.manualRotation = { x: entity.mesh.rotation.x, y: entity.mesh.rotation.y }
       canvas.style.cursor = 'grabbing'
       entity.setAutoRotation(false)
+      orbitalPlanes?.setAutoRotation(false)
     }
 
     const handleMouseMove = (e: MouseEvent) => {
@@ -163,6 +175,7 @@ export default function AssistantCanvas({
       dragStateRef.current.isDragging = false
       canvas.style.cursor = 'grab'
       entity.setAutoRotation(true)
+      orbitalPlanes?.setAutoRotation(true)
     }
 
     canvas.style.cursor = 'grab'
@@ -187,6 +200,7 @@ export default function AssistantCanvas({
     getFrequencyData,
     dragStateRef,
     mode,
+    null,
   )
 
   return (
