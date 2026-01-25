@@ -1,13 +1,14 @@
-import { Droplets, Wind, Eye, Sun, ChevronDown, ChevronUp } from 'lucide-react'
+import { Droplets, Wind, Eye, Sun, ChevronDown, ChevronUp, Lightbulb } from 'lucide-react'
 
 interface WeatherWidgetProps {
   location?: string
+  advice?: string | null
   isMinimized?: boolean
   onToggleMinimize?: () => void
   onClose?: () => void
 }
 
-export function WeatherWidget({ location = 'Dallas', isMinimized = false, onToggleMinimize, onClose }: WeatherWidgetProps) {
+export function WeatherWidget({ location = 'Dallas', advice, isMinimized = false, onToggleMinimize, onClose }: WeatherWidgetProps) {
   // Dummy data - will be replaced with real API data
   const weather = {
     location: location,
@@ -57,7 +58,7 @@ export function WeatherWidget({ location = 'Dallas', isMinimized = false, onTogg
 
   // Expanded State - Full Details
   return (
-    <div className="w-full max-w-2xl mx-auto">
+    <div className="w-full max-w-2xl mx-auto space-y-4">
       {/* Apple-style Weather Card with Real Background */}
       <div className="relative overflow-hidden rounded-3xl backdrop-blur-3xl shadow-2xl h-64 transition-all">
         {/* Real Weather Background Image */}
@@ -124,6 +125,21 @@ export function WeatherWidget({ location = 'Dallas', isMinimized = false, onTogg
           </div>
         </div>
       </div>
+
+      {/* Advice Card - shown when advice is provided */}
+      {advice && (
+        <div className="relative overflow-hidden rounded-3xl backdrop-blur-3xl bg-gradient-to-br from-amber-50/90 to-orange-50/90 border border-amber-200/50 shadow-xl p-6">
+          <div className="flex items-start gap-4">
+            <div className="flex-shrink-0 mt-1">
+              <Lightbulb className="w-6 h-6 text-amber-600" />
+            </div>
+            <div className="flex-1">
+              <h3 className="text-lg font-semibold text-amber-900 mb-2">Travel Tips</h3>
+              <p className="text-base font-light text-amber-800 leading-relaxed">{advice}</p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

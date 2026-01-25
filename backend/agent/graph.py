@@ -52,6 +52,113 @@ def show_flight_details(flight_number: str = "AA 2847") -> dict:
     }
 
 
+def _get_weather_advice(location: str, temp: int, condition: str) -> str:
+    """Generate dressing and activity advice based on weather conditions."""
+    location_lower = location.lower()
+    is_destination = "los angeles" in location_lower or "lax" in location_lower or "la" in location_lower
+    
+    advice_parts = []
+    
+    # Temperature-based dressing advice
+    if temp >= 80:
+        advice_parts.append("Light, breathable clothing like shorts and t-shirts are perfect.")
+        if is_destination:
+            advice_parts.append("Don't forget sunscreen and a hat for protection.")
+    elif temp >= 70:
+        advice_parts.append("Comfortable light layers work well - a t-shirt with a light jacket or cardigan.")
+    elif temp >= 60:
+        advice_parts.append("A light jacket or sweater is recommended.")
+    elif temp >= 50:
+        advice_parts.append("Wear a warm jacket or coat.")
+    else:
+        advice_parts.append("Bundle up with a heavy coat, gloves, and a hat.")
+    
+    # Condition-based advice
+    if "rain" in condition.lower() or "storm" in condition.lower():
+        advice_parts.append("Bring an umbrella or rain jacket.")
+    elif "sunny" in condition.lower() or "clear" in condition.lower():
+        if is_destination:
+            advice_parts.append("Great weather for outdoor activities like beach visits or hiking.")
+    elif "cloudy" in condition.lower() or "overcast" in condition.lower():
+        if is_destination:
+            advice_parts.append("Perfect for exploring museums or indoor attractions.")
+    
+    # Destination-specific activity suggestions
+    if is_destination:
+        if temp >= 75:
+            advice_parts.append("Consider beach activities, outdoor dining, or visiting parks.")
+        elif temp >= 65:
+            advice_parts.append("Great for walking tours, outdoor markets, or sightseeing.")
+        else:
+            advice_parts.append("Indoor activities like museums, shopping, or dining are ideal.")
+    
+    return " ".join(advice_parts)
+
+
+@tool
+def show_weather(location: str = "Dallas") -> dict:
+    """Show weather widget in chat when user asks about weather, temperature, or conditions.
+    
+    Location can be:
+    - "destination", "LAX", "Los Angeles", "LA" - shows weather at destination (Los Angeles)
+    - "here", "Dallas", "DFW" - shows weather at current location (Dallas)
+    - "both" - shows weather for both locations
+    - Any specific city name (e.g. "Dallas", "Los Angeles")
+    
+    When showing destination weather, automatically includes dressing and activity advice.
+    IMPORTANT: After calling this tool, you MUST provide a brief spoken response (1-2 sentences)
+    acknowledging what you're showing them. For example: 'Here\'s the weather in Los Angeles.'"""
+    
+    location = location.strip() or "Dallas"
+    location_lower = location.lower()
+    
+    # Map location keywords to actual cities
+    location_map = {
+        "destination": "Los Angeles",
+        "lax": "Los Angeles",
+        "los angeles": "Los Angeles",
+        "la": "Los Angeles",
+        "here": "Dallas",
+        "dallas": "Dallas",
+        "dfw": "Dallas",
+    }
+    
+    # Normalize location
+    normalized = location_map.get(location_lower, location)
+    
+    # Handle "both" case
+    if location_lower == "both":
+        # Generate advice for Los Angeles (destination)
+        la_advice = _get_weather_advice("Los Angeles", 72, "Sunny")
+        return {
+            "component_type": "weather",
+            "data": {
+                "locations": [
+                    {"location": "Dallas", "advice": None},
+                    {"location": "Los Angeles", "advice": la_advice},
+                ],
+            },
+        }
+    
+    # Check if this is destination weather (for advice)
+    is_destination = normalized == "Los Angeles"
+    
+    # Generate advice for destination
+    advice = None
+    if is_destination:
+        # Dummy weather data for advice generation (in real implementation, this would come from API)
+        # Using typical LA weather as placeholder
+        advice = _get_weather_advice(normalized, 72, "Sunny")
+    
+    return {
+        "component_type": "weather",
+        "data": {
+            "location": normalized,
+            "advice": advice,
+        },
+    }
+
+
 @tool
 def show_map(destination: str) -> dict:
     """Show map directions in chat when user asks for directions or location of gates, restrooms, or services.
@@ -309,7 +416,7 @@ def search_knowledge_base(query: str) -> str:
         return f"Unable to search knowledge base: {str(e)}"
 
 
-tools = [get_current_time, add, multiply, divide, show_flight_details, show_map, show_destination_info, search_knowledge_base]
+tools = [get_current_time, add, multiply, divide, show_flight_details, show_weather, show_map, show_destination_info, search_knowledge_base]
 tools_by_name = {t.name: t for t in tools}
 
 
@@ -324,12 +431,13 @@ You have access to callable tools (nodes):
 - get_current_time: use when the user asks about the current time, date, or "today"
 - add, multiply, divide: use for basic arithmetic when the user asks for calculations
 - show_flight_details: use when the user asks about their flight, gate, boarding status, or flight information
-- show_map: use when the user asks for directions or where to find gates (A28, B9), restrooms, or customer service. Valid destinations: RESTROOM, CUSTOMER_SERVICE, A28, B9
+- show_weather: use when the user asks about weather, temperature, or conditions. Location can be "destination"/"LAX"/"Los Angeles" for destination, "here"/"Dallas"/"DFW" for current location, "both" for both, or any city name. When showing destination weather, advice is automatically included.
+- show_map: use when the user asks for directions or where to find gates (A28, B9, C43, D12), restrooms, or customer service. Valid destinations: RESTROOM, CUSTOMER_SERVICE, A28, B9, C43, D12
 - show_destination_info: use when the user asks about specific airport destinations, lounges, restaurants, shops, or terminal information. Valid destinations: ADMIRALS_CLUB, CENTURION_LOUNGE, FOOD_COURT, DUTY_FREE, BAGGAGE_CLAIM, TERMINAL_A, TERMINAL_B, TERMINAL_C
 - search_knowledge_base: use when the user asks about airport policies, procedures, baggage rules, security guidelines, available services, or facility information
 
-CRITICAL: After calling show_flight_details, show_map, or show_destination_info, you MUST provide a brief spoken response (1-2 sentences) to accompany the visual component.
-For example: "Here are your flight details" or "Here are directions to Gate A28. Follow the highlighted path." or "Here's information about the Admirals Club lounge."
+CRITICAL: After calling show_flight_details, show_weather, show_map, or show_destination_info, you MUST provide a brief spoken response (1-2 sentences) to accompany the visual component.
+For example: "Here are your flight details" or "Here's the weather in Dallas." or "Here are directions to Gate A28. Follow the highlighted path." or "Here's information about the Admirals Club lounge."
 
 Call the appropriate tool when it helps answer the user. Otherwise reply directly. Keep replies clear and concise and do not use markdown formatting."""
 
