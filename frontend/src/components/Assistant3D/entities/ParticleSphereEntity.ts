@@ -7,6 +7,8 @@ export class ParticleSphereEntity {
   material: THREE.PointsMaterial
   geometry: THREE.BufferGeometry
   private texture: THREE.CanvasTexture
+  private continentsTexture: THREE.Texture | null = null
+  private continentsImageData: ImageData | null = null
 
   private smoothedAudioAmplitude = 0
   private smoothedFrequencies: Float32Array = new Float32Array(32)
@@ -42,30 +44,11 @@ export class ParticleSphereEntity {
     this.tempVector2 = new THREE.Vector3()
     this.tempVector3 = new THREE.Vector3()
 
-    for (let i = 0; i < this.particleCount; i++) {
-      const radius = 1.0
-      const theta = Math.random() * Math.PI * 2
-      const phi = Math.acos(2 * Math.random() - 1)
+    // Load continents mask asynchronously
+    this.loadContinentsMask()
 
-      // Y-up spherical to cartesian
-      const x = radius * Math.sin(phi) * Math.cos(theta)
-      const y = radius * Math.cos(phi)
-      const z = radius * Math.sin(phi) * Math.sin(theta)
-
-      const i3 = i * 3
-      this.uniformPositions[i3] = x
-      this.uniformPositions[i3 + 1] = y
-      this.uniformPositions[i3 + 2] = z
-
-      // Set base and current positions to uniform positions
-      this.basePositions[i3] = x
-      this.basePositions[i3 + 1] = y
-      this.basePositions[i3 + 2] = z
-
-      this.positions[i3] = x
-      this.positions[i3 + 1] = y
-      this.positions[i3 + 2] = z
-    }
+    // Initialize with uniform distribution first (will be replaced once texture loads)
+    this.generateUniformParticles()
 
     this.geometry = new THREE.BufferGeometry()
     this.geometry.setAttribute(
@@ -130,6 +113,202 @@ export class ParticleSphereEntity {
       hasMesh: !!this.mesh,
       meshVisible: this.mesh.visible,
     })
+  }
+
+  /**
+   * Load the continents mask texture and extract ImageData for sampling
+   */
+  private async loadContinentsMask(): Promise<void> {
+    console.log('[ParticleSphereEntity] Loading continents mask...')
+    const loader = new THREE.TextureLoader()
+
+    try {
+      this.continentsTexture = await loader.loadAsync('/continents.png')
+      console.log('[ParticleSphereEntity] Continents texture loaded')
+
+      // Extract ImageData for pixel sampling
+      const image = this.continentsTexture.image as HTMLImageElement
+      const canvas = document.createElement('canvas')
+      canvas.width = image.width
+      canvas.height = image.height
+      const ctx = canvas.getContext('2d')!
+      ctx.drawImage(image, 0, 0)
+      this.continentsImageData = ctx.getImageData(0, 0, image.width, image.height)
+      console.log('[ParticleSphereEntity] ImageData extracted', {
+        width: this.continentsImageData.width,
+        height: this.continentsImageData.height,
+      })
+
+      // Regenerate particles with continent weighting
+      this.generateContinentWeightedParticles()
+      this.updateGeometryPositions()
+    } catch (error) {
+      console.error('[ParticleSphereEntity] Failed to load continents mask:', error)
+      // Keep uniform distribution if loading fails
+    }
+  }
+
+  /**
+   * Sample the continents mask at given UV coordinates
+   * Returns darkness value (0 = white/ocean, 1 = black/continent)
+   */
+  private sampleContinentsMask(u: number, v: number): number {
+    if (!this.continentsImageData) return 0.5 // Neutral if no texture
+
+    const width = this.continentsImageData.width
+    const height = this.continentsImageData.height
+
+    // Wrap UV coordinates to [0, 1)
+    u = ((u % 1) + 1) % 1
+    v = ((v % 1) + 1) % 1
+
+    // Convert to pixel coordinates
+    const x = Math.floor(u * width) % width
+    const y = Math.floor(v * height) % height
+
+    const index = (y * width + x) * 4
+    const r = this.continentsImageData.data[index]
+    const g = this.continentsImageData.data[index + 1]
+    const b = this.continentsImageData.data[index + 2]
+
+    // Convert to grayscale and invert (black = 1, white = 0)
+    const brightness = (r + g + b) / (3 * 255)
+    return 1 - brightness // Darker = higher value
+  }
+
+  /**
+   * Generate particles uniformly on sphere (fallback)
+   */
+  private generateUniformParticles(): void {
+    for (let i = 0; i < this.particleCount; i++) {
+      const radius = 1.0
+      const theta = Math.random() * Math.PI * 2
+      const phi = Math.acos(2 * Math.random() - 1)
+
+      // Y-up spherical to cartesian
+      const x = radius * Math.sin(phi) * Math.cos(theta)
+      const y = radius * Math.cos(phi)
+      const z = radius * Math.sin(phi) * Math.sin(theta)
+
+      const i3 = i * 3
+      this.uniformPositions[i3] = x
+      this.uniformPositions[i3 + 1] = y
+      this.uniformPositions[i3 + 2] = z
+
+      // Set base and current positions to uniform positions
+      this.basePositions[i3] = x
+      this.basePositions[i3 + 1] = y
+      this.basePositions[i3 + 2] = z
+
+      this.positions[i3] = x
+      this.positions[i3 + 1] = y
+      this.positions[i3 + 2] = z
+    }
+  }
+
+  /**
+   * Generate particles with continent weighting using rejection sampling
+   * More particles on continents (black), fewer on oceans (white)
+   */
+  private generateContinentWeightedParticles(): void {
+    console.log('[ParticleSphereEntity] Generating continent-weighted particles...')
+    const radius = 1.0
+    const continentBias = 10.0 // How much to favor continents (higher = more bias)
+
+    let generated = 0
+    let attempts = 0
+    const maxAttempts = this.particleCount * 100 // Safety limit
+
+    while (generated < this.particleCount && attempts < maxAttempts) {
+      attempts++
+
+      // Generate random point on sphere using uniform angular distribution
+      const theta = Math.random() * Math.PI * 2 // Azimuthal angle [0, 2π]
+      const phi = Math.acos(2 * Math.random() - 1) // Polar angle [0, π] (uniform distribution)
+
+      // Convert spherical to UV coordinates for texture sampling
+      // For equirectangular projection:
+      // u = theta / (2π) - maps longitude [0, 2π] to [0, 1]
+      // v = phi / π - maps latitude [0, π] to [0, 1] (0 at north pole, 1 at south)
+      const u = theta / (Math.PI * 2)
+      const v = phi / Math.PI
+
+      // Sample continent mask (0 = ocean, 1 = continent)
+      const continentValue = this.sampleContinentsMask(u, v)
+
+      // Rejection sampling: accept with probability weighted by continent value
+      // Ocean (white, 0): low acceptance probability (1 / continentBias)
+      // Continent (black, 1): high acceptance probability (1.0)
+      const acceptanceProbability = (1 + continentValue * (continentBias - 1)) / continentBias
+
+      if (Math.random() < acceptanceProbability) {
+        // Accept this particle position
+        // Y-up spherical to cartesian
+        const x = radius * Math.sin(phi) * Math.cos(theta)
+        const y = radius * Math.cos(phi)
+        const z = radius * Math.sin(phi) * Math.sin(theta)
+
+        const i3 = generated * 3
+        this.uniformPositions[i3] = x
+        this.uniformPositions[i3 + 1] = y
+        this.uniformPositions[i3 + 2] = z
+
+        this.basePositions[i3] = x
+        this.basePositions[i3 + 1] = y
+        this.basePositions[i3 + 2] = z
+
+        this.positions[i3] = x
+        this.positions[i3 + 1] = y
+        this.positions[i3 + 2] = z
+
+        generated++
+      }
+    }
+
+    console.log('[ParticleSphereEntity] Generated particles:', {
+      generated,
+      attempts,
+      efficiency: (generated / attempts * 100).toFixed(2) + '%',
+    })
+
+    // If we didn't generate enough particles (shouldn't happen), fill remaining uniformly
+    if (generated < this.particleCount) {
+      console.warn('[ParticleSphereEntity] Failed to generate all particles, filling remaining uniformly')
+      for (let i = generated; i < this.particleCount; i++) {
+        const theta = Math.random() * Math.PI * 2
+        const phi = Math.acos(2 * Math.random() - 1)
+
+        const x = radius * Math.sin(phi) * Math.cos(theta)
+        const y = radius * Math.cos(phi)
+        const z = radius * Math.sin(phi) * Math.sin(theta)
+
+        const i3 = i * 3
+        this.uniformPositions[i3] = x
+        this.uniformPositions[i3 + 1] = y
+        this.uniformPositions[i3 + 2] = z
+
+        this.basePositions[i3] = x
+        this.basePositions[i3 + 1] = y
+        this.basePositions[i3 + 2] = z
+
+        this.positions[i3] = x
+        this.positions[i3 + 1] = y
+        this.positions[i3 + 2] = z
+      }
+    }
+  }
+
+  /**
+   * Update geometry positions after regenerating particles
+   */
+  private updateGeometryPositions(): void {
+    const positionAttr = this.geometry.attributes.position
+    if (positionAttr) {
+      positionAttr.array.set(this.positions)
+      positionAttr.needsUpdate = true
+      this.geometry.computeBoundingSphere()
+      console.log('[ParticleSphereEntity] Geometry positions updated with continent weighting')
+    }
   }
 
   private updateBasePositions(): void {
@@ -497,5 +676,8 @@ export class ParticleSphereEntity {
     this.geometry.dispose()
     this.material.dispose()
     this.texture.dispose()
+    if (this.continentsTexture) {
+      this.continentsTexture.dispose()
+    }
   }
 }
