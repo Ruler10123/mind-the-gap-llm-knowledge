@@ -27,7 +27,8 @@
       "Bash(/c/Users/lucas/AppData/Roaming/npm/pnpm install)",
       "Bash(cmd.exe /c \"pnpm install\")",
       "Bash(pnpm.cmd install:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(python -m py_compile:*)"
     ]
   }
 }

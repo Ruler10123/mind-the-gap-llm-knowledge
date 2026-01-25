@@ -33,10 +33,11 @@ const FlightDelayInfo = ({
   const handleOptionClick = (option: ResolutionOption) => {
     if (option.id === 'wait') {
       sendMessage('I will wait for the delayed flight')
-    } else if (option.id === 'rebook') {
-      sendMessage('I want to view rebooking options')
     } else if (option.id === 'compensation') {
       sendMessage('I want to request compensation for the delay')
+    } else {
+      // Handle any other option by sending its label
+      sendMessage(`I want to: ${option.label}`)
     }
   }
 
