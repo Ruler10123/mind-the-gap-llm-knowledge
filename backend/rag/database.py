@@ -68,7 +68,7 @@ class RAGDatabaseService:
         """Perform vector search using MongoDB Atlas Vector Search.
 
         Args:
-            query_embedding: Query vector (384-dim)
+            query_embedding: Query vector (dims must match index, e.g. 768 or 384)
             limit: Maximum number of results
             category_filter: Optional category filter
 

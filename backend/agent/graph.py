@@ -399,8 +399,7 @@ def search_knowledge_base(query: str) -> str:
 
     try:
         import asyncio
-        loop = asyncio.get_event_loop()
-        citations = loop.run_until_complete(_rag_service.retrieve(query))
+        citations = asyncio.run(_rag_service.retrieve(query))
 
         if not citations:
             return "No relevant information found in the knowledge base."

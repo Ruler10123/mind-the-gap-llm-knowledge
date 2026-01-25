@@ -34,7 +34,10 @@ class Settings(BaseSettings):
 
     # RAG
     rag_top_k: int = 5
-    embedding_model: str = "all-MiniLM-L6-v2"
+    embedding_model: str = Field(
+        default="all-mpnet-base-v2",
+        description="Sentence-transformers model. Must match Atlas index numDimensions: all-mpnet-base-v2=768, all-MiniLM-L6-v2=384.",
+    )
     rag_mongo_uri: str = Field(default="", description="MongoDB URI for RAG (uses auth_mongo_uri if empty)")
     rag_database_name: str = Field(default="RAG", description="RAG database name")
     rag_collection_name: str = Field(default="RAG_collection", description="RAG collection name")
