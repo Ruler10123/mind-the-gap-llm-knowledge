@@ -1,4 +1,4 @@
-const API_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY || 'e2831fdf6ac7de111d3815a2cad347ca'
+const API_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY || ''
 const BASE_URL = 'https://api.openweathermap.org/data/2.5'
 
 export interface WeatherData {
