@@ -12,12 +12,30 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-    # API Keys
+    # LLM provider selection. "vultr" | "openai" | "stub".
+    # "stub" lets the app boot and stream responses with no API keys (echoes a placeholder).
+    llm_provider: str = "stub"
+
+    # Vultr Serverless Inference (used when llm_provider == "vultr")
     vultr_api_key: str = ""
-    vultr_model: str = "llama-3.1-70b-instruct-fp8"  # Default model
+    vultr_model: str = "llama-3.1-70b-instruct-fp8"
+
+    # Generic OpenAI-compatible endpoint (used when llm_provider == "openai")
+    openai_api_key: str = ""
+    openai_base_url: str = "https://api.openai.com/v1"
+    openai_model: str = "gpt-4o-mini"
+
+    # TTS / weather (all optional). Empty key disables the integration.
     elevenlabs_api_key: str = ""
     elevenlabs_voice_id: str = ""
     openweather_api_key: str = ""
+
+    # Optional kiosk demo features (face auth + flights REST API).
+    # Disabled by default so the app boots without MongoDB or DeepFace.
+    enable_kiosk_demo: bool = False
+
+    # RAG backend: "local" (in-memory, default) | "mongo" (Atlas Vector Search)
+    rag_backend: str = "local"
 
     # MongoDB
     mongodb_uri: str = "mongodb://localhost:27017"

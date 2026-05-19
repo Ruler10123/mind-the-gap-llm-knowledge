@@ -1,6 +1,14 @@
-# Aria
+# mind-the-gap-llm-knowledge
 
-Traditional airport kiosks rely on touchscreens that are unhygienic, hard to use with luggage, and lack personalization. We wanted a voice-first, multimodal AI assistant that feels natural and helpful—like talking to a knowledgeable airport employee. By combining conversational AI with a 3D visual interface, we make airport navigation more intuitive and engaging.
+Experimental harness, cloned from the Aria airport-kiosk hackathon
+project, for comparing domain-knowledge strategies for LLM assistants:
+base model, RAG, RAG + guardrails, LoRA/PEFT, and continued pretraining.
+
+The voice-first 3D kiosk UI is preserved; everything outside the
+WebSocket loop is now optional and swappable. See
+[`docs/experiment_plan.md`](docs/experiment_plan.md) for the research
+question and [`docs/cleanup_notes.md`](docs/cleanup_notes.md) for what
+changed in this phase.
 
 ## Tech Stack
 
@@ -13,30 +21,58 @@ Traditional airport kiosks rely on touchscreens that are unhygienic, hard to use
 **Backend**
 - FastAPI with WebSocket support
 - LangGraph for agent orchestration
-- ElevenLabs TTS
-- MongoDB Atlas for RAG
+- Pluggable LLM provider (stub / Vultr / OpenAI-compatible)
+- Pluggable RAG backend (local in-memory / MongoDB Atlas)
+- Optional ElevenLabs TTS
 
-## Quick Start
+## Quick Start (minimal local mode, no API keys)
+
+### Backend
+
+```bash
+cd backend
+cp .env.example .env       # empty .env also works
+uv run main.py             # http://localhost:8000
+```
+
+Boots with a stub LLM that echoes input, a local keyword RAG over
+`backend/rag/documents/`, and TTS disabled. Useful for verifying the
+WebSocket / 3D loop without provisioning anything.
 
 ### Frontend
 
 ```bash
 cd frontend
 pnpm install
-pnpm dev          # http://localhost:3000
+pnpm dev                   # http://localhost:3000
 ```
 
-### Backend
+## Enabling a real LLM
 
-```bash
-cd backend
-uv run main.py    # http://localhost:8000
+In `backend/.env`:
+
+```env
+LLM_PROVIDER=openai
+OPENAI_API_KEY=sk-...
+OPENAI_MODEL=gpt-4o-mini
 ```
 
-Requires `.env` with:
-- `vultr_api_key`, `vultr_model`
-- `elevenlabs_api_key`, `elevenlabs_voice_id`
-- `mongodb_uri`, `mongodb_database`, `mongodb_collection`
+or for Vultr:
+
+```env
+LLM_PROVIDER=vultr
+VULTR_API_KEY=...
+VULTR_MODEL=llama-3.1-70b-instruct-fp8
+```
+
+## Optional features
+
+| Feature | How to enable |
+|---|---|
+| ElevenLabs TTS | Set `ELEVENLABS_API_KEY` and `ELEVENLABS_VOICE_ID`. |
+| MongoDB Atlas RAG | `RAG_BACKEND=mongo` + Atlas vars (see `.env.example`). |
+| Kiosk demo (face auth + flights REST) | `ENABLE_KIOSK_DEMO=true` + MongoDB. Requires DeepFace. |
+| OpenWeatherMap | Set `OPENWEATHER_API_KEY` (tool falls back to mocks otherwise). |
 
 ## Project Structure
 

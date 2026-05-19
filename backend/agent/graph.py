@@ -7,7 +7,6 @@ from zoneinfo import ZoneInfo
 
 from langchain_core.messages import AIMessage, BaseMessage, SystemMessage, ToolMessage
 from langchain_core.tools import tool
-from langchain_openai import ChatOpenAI
 from langgraph.graph import END, START, StateGraph
 from langgraph.graph.message import add_messages
 from typing_extensions import TypedDict
@@ -744,16 +743,64 @@ Call the appropriate tool when it helps answer the user. Otherwise reply directl
 _agent = None
 
 
+class _StubChatModel:
+    """Minimal LLM stand-in when no provider is configured.
+
+    Echoes the latest user message so the WebSocket / TTS / 3D loop stays
+    exercisable in local-dev mode without any API key.
+    """
+
+    def bind_tools(self, _tools):
+        return self
+
+    def invoke(self, messages):
+        last_user = ""
+        for m in reversed(messages):
+            if getattr(m, "type", None) == "human" or m.__class__.__name__ == "HumanMessage":
+                last_user = m.content if isinstance(m.content, str) else str(m.content)
+                break
+        return AIMessage(
+            content=(
+                "Local stub LLM is active (no provider configured). "
+                f"You said: {last_user}"
+            )
+        )
+
+
+def _build_llm():
+    """Construct the chat model based on settings.llm_provider."""
+    provider = (settings.llm_provider or "stub").lower()
+
+    if provider == "vultr":
+        if not settings.vultr_api_key:
+            logger.warning("[Agent] llm_provider=vultr but VULTR_API_KEY missing; falling back to stub")
+            return _StubChatModel()
+        from langchain_openai import ChatOpenAI
+        return ChatOpenAI(
+            model=settings.vultr_model,
+            api_key=settings.vultr_api_key,
+            base_url="https://api.vultrinference.com/v1",
+            temperature=0,
+        )
+
+    if provider == "openai":
+        if not settings.openai_api_key:
+            logger.warning("[Agent] llm_provider=openai but OPENAI_API_KEY missing; falling back to stub")
+            return _StubChatModel()
+        from langchain_openai import ChatOpenAI
+        return ChatOpenAI(
+            model=settings.openai_model,
+            api_key=settings.openai_api_key,
+            base_url=settings.openai_base_url,
+            temperature=0,
+        )
+
+    logger.info("[Agent] Using stub LLM (set llm_provider=vultr|openai for a real model)")
+    return _StubChatModel()
+
+
 def _build_agent():
-    if not settings.vultr_api_key:
-        raise ValueError("VULTR_API_KEY must be provided")
-    
-    model = ChatOpenAI(
-        model=settings.vultr_model,
-        api_key=settings.vultr_api_key,
-        base_url="https://api.vultrinference.com/v1",
-        temperature=0,
-    )
+    model = _build_llm()
     model_with_tools = model.bind_tools(tools)
 
     def llm_call(state: dict) -> dict:

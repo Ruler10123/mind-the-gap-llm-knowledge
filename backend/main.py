@@ -1,21 +1,24 @@
-"""FastAPI app: CORS, /health, WebSocket /ws for AI assistant."""
+"""FastAPI app: CORS, /health, WebSocket /ws for AI assistant.
+
+All subsystems (kiosk demo auth/flights, RAG, ElevenLabs TTS, LLM provider)
+are optional. The app will start in a degraded but functional state when
+external services are missing — the voice-first /ws loop is the only
+hard requirement.
+"""
 
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 
 from transport.websocket_handler import WebSocketHandler
-from auth import auth_router, DatabaseService, FaceRecognitionService, QRService
-from flights import flights_router, DatabaseService as FlightsDatabaseService
 from config import settings
+from observability.logger import logger
 
-# Global auth service instances
-auth_db_service: DatabaseService = None
-auth_face_service: FaceRecognitionService = None
-auth_qr_service: QRService = None
-
-# Global flights service instance
-flights_db_service: FlightsDatabaseService = None
+# Global service instances (kiosk demo only)
+auth_db_service = None
+auth_face_service = None
+auth_qr_service = None
+flights_db_service = None
 
 # Global RAG service instances
 rag_db_service = None
@@ -23,73 +26,109 @@ rag_embedding_service = None
 rag_service = None
 
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    """Manage application lifecycle."""
-    global auth_db_service, auth_face_service, auth_qr_service, flights_db_service
-    global rag_db_service, rag_embedding_service, rag_service
+def _init_kiosk_demo() -> tuple[object, object]:
+    """Lazy-import and initialize face auth + flights services.
 
-    # Initialize auth services
+    Returns (auth_router, flights_router) when both initialize successfully,
+    otherwise (None, None). Imports happen here so the heavy deps
+    (DeepFace / pymongo) are not required for minimal-mode startup.
+    """
+    global auth_db_service, auth_face_service, auth_qr_service, flights_db_service
+
     try:
-        # Create runtime directories
+        from auth import auth_router, DatabaseService, FaceRecognitionService, QRService
+        from flights import flights_router, DatabaseService as FlightsDatabaseService
+        from auth import routes as auth_routes
+        from flights import routes as flights_routes
+    except Exception as e:
+        logger.warning(f"[kiosk-demo] Imports failed, demo features disabled: {e}")
+        return None, None
+
+    try:
         settings.auth_temp_dir.mkdir(parents=True, exist_ok=True)
         settings.auth_qr_dir.mkdir(parents=True, exist_ok=True)
 
-        # Initialize services
         auth_db_service = DatabaseService()
         auth_face_service = FaceRecognitionService()
         auth_qr_service = QRService()
-
-        # Inject services into router
-        from auth import routes
-        routes.db_service = auth_db_service
-        routes.face_service = auth_face_service
-        routes.qr_service = auth_qr_service
-
-        print("Auth services initialized successfully")
-
+        auth_routes.db_service = auth_db_service
+        auth_routes.face_service = auth_face_service
+        auth_routes.qr_service = auth_qr_service
+        logger.info("[kiosk-demo] Auth services initialized")
     except Exception as e:
-        print(f"Error initializing auth services: {e}")
-        raise
+        logger.warning(f"[kiosk-demo] Auth init failed: {e}")
+        return None, None
 
-    # Initialize flights services
     try:
         flights_db_service = FlightsDatabaseService()
-
-        # Inject services into router
-        from flights import routes as flights_routes
         flights_routes.db_service = flights_db_service
-
-        print("Flights services initialized successfully")
+        logger.info("[kiosk-demo] Flights services initialized")
     except Exception as e:
-        print(f"Error initializing flights services: {e}")
-        raise
+        logger.warning(f"[kiosk-demo] Flights init failed: {e}")
+        return auth_router, None
 
-    # Initialize RAG services
+    return auth_router, flights_router
+
+
+def _init_rag() -> None:
+    """Initialize RAG service and inject into the agent.
+
+    Picks Atlas Vector Search when rag_backend == "mongo" and the
+    connection succeeds, otherwise falls back to the local in-memory
+    keyword retriever.
+    """
+    global rag_db_service, rag_embedding_service, rag_service
+
+    from agent.graph import set_rag_service
+
+    backend = (settings.rag_backend or "local").lower()
+    if backend == "mongo":
+        try:
+            from rag.database import RAGDatabaseService
+            from rag.embeddings import EmbeddingService
+            from rag.service import RAGService
+
+            rag_db_service = RAGDatabaseService()
+            rag_embedding_service = EmbeddingService()
+            rag_service = RAGService(rag_db_service, rag_embedding_service)
+            set_rag_service(rag_service)
+            logger.info("[RAG] MongoDB Atlas backend initialized")
+            return
+        except Exception as e:
+            logger.warning(f"[RAG] MongoDB backend failed ({e}); falling back to local")
+
     try:
-        from rag.database import RAGDatabaseService
-        from rag.embeddings import EmbeddingService
-        from rag.service import RAGService
-        from agent.graph import set_rag_service
-
-        rag_db_service = RAGDatabaseService()
-        rag_embedding_service = EmbeddingService()
-        rag_service = RAGService(rag_db_service, rag_embedding_service)
+        from rag.local_rag import LocalRAGService
+        rag_service = LocalRAGService()
         set_rag_service(rag_service)
-        print("RAG services initialized successfully")
+        logger.info(f"[RAG] Local backend initialized with {len(rag_service.chunks)} chunks")
     except Exception as e:
-        print(f"Warning: RAG initialization failed: {e}")
-        print("Agent will continue without knowledge base search capability")
+        logger.warning(f"[RAG] Local backend failed: {e}; knowledge base tool disabled")
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Manage application lifecycle. Every subsystem is best-effort."""
+    if settings.enable_kiosk_demo:
+        auth_router, flights_router = _init_kiosk_demo()
+        if auth_router is not None:
+            app.include_router(auth_router, prefix="/api")
+        if flights_router is not None:
+            app.include_router(flights_router, prefix="/api")
+    else:
+        logger.info("[startup] Kiosk demo features disabled (set enable_kiosk_demo=true to enable)")
+
+    _init_rag()
 
     yield
 
     # Shutdown
-    if auth_db_service:
-        auth_db_service.close()
-    if flights_db_service:
-        flights_db_service.close()
-    if rag_db_service:
-        rag_db_service.close()
+    for svc in (auth_db_service, flights_db_service, rag_db_service):
+        if svc is not None and hasattr(svc, "close"):
+            try:
+                svc.close()
+            except Exception as e:
+                logger.warning(f"[shutdown] close() failed: {e}")
 
 
 app = FastAPI(title="AI Assistant API", lifespan=lifespan)
@@ -102,17 +141,18 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Initialize WebSocket handler
 ws_handler = WebSocketHandler()
-
-# Include routers
-app.include_router(auth_router, prefix="/api")
-app.include_router(flights_router, prefix="/api")
 
 
 @app.get("/health")
 def health() -> dict[str, str]:
-    return {"status": "ok"}
+    return {
+        "status": "ok",
+        "llm_provider": settings.llm_provider,
+        "rag_backend": settings.rag_backend,
+        "tts_enabled": "true" if (settings.elevenlabs_api_key and settings.elevenlabs_voice_id) else "false",
+        "kiosk_demo": "true" if settings.enable_kiosk_demo else "false",
+    }
 
 
 @app.websocket("/ws")

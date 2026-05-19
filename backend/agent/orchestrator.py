@@ -17,7 +17,13 @@ class AgentOrchestrator:
 
     def __init__(self):
         self.retry_strategy = RetryStrategy(max_retries=settings.agent_max_retries)
-        self.agent = get_agent()
+        self._agent = None
+
+    @property
+    def agent(self):
+        if self._agent is None:
+            self._agent = get_agent()
+        return self._agent
 
     async def process(
         self,
