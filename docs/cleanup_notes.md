@@ -1,5 +1,41 @@
 # Phase 01 Cleanup Notes
 
+## Addendum: Kokoro TTS provider
+
+Added a second TTS implementation (`KokoroTTSService`) behind the
+existing `TTSService` facade, plus a `TTS_PROVIDER` setting
+(`kokoro | elevenlabs | disabled`). The WebSocket contract is
+unchanged.
+
+Files added:
+- `backend/tts/base.py` — `BaseTTSService` abstract base + `DisabledTTSService`.
+- `backend/tts/elevenlabs_service.py` — thin class wrapper over the
+  unchanged `elevenlabs_client.py`.
+- `backend/tts/kokoro_service.py` — local TTS via `kokoro.KPipeline`;
+  yields one WAV chunk per response, no alignment.
+
+Files changed:
+- `backend/config.py` — added `tts_provider` and `kokoro_*` settings.
+- `backend/tts/service.py` — `TTSService` is now a thin facade that
+  picks an impl based on `tts_provider`. Back-compat: empty
+  `tts_provider` + ElevenLabs keys present → ElevenLabs.
+- `backend/main.py` — `/health` now asks the facade whether TTS is
+  enabled and reports the active provider.
+- `backend/.env.example` and `README.md` updated.
+
+The `kokoro` package is **not** in `pyproject.toml` — model weights +
+torch make it heavy. Install on demand:
+
+```bash
+cd backend
+uv pip install kokoro soundfile
+```
+
+If `TTS_PROVIDER=kokoro` and the package fails to import, the facade
+falls back to `Disabled` and logs an install hint instead of crashing.
+
+
+
 This pass turned the hackathon kiosk repo into a runnable experimental
 harness without touching the voice-first WebSocket loop. Every external
 service is now optional. The app can boot, accept a WebSocket

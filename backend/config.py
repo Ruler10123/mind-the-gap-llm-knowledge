@@ -25,9 +25,22 @@ class Settings(BaseSettings):
     openai_base_url: str = "https://api.openai.com/v1"
     openai_model: str = "gpt-4o-mini"
 
-    # TTS / weather (all optional). Empty key disables the integration.
+    # TTS provider selection. One of: "kokoro" | "elevenlabs" | "disabled".
+    # Empty string is treated as auto: elevenlabs if keys present, else disabled.
+    tts_provider: str = ""
+
+    # ElevenLabs (cloud TTS, used when tts_provider == "elevenlabs")
     elevenlabs_api_key: str = ""
     elevenlabs_voice_id: str = ""
+
+    # Kokoro (local TTS, used when tts_provider == "kokoro")
+    # Voice options depend on installed model weights (see kokoro README).
+    kokoro_voice: str = "af_heart"
+    kokoro_lang_code: str = "a"  # 'a' = American English; see kokoro docs
+    kokoro_speed: float = 1.0
+    kokoro_sample_rate: int = 24000
+
+    # Weather (optional). Empty key disables the integration.
     openweather_api_key: str = ""
 
     # Optional kiosk demo features (face auth + flights REST API).

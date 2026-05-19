@@ -150,7 +150,8 @@ def health() -> dict[str, str]:
         "status": "ok",
         "llm_provider": settings.llm_provider,
         "rag_backend": settings.rag_backend,
-        "tts_enabled": "true" if (settings.elevenlabs_api_key and settings.elevenlabs_voice_id) else "false",
+        "tts_provider": (settings.tts_provider or "").lower() or "auto",
+        "tts_enabled": "true" if ws_handler.tts_service.enabled else "false",
         "kiosk_demo": "true" if settings.enable_kiosk_demo else "false",
     }
 

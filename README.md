@@ -69,10 +69,45 @@ VULTR_MODEL=llama-3.1-70b-instruct-fp8
 
 | Feature | How to enable |
 |---|---|
-| ElevenLabs TTS | Set `ELEVENLABS_API_KEY` and `ELEVENLABS_VOICE_ID`. |
+| ElevenLabs TTS (cloud) | `TTS_PROVIDER=elevenlabs` + `ELEVENLABS_API_KEY` + `ELEVENLABS_VOICE_ID`. |
+| Kokoro TTS (local, no API key) | `TTS_PROVIDER=kokoro` + `uv pip install kokoro soundfile`. |
 | MongoDB Atlas RAG | `RAG_BACKEND=mongo` + Atlas vars (see `.env.example`). |
 | Kiosk demo (face auth + flights REST) | `ENABLE_KIOSK_DEMO=true` + MongoDB. Requires DeepFace. |
 | OpenWeatherMap | Set `OPENWEATHER_API_KEY` (tool falls back to mocks otherwise). |
+
+## TTS providers
+
+The `TTSService` facade in `backend/tts/service.py` dispatches to one of
+three implementations based on `TTS_PROVIDER`:
+
+- **`kokoro`** — local on-device TTS via the [`kokoro`](https://github.com/hexgrad/kokoro)
+  package. Emits one WAV chunk per response. No character alignment
+  (the WebSocket alignment event is simply omitted). Tunables:
+  `KOKORO_VOICE`, `KOKORO_LANG_CODE`, `KOKORO_SPEED`, `KOKORO_SAMPLE_RATE`.
+  Install:
+
+  ```bash
+  cd backend
+  uv pip install kokoro soundfile
+  # On first synthesis, kokoro downloads its model weights (~hundreds of MB).
+  ```
+
+  Note: `kokoro` is *not* in `pyproject.toml` to keep `uv sync` fast.
+  If `TTS_PROVIDER=kokoro` but the package fails to import, the facade
+  falls back to disabled and logs an install hint.
+
+- **`elevenlabs`** — cloud TTS with character-level alignment.
+  Requires `ELEVENLABS_API_KEY` and `ELEVENLABS_VOICE_ID`.
+
+- **`disabled`** — no TTS. WebSocket loop completes with `done` only.
+
+If `TTS_PROVIDER` is unset, the facade preserves the original
+behaviour: ElevenLabs if both keys are present, otherwise disabled.
+
+The WebSocket audio event format (`{"type":"audio","chunk":<base64>}`)
+is unchanged across providers. Browsers sniff the audio header, so
+both mp3 (ElevenLabs) and WAV (Kokoro) play through the existing
+frontend `<audio>` element.
 
 ## Project Structure
 
