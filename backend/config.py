@@ -12,8 +12,9 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-    # LLM provider selection. "vultr" | "openai" | "stub".
+    # LLM provider selection. "vultr" | "openai" | "local" | "stub".
     # "stub" lets the app boot and stream responses with no API keys (echoes a placeholder).
+    # "local" runs a HuggingFace causal LM on-device (requires the `local` optional deps).
     llm_provider: str = "stub"
 
     # Vultr Serverless Inference (used when llm_provider == "vultr")
@@ -24,6 +25,18 @@ class Settings(BaseSettings):
     openai_api_key: str = ""
     openai_base_url: str = "https://api.openai.com/v1"
     openai_model: str = "gpt-4o-mini"
+
+    # Local HuggingFace model (used when llm_provider == "local")
+    # Install deps: `uv sync --extra local` (adds transformers + accelerate).
+    local_model_id: str = "Qwen/Qwen2.5-0.5B-Instruct"
+    local_model_device: str = "auto"  # "auto" | "cpu" | "cuda" | "cuda:0" | "mps"
+    local_model_max_new_tokens: int = 256
+    local_model_temperature: float = 0.0
+
+    # Experiment mode. "agent" runs the full LangGraph tool-using loop.
+    # "base_only" calls the LLM once with no tools and no RAG — the baseline
+    # for the knowledge-strategy comparison in docs/experiment_plan.md.
+    experiment_mode: str = "agent"
 
     # TTS provider selection. One of: "kokoro" | "elevenlabs" | "disabled".
     # Empty string is treated as auto: elevenlabs if keys present, else disabled.

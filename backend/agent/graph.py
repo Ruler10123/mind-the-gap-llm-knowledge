@@ -795,7 +795,15 @@ def _build_llm():
             temperature=0,
         )
 
-    logger.info("[Agent] Using stub LLM (set llm_provider=vultr|openai for a real model)")
+    if provider == "local":
+        try:
+            from llm.local import LocalChatModel
+        except Exception as e:
+            logger.warning(f"[Agent] llm_provider=local but import failed; falling back to stub. {e}")
+            return _StubChatModel()
+        return LocalChatModel()
+
+    logger.info("[Agent] Using stub LLM (set llm_provider=vultr|openai|local for a real model)")
     return _StubChatModel()
 
 
@@ -859,3 +867,22 @@ def get_agent():
     if _agent is None:
         _agent = _build_agent()
     return _agent
+
+
+# Stripped-down system prompt for EXPERIMENT_MODE=base_only.
+# No tool list, no UI tool guidance — pure base-model behaviour.
+BASE_ONLY_SYSTEM_PROMPT = (
+    "You are a helpful airport assistant. Answer the user's question concisely "
+    "and clearly. Do not use markdown formatting."
+)
+
+
+_base_llm = None
+
+
+def get_base_llm():
+    """Bare LLM (no tools, no graph) used by EXPERIMENT_MODE=base_only."""
+    global _base_llm
+    if _base_llm is None:
+        _base_llm = _build_llm()
+    return _base_llm

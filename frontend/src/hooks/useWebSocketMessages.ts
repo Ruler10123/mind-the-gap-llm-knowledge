@@ -23,6 +23,7 @@ type MessageHandlers = {
   onError?: (message: string) => void;
   onUIAction?: (event: { action: string; payload: Record<string, any> }) => void;
   onComponent?: (event: { componentType: string; data: Record<string, any> }) => void;
+  onText?: (content: string) => void;
 };
 
 /**
@@ -64,6 +65,15 @@ export function useWebSocketMessages(handlers: MessageHandlers) {
               alignment.characters.length
             );
             handlers.onAlignment?.(alignment);
+            break;
+          }
+          case "text": {
+            const content = msg.content ?? "";
+            console.log(
+              "[useWebSocketMessages] Text fallback received, length:",
+              content.length
+            );
+            handlers.onText?.(content);
             break;
           }
           case "done":

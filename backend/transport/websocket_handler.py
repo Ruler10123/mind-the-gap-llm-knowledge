@@ -63,10 +63,12 @@ class WebSocketHandler:
 
                 # Stream TTS with alignment
                 alignment_acc: dict[str, list] = {}
+                audio_chunks_sent = 0
                 try:
                     async for audio_chunk, alignment_part in self.tts_service.stream_with_timestamps(full_text):
                         b64 = base64.b64encode(audio_chunk).decode("ascii")
                         await send({"type": "audio", "chunk": b64})
+                        audio_chunks_sent += 1
                         _merge_alignment(alignment_acc, alignment_part)
 
                     if alignment_acc:
@@ -78,6 +80,12 @@ class WebSocketHandler:
                         })
                 except Exception as e:
                     await send({"type": "error", "message": f"TTS failed: {e}"})
+
+                # Phase 02 fallback: when no audio was streamed (TTS disabled or
+                # yielded nothing) the frontend's audio-driven reveal will not
+                # fire, so send the final text directly.
+                if audio_chunks_sent == 0:
+                    await send({"type": "text", "content": full_text})
 
                 await send({"type": "done"})
 

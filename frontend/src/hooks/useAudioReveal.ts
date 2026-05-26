@@ -99,6 +99,11 @@ export function useAudioReveal() {
     clearText();
   }, [stopAudio, clearText]);
 
+  const setText = useCallback((text: string) => {
+    setRevealedText(text);
+    lastCharIndexRef.current = text.length - 1;
+  }, []);
+
   return {
     audioElRef,
     revealedText,
@@ -106,5 +111,6 @@ export function useAudioReveal() {
     playWithReveal,
     stopAudio: stopAudioAndCleanup,
     clearText,
+    setText,
   };
 }

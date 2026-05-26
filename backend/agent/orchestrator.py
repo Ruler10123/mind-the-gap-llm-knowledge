@@ -8,7 +8,7 @@ from config import settings
 from core.events import BaseEvent, RetryEvent, ErrorEvent, UIActionEvent, ComponentEvent
 from core.exceptions import LLMParseError, ToolExecutionError, AgentException
 from agent.strategies import RetryStrategy
-from agent.graph import get_agent
+from agent.graph import get_agent, get_base_llm, BASE_ONLY_SYSTEM_PROMPT
 from observability.logger import logger
 
 
@@ -35,6 +35,25 @@ class AgentOrchestrator:
         Yields events for streaming to frontend.
         """
         logger.info(f"[AgentOrchestrator] Starting query processing: '{input_text[:100]}{'...' if len(input_text) > 100 else ''}' (context: {len(session_context)} messages)")
+
+        # EXPERIMENT_MODE=base_only short-circuits LangGraph entirely:
+        # one LLM call, no tools, no RAG, no UI components.
+        if (settings.experiment_mode or "agent").lower() == "base_only":
+            logger.info("[AgentOrchestrator] base_only mode: bypassing LangGraph")
+            try:
+                llm = get_base_llm()
+                msgs = [SystemMessage(content=BASE_ONLY_SYSTEM_PROMPT)]
+                msgs.extend(session_context)
+                msgs.append(HumanMessage(content=input_text))
+                response = llm.invoke(msgs)
+                content = response.content if isinstance(response.content, str) else str(response.content)
+                logger.info(f"[AgentOrchestrator] base_only response: {len(content)} chars")
+                yield content
+            except Exception as e:
+                logger.error(f"base_only mode error: {e}")
+                yield ErrorEvent(message=f"Unexpected error: {str(e)}")
+            return
+
         attempt = 0
         messages = session_context.copy()
         messages.append(HumanMessage(content=input_text))

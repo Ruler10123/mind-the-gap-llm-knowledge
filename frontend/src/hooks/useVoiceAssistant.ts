@@ -12,7 +12,7 @@ export function useVoiceAssistant() {
     componentType: string;
     data: Record<string, any>;
   }>>([]);
-  const { audioElRef, revealedText, isRevealing, playWithReveal, clearText, stopAudio } =
+  const { audioElRef, revealedText, isRevealing, playWithReveal, clearText, stopAudio, setText } =
     useAudioReveal();
   const { handleUIAction, modalState, closeModal, openPendingModal, clearPendingModal } = useNavigationHandler();
   // Track if we're closing to prevent mic completion from sending messages
@@ -35,6 +35,17 @@ export function useVoiceAssistant() {
     setIsProcessing(false);
   }, []);
 
+  const handleText = useCallback((content: string) => {
+    // Text-only fallback when TTS is disabled / produced no audio.
+    // Render immediately, then settle processing state.
+    console.log("[VoiceAssistant] Text fallback received, length:", content.length);
+    if (content) {
+      setText(content);
+    }
+    clearQueue();
+    setIsProcessing(false);
+  }, [setText]);
+
   const handleComponent = useCallback((event: { componentType: string; data: Record<string, any> }) => {
     console.log("[VoiceAssistant] Component received:", event);
     setComponentMessages(prev => [...prev, {
@@ -50,6 +61,7 @@ export function useVoiceAssistant() {
       onError: handleError,
       onUIAction: handleUIAction,
       onComponent: handleComponent,
+      onText: handleText,
     });
 
   // Expose clear methods for external use - stops audio and clears all buffers

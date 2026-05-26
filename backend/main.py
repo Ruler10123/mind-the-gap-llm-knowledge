@@ -146,14 +146,18 @@ ws_handler = WebSocketHandler()
 
 @app.get("/health")
 def health() -> dict[str, str]:
-    return {
+    info = {
         "status": "ok",
         "llm_provider": settings.llm_provider,
+        "experiment_mode": (settings.experiment_mode or "agent"),
         "rag_backend": settings.rag_backend,
         "tts_provider": (settings.tts_provider or "").lower() or "auto",
         "tts_enabled": "true" if ws_handler.tts_service.enabled else "false",
         "kiosk_demo": "true" if settings.enable_kiosk_demo else "false",
     }
+    if settings.llm_provider == "local":
+        info["local_model_id"] = settings.local_model_id
+    return info
 
 
 @app.websocket("/ws")
