@@ -1,0 +1,26 @@
+{
+  "roadmap": "ROADMAP.md",
+  "baseBranch": "master",
+  "maxStack": 1,
+  "setup": [
+    "cd frontend; pnpm install --frozen-lockfile",
+    "cd backend; uv sync"
+  ],
+  "baselineVerify": [
+    "cd backend; uv run python -c \"import main\""
+  ],
+  "protectedPaths": [
+    "ROADMAP.md",
+    "autopilot.json",
+    ".claude/**",
+    ".github/**",
+    "testing/**",
+    "eval/heldout/**",
+    "backend/.env",
+    "**/.env"
+  ],
+  "agent": {
+    "maxTurns": 80,
+    "timeoutMinutes": 60
+  }
+}
