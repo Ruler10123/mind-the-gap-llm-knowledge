@@ -33,7 +33,10 @@ def _split_sections(text: str) -> list[str]:
     """Split on blank lines, attaching heading-only blocks to the next block.
 
     Without this, a line like `## Parking and Ground Transportation` becomes
-    a chunk of its own that matches queries but carries no answer.
+    a chunk of its own that matches queries but carries no answer. Level-1
+    `#` document titles are dropped rather than attached: they would land in
+    the first section only and make it match every query that mentions the
+    title's words (e.g. "airport").
     """
     chunks: list[str] = []
     pending: list[str] = []
@@ -42,7 +45,7 @@ def _split_sections(text: str) -> list[str]:
         if not block:
             continue
         if _is_heading_block(block):
-            pending.append(block)
+            pending.extend(line for line in block.splitlines() if not line.startswith("# "))
             continue
         chunks.append("\n".join(pending + [block]))
         pending = []

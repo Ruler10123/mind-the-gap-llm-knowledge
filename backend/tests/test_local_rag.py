@@ -20,7 +20,7 @@ Second section body text.
 
 def test_headings_attach_to_following_block():
     assert _split_sections(DOC) == [
-        "# Title\n## Group One\n### First Section\nFirst section body text.",
+        "## Group One\n### First Section\nFirst section body text.",
         "### Second Section\nSecond section body text.",
     ]
 
