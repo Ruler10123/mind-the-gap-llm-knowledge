@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import json
 import subprocess
+import sys
 from collections import defaultdict
 from collections.abc import Iterable, Sequence
 from datetime import datetime, timezone
@@ -173,18 +174,25 @@ def summarise_answers(rows: list[dict]) -> dict:
     }
 
 
-def evaluate_system(system: str, cases: list[EvalCase], rag, llm, top_k: int) -> list[dict]:
+def evaluate_system(
+    system: str, cases: list[EvalCase], rag, llm, top_k: int, progress: bool = False
+) -> list[dict]:
+    if system not in SYSTEMS:
+        raise ValueError(f"unknown system {system!r}; expected one of {SYSTEMS}")
     index = chunk_index(rag)
     rows = []
-    for case in cases:
+    for i, case in enumerate(cases, 1):
         if system == "rag":
             answer = rag_answer(case.question, rag, llm, top_k)
-        elif system == "base_only":
-            answer = base_only_answer(case.question, llm)
         else:
-            raise ValueError(f"unknown system {system!r}; expected one of {SYSTEMS}")
+            answer = base_only_answer(case.question, llm)
         evidence = "\n".join(index[s]["content"] for s in case.source_ids if s in index)
-        rows.append({"system": system, **score_answer(case, answer, evidence)})
+        row = {"system": system, **score_answer(case, answer, evidence)}
+        rows.append(row)
+        if progress:
+            mark = "ok" if row["correct"] else "WRONG"
+            print(f"[{system} {i}/{len(cases)}] {case.id} {row['total_ms'] / 1000:.1f}s {mark}",
+                  file=sys.stderr, flush=True)
     return rows
 
 
@@ -257,6 +265,7 @@ def run_eval(
     documents_dir: str | Path | None = None,
     top_k: int | None = None,
     run_id: str | None = None,
+    progress: bool = False,
 ) -> Path:
     from eval.report import render_report
     from rag.local_rag import LocalRAGService
@@ -278,7 +287,7 @@ def run_eval(
     rows: list[dict] = []
     answers: dict[str, dict] = {}
     for system in systems:
-        sys_rows = evaluate_system(system, cases, rag, llm, top_k)
+        sys_rows = evaluate_system(system, cases, rag, llm, top_k, progress)
         rows.extend(sys_rows)
         answers[system] = {
             "summary": summarise_answers(sys_rows),

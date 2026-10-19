@@ -1,0 +1,1718 @@
+{
+  "retrieval": {
+    "ks": [
+      1,
+      3,
+      5
+    ],
+    "summary": {
+      "n": 38,
+      "mrr": 0.6864035087719298,
+      "hit@1": 0.5789473684210527,
+      "recall@1": 0.5526315789473685,
+      "precision@1": 0.5789473684210527,
+      "ndcg@1": 0.5789473684210527,
+      "hit@3": 0.7894736842105263,
+      "recall@3": 0.6973684210526315,
+      "precision@3": 0.2631578947368421,
+      "ndcg@3": 0.649515270955029,
+      "hit@5": 0.868421052631579,
+      "recall@5": 0.7894736842105263,
+      "precision@5": 0.17894736842105266,
+      "ndcg@5": 0.6904652129758914
+    },
+    "by_category": {
+      "assistance": {
+        "n": 6,
+        "mrr": 0.75,
+        "hit@1": 0.5,
+        "recall@1": 0.5,
+        "precision@1": 0.5,
+        "ndcg@1": 0.5,
+        "hit@3": 1.0,
+        "recall@3": 0.8333333333333334,
+        "precision@3": 0.3333333333333333,
+        "ndcg@3": 0.7341058946734235,
+        "hit@5": 1.0,
+        "recall@5": 0.8333333333333334,
+        "precision@5": 0.20000000000000004,
+        "ndcg@5": 0.7341058946734235
+      },
+      "baggage": {
+        "n": 5,
+        "mrr": 0.6666666666666667,
+        "hit@1": 0.6,
+        "recall@1": 0.6,
+        "precision@1": 0.6,
+        "ndcg@1": 0.6,
+        "hit@3": 0.8,
+        "recall@3": 0.8,
+        "precision@3": 0.26666666666666666,
+        "ndcg@3": 0.7,
+        "hit@5": 0.8,
+        "recall@5": 0.8,
+        "precision@5": 0.16,
+        "ndcg@5": 0.7
+      },
+      "facilities": {
+        "n": 6,
+        "mrr": 0.5972222222222222,
+        "hit@1": 0.5,
+        "recall@1": 0.5,
+        "precision@1": 0.5,
+        "ndcg@1": 0.5,
+        "hit@3": 0.6666666666666666,
+        "recall@3": 0.5833333333333334,
+        "precision@3": 0.2222222222222222,
+        "ndcg@3": 0.5510955993971215,
+        "hit@5": 0.8333333333333334,
+        "recall@5": 0.75,
+        "precision@5": 0.16666666666666666,
+        "ndcg@5": 0.622875025742687
+      },
+      "flight_info": {
+        "n": 6,
+        "mrr": 0.47222222222222227,
+        "hit@1": 0.3333333333333333,
+        "recall@1": 0.3333333333333333,
+        "precision@1": 0.3333333333333333,
+        "ndcg@1": 0.3333333333333333,
+        "hit@3": 0.5,
+        "recall@3": 0.4166666666666667,
+        "precision@3": 0.16666666666666666,
+        "ndcg@3": 0.38442893273045486,
+        "hit@5": 0.8333333333333334,
+        "recall@5": 0.75,
+        "precision@5": 0.16666666666666666,
+        "ndcg@5": 0.5279877854215859
+      },
+      "security": {
+        "n": 5,
+        "mrr": 1.0,
+        "hit@1": 1.0,
+        "recall@1": 0.8,
+        "precision@1": 1.0,
+        "ndcg@1": 1.0,
+        "hit@3": 1.0,
+        "recall@3": 0.8,
+        "precision@3": 0.3333333333333333,
+        "ndcg@3": 0.8452588771061833,
+        "hit@5": 1.0,
+        "recall@5": 0.9,
+        "precision@5": 0.24000000000000005,
+        "ndcg@5": 0.8980725016207016
+      },
+      "services": {
+        "n": 5,
+        "mrr": 0.6,
+        "hit@1": 0.6,
+        "recall@1": 0.6,
+        "precision@1": 0.6,
+        "ndcg@1": 0.6,
+        "hit@3": 0.6,
+        "recall@3": 0.6,
+        "precision@3": 0.2,
+        "ndcg@3": 0.6,
+        "hit@5": 0.6,
+        "recall@5": 0.6,
+        "precision@5": 0.12000000000000002,
+        "ndcg@5": 0.6
+      },
+      "transport": {
+        "n": 5,
+        "mrr": 0.7666666666666667,
+        "hit@1": 0.6,
+        "recall@1": 0.6,
+        "precision@1": 0.6,
+        "ndcg@1": 0.6,
+        "hit@3": 1.0,
+        "recall@3": 0.9,
+        "precision@3": 0.3333333333333333,
+        "ndcg@3": 0.7875006699908373,
+        "hit@5": 1.0,
+        "recall@5": 0.9,
+        "precision@5": 0.2,
+        "ndcg@5": 0.7875006699908373
+      }
+    },
+    "by_difficulty": {
+      "lexical": {
+        "n": 17,
+        "mrr": 0.9264705882352942,
+        "hit@1": 0.8823529411764706,
+        "recall@1": 0.8823529411764706,
+        "precision@1": 0.8823529411764706,
+        "ndcg@1": 0.8823529411764706,
+        "hit@3": 0.9411764705882353,
+        "recall@3": 0.9411764705882353,
+        "precision@3": 0.3137254901960784,
+        "ndcg@3": 0.9194664560924387,
+        "hit@5": 1.0,
+        "recall@5": 1.0,
+        "precision@5": 0.2,
+        "ndcg@5": 0.9448003712732266
+      },
+      "multi_hop": {
+        "n": 6,
+        "mrr": 0.5,
+        "hit@1": 0.16666666666666666,
+        "recall@1": 0.08333333333333333,
+        "precision@1": 0.16666666666666666,
+        "ndcg@1": 0.16666666666666666,
+        "hit@3": 1.0,
+        "recall@3": 0.5,
+        "precision@3": 0.3333333333333333,
+        "ndcg@3": 0.38442893273045486,
+        "hit@5": 1.0,
+        "recall@5": 0.5833333333333334,
+        "precision@5": 0.23333333333333336,
+        "ndcg@5": 0.4284402864925534
+      },
+      "paraphrase": {
+        "n": 15,
+        "mrr": 0.4888888888888889,
+        "hit@1": 0.4,
+        "recall@1": 0.36666666666666664,
+        "precision@1": 0.4,
+        "ndcg@1": 0.4,
+        "hit@3": 0.5333333333333333,
+        "recall@3": 0.5,
+        "precision@3": 0.17777777777777776,
+        "ndcg@3": 0.4496051297557944,
+        "hit@5": 0.6666666666666666,
+        "recall@5": 0.6333333333333333,
+        "precision@5": 0.13333333333333333,
+        "ndcg@5": 0.5070286708322468
+      }
+    },
+    "top1_score": {
+      "answerable": {
+        "n": 38,
+        "min": 1.0,
+        "p50": 4.0,
+        "max": 7.0,
+        "mean": 3.6842105263157894
+      },
+      "unanswerable": {
+        "n": 9,
+        "min": 1.0,
+        "p50": 3.0,
+        "max": 5.0,
+        "mean": 3.111111111111111
+      }
+    },
+    "per_case": [
+      {
+        "id": "bag-001",
+        "category": "baggage",
+        "difficulty": "lexical",
+        "relevant": [
+          "airport_faq#carry-on-baggage"
+        ],
+        "retrieved": [
+          "airport_faq#carry-on-baggage",
+          "airport_faq#gate-information",
+          "airport_faq#lounges",
+          "airport_faq#charging-stations",
+          "airport_faq#lost-and-found"
+        ],
+        "latency_ms": 1.6854999703355134,
+        "mrr": 1.0,
+        "hit@1": 1.0,
+        "recall@1": 1.0,
+        "precision@1": 1.0,
+        "ndcg@1": 1.0,
+        "hit@3": 1.0,
+        "recall@3": 1.0,
+        "precision@3": 0.3333333333333333,
+        "ndcg@3": 1.0,
+        "hit@5": 1.0,
+        "recall@5": 1.0,
+        "precision@5": 0.2,
+        "ndcg@5": 1.0
+      },
+      {
+        "id": "bag-002",
+        "category": "baggage",
+        "difficulty": "lexical",
+        "relevant": [
+          "airport_faq#checked-baggage"
+        ],
+        "retrieved": [
+          "airport_faq#checked-baggage",
+          "airport_faq#traveling-with-children",
+          "airport_faq#parking",
+          "airport_faq#carry-on-baggage",
+          "airport_faq#prohibited-items"
+        ],
+        "latency_ms": 0.6472000386565924,
+        "mrr": 1.0,
+        "hit@1": 1.0,
+        "recall@1": 1.0,
+        "precision@1": 1.0,
+        "ndcg@1": 1.0,
+        "hit@3": 1.0,
+        "recall@3": 1.0,
+        "precision@3": 0.3333333333333333,
+        "ndcg@3": 1.0,
+        "hit@5": 1.0,
+        "recall@5": 1.0,
+        "precision@5": 0.2,
+        "ndcg@5": 1.0
+      },
+      {
+        "id": "bag-003",
+        "category": "baggage",
+        "difficulty": "paraphrase",
+        "relevant": [
+          "airport_faq#lost-baggage"
+        ],
+        "retrieved": [
+          "airport_faq#carry-on-baggage",
+          "airport_faq#gate-information",
+          "airport_faq#wheelchair-service",
+          "airport_faq#service-animals",
+          "airport_faq#rideshare"
+        ],
+        "latency_ms": 0.5780999781563878,
+        "mrr": 0.0,
+        "hit@1": 0.0,
+        "recall@1": 0.0,
+        "precision@1": 0.0,
+        "ndcg@1": 0.0,
+        "hit@3": 0.0,
+        "recall@3": 0.0,
+        "precision@3": 0.0,
+        "ndcg@3": 0.0,
+        "hit@5": 0.0,
+        "recall@5": 0.0,
+        "precision@5": 0.0,
+        "ndcg@5": 0.0
+      },
+      {
+        "id": "bag-004",
+        "category": "baggage",
+        "difficulty": "paraphrase",
+        "relevant": [
+          "airport_faq#prohibited-items"
+        ],
+        "retrieved": [
+          "airport_faq#carry-on-baggage",
+          "airport_faq#public-transit",
+          "airport_faq#prohibited-items",
+          "airport_faq#lost-baggage",
+          "airport_faq#wifi"
+        ],
+        "latency_ms": 0.5020999815315008,
+        "mrr": 0.3333333333333333,
+        "hit@1": 0.0,
+        "recall@1": 0.0,
+        "precision@1": 0.0,
+        "ndcg@1": 0.0,
+        "hit@3": 1.0,
+        "recall@3": 1.0,
+        "precision@3": 0.3333333333333333,
+        "ndcg@3": 0.5,
+        "hit@5": 1.0,
+        "recall@5": 1.0,
+        "precision@5": 0.2,
+        "ndcg@5": 0.5
+      },
+      {
+        "id": "bag-005",
+        "category": "baggage",
+        "difficulty": "lexical",
+        "relevant": [
+          "airport_faq#checked-baggage"
+        ],
+        "retrieved": [
+          "airport_faq#checked-baggage",
+          "airport_faq#lounges",
+          "airport_faq#carry-on-baggage",
+          "airport_faq#precheck",
+          "airport_faq#boarding-process"
+        ],
+        "latency_ms": 0.487400044221431,
+        "mrr": 1.0,
+        "hit@1": 1.0,
+        "recall@1": 1.0,
+        "precision@1": 1.0,
+        "ndcg@1": 1.0,
+        "hit@3": 1.0,
+        "recall@3": 1.0,
+        "precision@3": 0.3333333333333333,
+        "ndcg@3": 1.0,
+        "hit@5": 1.0,
+        "recall@5": 1.0,
+        "precision@5": 0.2,
+        "ndcg@5": 1.0
+      },
+      {
+        "id": "sec-001",
+        "category": "security",
+        "difficulty": "multi_hop",
+        "relevant": [
+          "airport_faq#tsa-screening",
+          "airport_faq#precheck"
+        ],
+        "retrieved": [
+          "airport_faq#precheck",
+          "airport_faq#international-travel",
+          "airport_faq#lost-baggage",
+          "airport_faq#tsa-screening",
+          "airport_faq#service-animals"
+        ],
+        "latency_ms": 0.49100001342594624,
+        "mrr": 1.0,
+        "hit@1": 1.0,
+        "recall@1": 0.5,
+        "precision@1": 1.0,
+        "ndcg@1": 1.0,
+        "hit@3": 1.0,
+        "recall@3": 0.5,
+        "precision@3": 0.3333333333333333,
+        "ndcg@3": 0.6131471927654584,
+        "hit@5": 1.0,
+        "recall@5": 1.0,
+        "precision@5": 0.4,
+        "ndcg@5": 0.8772153153380493
+      },
+      {
+        "id": "sec-002",
+        "category": "security",
+        "difficulty": "lexical",
+        "relevant": [
+          "airport_faq#liquids-rule"
+        ],
+        "retrieved": [
+          "airport_faq#liquids-rule",
+          "airport_faq#rideshare",
+          "airport_faq#public-transit",
+          "README-5",
+          "README-11"
+        ],
+        "latency_ms": 0.48040004912763834,
+        "mrr": 1.0,
+        "hit@1": 1.0,
+        "recall@1": 1.0,
+        "precision@1": 1.0,
+        "ndcg@1": 1.0,
+        "hit@3": 1.0,
+        "recall@3": 1.0,
+        "precision@3": 0.3333333333333333,
+        "ndcg@3": 1.0,
+        "hit@5": 1.0,
+        "recall@5": 1.0,
+        "precision@5": 0.2,
+        "ndcg@5": 1.0
+      },
+      {
+        "id": "sec-003",
+        "category": "security",
+        "difficulty": "paraphrase",
+        "relevant": [
+          "airport_faq#precheck"
+        ],
+        "retrieved": [
+          "airport_faq#precheck",
+          "airport_faq#lounges",
+          "airport_faq#checked-baggage",
+          "airport_faq#tsa-screening",
+          "airport_faq#international-travel"
+        ],
+        "latency_ms": 0.4684000159613788,
+        "mrr": 1.0,
+        "hit@1": 1.0,
+        "recall@1": 1.0,
+        "precision@1": 1.0,
+        "ndcg@1": 1.0,
+        "hit@3": 1.0,
+        "recall@3": 1.0,
+        "precision@3": 0.3333333333333333,
+        "ndcg@3": 1.0,
+        "hit@5": 1.0,
+        "recall@5": 1.0,
+        "precision@5": 0.2,
+        "ndcg@5": 1.0
+      },
+      {
+        "id": "sec-004",
+        "category": "security",
+        "difficulty": "lexical",
+        "relevant": [
+          "airport_faq#international-travel"
+        ],
+        "retrieved": [
+          "airport_faq#international-travel",
+          "README-9",
+          "airport_faq#flight-delays-and-cancellations",
+          "airport_faq#checked-baggage",
+          "airport_faq#lost-baggage"
+        ],
+        "latency_ms": 0.45900000259280205,
+        "mrr": 1.0,
+        "hit@1": 1.0,
+        "recall@1": 1.0,
+        "precision@1": 1.0,
+        "ndcg@1": 1.0,
+        "hit@3": 1.0,
+        "recall@3": 1.0,
+        "precision@3": 0.3333333333333333,
+        "ndcg@3": 1.0,
+        "hit@5": 1.0,
+        "recall@5": 1.0,
+        "precision@5": 0.2,
+        "ndcg@5": 1.0
+      },
+      {
+        "id": "sec-005",
+        "category": "security",
+        "difficulty": "paraphrase",
+        "relevant": [
+          "airport_faq#liquids-rule",
+          "airport_faq#prohibited-items"
+        ],
+        "retrieved": [
+          "airport_faq#prohibited-items",
+          "airport_faq#wheelchair-service",
+          "airport_faq#traveling-with-children",
+          "airport_faq#tsa-screening",
+          "airport_faq#help-desk"
+        ],
+        "latency_ms": 0.47339999582618475,
+        "mrr": 1.0,
+        "hit@1": 1.0,
+        "recall@1": 0.5,
+        "precision@1": 1.0,
+        "ndcg@1": 1.0,
+        "hit@3": 1.0,
+        "recall@3": 0.5,
+        "precision@3": 0.3333333333333333,
+        "ndcg@3": 0.6131471927654584,
+        "hit@5": 1.0,
+        "recall@5": 0.5,
+        "precision@5": 0.2,
+        "ndcg@5": 0.6131471927654584
+      },
+      {
+        "id": "svc-001",
+        "category": "services",
+        "difficulty": "lexical",
+        "relevant": [
+          "airport_faq#wifi"
+        ],
+        "retrieved": [
+          "airport_faq#wifi",
+          "airport_faq#wheelchair-service",
+          "airport_faq#parking",
+          "airport_faq#lost-baggage",
+          "airport_faq#dining-and-shopping"
+        ],
+        "latency_ms": 0.4545000265352428,
+        "mrr": 1.0,
+        "hit@1": 1.0,
+        "recall@1": 1.0,
+        "precision@1": 1.0,
+        "ndcg@1": 1.0,
+        "hit@3": 1.0,
+        "recall@3": 1.0,
+        "precision@3": 0.3333333333333333,
+        "ndcg@3": 1.0,
+        "hit@5": 1.0,
+        "recall@5": 1.0,
+        "precision@5": 0.2,
+        "ndcg@5": 1.0
+      },
+      {
+        "id": "svc-002",
+        "category": "services",
+        "difficulty": "paraphrase",
+        "relevant": [
+          "airport_faq#currency-exchange"
+        ],
+        "retrieved": [
+          "airport_faq#precheck",
+          "airport_faq#lounges",
+          "airport_faq#checked-baggage",
+          "airport_faq#tsa-screening",
+          "airport_faq#international-travel"
+        ],
+        "latency_ms": 0.4512000014074147,
+        "mrr": 0.0,
+        "hit@1": 0.0,
+        "recall@1": 0.0,
+        "precision@1": 0.0,
+        "ndcg@1": 0.0,
+        "hit@3": 0.0,
+        "recall@3": 0.0,
+        "precision@3": 0.0,
+        "ndcg@3": 0.0,
+        "hit@5": 0.0,
+        "recall@5": 0.0,
+        "precision@5": 0.0,
+        "ndcg@5": 0.0
+      },
+      {
+        "id": "svc-003",
+        "category": "services",
+        "difficulty": "paraphrase",
+        "relevant": [
+          "airport_faq#charging-stations"
+        ],
+        "retrieved": [
+          "airport_faq#lost-baggage",
+          "airport_faq#parking",
+          "airport_faq#checked-baggage",
+          "airport_faq#tsa-screening",
+          "airport_faq#precheck"
+        ],
+        "latency_ms": 0.45579997822642326,
+        "mrr": 0.0,
+        "hit@1": 0.0,
+        "recall@1": 0.0,
+        "precision@1": 0.0,
+        "ndcg@1": 0.0,
+        "hit@3": 0.0,
+        "recall@3": 0.0,
+        "precision@3": 0.0,
+        "ndcg@3": 0.0,
+        "hit@5": 0.0,
+        "recall@5": 0.0,
+        "precision@5": 0.0,
+        "ndcg@5": 0.0
+      },
+      {
+        "id": "svc-004",
+        "category": "services",
+        "difficulty": "lexical",
+        "relevant": [
+          "airport_faq#lounges"
+        ],
+        "retrieved": [
+          "airport_faq#lounges",
+          "airport_faq#help-desk",
+          "airport_faq#precheck",
+          "airport_faq#wifi",
+          "airport_faq#dining-and-shopping"
+        ],
+        "latency_ms": 0.4632999771274626,
+        "mrr": 1.0,
+        "hit@1": 1.0,
+        "recall@1": 1.0,
+        "precision@1": 1.0,
+        "ndcg@1": 1.0,
+        "hit@3": 1.0,
+        "recall@3": 1.0,
+        "precision@3": 0.3333333333333333,
+        "ndcg@3": 1.0,
+        "hit@5": 1.0,
+        "recall@5": 1.0,
+        "precision@5": 0.2,
+        "ndcg@5": 1.0
+      },
+      {
+        "id": "svc-005",
+        "category": "services",
+        "difficulty": "lexical",
+        "relevant": [
+          "airport_faq#dining-and-shopping"
+        ],
+        "retrieved": [
+          "airport_faq#dining-and-shopping",
+          "airport_faq#wifi",
+          "airport_faq#lounges",
+          "airport_faq#currency-exchange",
+          "airport_faq#help-desk"
+        ],
+        "latency_ms": 0.451600004453212,
+        "mrr": 1.0,
+        "hit@1": 1.0,
+        "recall@1": 1.0,
+        "precision@1": 1.0,
+        "ndcg@1": 1.0,
+        "hit@3": 1.0,
+        "recall@3": 1.0,
+        "precision@3": 0.3333333333333333,
+        "ndcg@3": 1.0,
+        "hit@5": 1.0,
+        "recall@5": 1.0,
+        "precision@5": 0.2,
+        "ndcg@5": 1.0
+      },
+      {
+        "id": "fac-001",
+        "category": "facilities",
+        "difficulty": "paraphrase",
+        "relevant": [
+          "airport_faq#medical-services"
+        ],
+        "retrieved": [
+          "airport_faq#help-desk",
+          "airport_faq#precheck",
+          "airport_faq#lounges",
+          "airport_faq#medical-services",
+          "airport_faq#traveling-with-children"
+        ],
+        "latency_ms": 0.4482999793253839,
+        "mrr": 0.25,
+        "hit@1": 0.0,
+        "recall@1": 0.0,
+        "precision@1": 0.0,
+        "ndcg@1": 0.0,
+        "hit@3": 0.0,
+        "recall@3": 0.0,
+        "precision@3": 0.0,
+        "ndcg@3": 0.0,
+        "hit@5": 1.0,
+        "recall@5": 1.0,
+        "precision@5": 0.2,
+        "ndcg@5": 0.43067655807339306
+      },
+      {
+        "id": "fac-002",
+        "category": "facilities",
+        "difficulty": "lexical",
+        "relevant": [
+          "airport_faq#lost-and-found"
+        ],
+        "retrieved": [
+          "airport_faq#lost-and-found",
+          "airport_faq#carry-on-baggage",
+          "airport_faq#prohibited-items",
+          "airport_faq#lost-baggage",
+          "airport_faq#tsa-screening"
+        ],
+        "latency_ms": 0.4572999896481633,
+        "mrr": 1.0,
+        "hit@1": 1.0,
+        "recall@1": 1.0,
+        "precision@1": 1.0,
+        "ndcg@1": 1.0,
+        "hit@3": 1.0,
+        "recall@3": 1.0,
+        "precision@3": 0.3333333333333333,
+        "ndcg@3": 1.0,
+        "hit@5": 1.0,
+        "recall@5": 1.0,
+        "precision@5": 0.2,
+        "ndcg@5": 1.0
+      },
+      {
+        "id": "fac-003",
+        "category": "facilities",
+        "difficulty": "paraphrase",
+        "relevant": [
+          "airport_faq#pet-relief-areas"
+        ],
+        "retrieved": [
+          "airport_faq#service-animals",
+          "airport_faq#precheck",
+          "airport_faq#international-travel",
+          "airport_faq#help-desk",
+          "airport_faq#parking"
+        ],
+        "latency_ms": 0.4184000426903367,
+        "mrr": 0.0,
+        "hit@1": 0.0,
+        "recall@1": 0.0,
+        "precision@1": 0.0,
+        "ndcg@1": 0.0,
+        "hit@3": 0.0,
+        "recall@3": 0.0,
+        "precision@3": 0.0,
+        "ndcg@3": 0.0,
+        "hit@5": 0.0,
+        "recall@5": 0.0,
+        "precision@5": 0.0,
+        "ndcg@5": 0.0
+      },
+      {
+        "id": "fac-004",
+        "category": "facilities",
+        "difficulty": "lexical",
+        "relevant": [
+          "airport_faq#restrooms"
+        ],
+        "retrieved": [
+          "airport_faq#restrooms",
+          "airport_faq#traveling-with-children",
+          "airport_faq#charging-stations",
+          "airport_faq#help-desk",
+          "airport_faq#flight-delays-and-cancellations"
+        ],
+        "latency_ms": 0.408699968829751,
+        "mrr": 1.0,
+        "hit@1": 1.0,
+        "recall@1": 1.0,
+        "precision@1": 1.0,
+        "ndcg@1": 1.0,
+        "hit@3": 1.0,
+        "recall@3": 1.0,
+        "precision@3": 0.3333333333333333,
+        "ndcg@3": 1.0,
+        "hit@5": 1.0,
+        "recall@5": 1.0,
+        "precision@5": 0.2,
+        "ndcg@5": 1.0
+      },
+      {
+        "id": "fac-005",
+        "category": "facilities",
+        "difficulty": "lexical",
+        "relevant": [
+          "airport_faq#lost-and-found"
+        ],
+        "retrieved": [
+          "airport_faq#lost-and-found",
+          "airport_faq#lost-baggage",
+          "airport_faq#rideshare",
+          "airport_faq#checked-baggage",
+          "airport_faq#tsa-screening"
+        ],
+        "latency_ms": 0.41500001680105925,
+        "mrr": 1.0,
+        "hit@1": 1.0,
+        "recall@1": 1.0,
+        "precision@1": 1.0,
+        "ndcg@1": 1.0,
+        "hit@3": 1.0,
+        "recall@3": 1.0,
+        "precision@3": 0.3333333333333333,
+        "ndcg@3": 1.0,
+        "hit@5": 1.0,
+        "recall@5": 1.0,
+        "precision@5": 0.2,
+        "ndcg@5": 1.0
+      },
+      {
+        "id": "fli-001",
+        "category": "flight_info",
+        "difficulty": "lexical",
+        "relevant": [
+          "airport_faq#check-in"
+        ],
+        "retrieved": [
+          "airport_faq#check-in",
+          "airport_faq#lost-baggage",
+          "airport_faq#flight-delays-and-cancellations",
+          "airport_faq#wheelchair-service",
+          "airport_faq#parking"
+        ],
+        "latency_ms": 0.5127000040374696,
+        "mrr": 1.0,
+        "hit@1": 1.0,
+        "recall@1": 1.0,
+        "precision@1": 1.0,
+        "ndcg@1": 1.0,
+        "hit@3": 1.0,
+        "recall@3": 1.0,
+        "precision@3": 0.3333333333333333,
+        "ndcg@3": 1.0,
+        "hit@5": 1.0,
+        "recall@5": 1.0,
+        "precision@5": 0.2,
+        "ndcg@5": 1.0
+      },
+      {
+        "id": "fli-002",
+        "category": "flight_info",
+        "difficulty": "paraphrase",
+        "relevant": [
+          "airport_faq#check-in"
+        ],
+        "retrieved": [
+          "airport_faq#service-animals",
+          "airport_faq#rideshare",
+          "airport_faq#carry-on-baggage",
+          "airport_faq#gate-information",
+          "airport_faq#wheelchair-service"
+        ],
+        "latency_ms": 0.4143999540247023,
+        "mrr": 0.0,
+        "hit@1": 0.0,
+        "recall@1": 0.0,
+        "precision@1": 0.0,
+        "ndcg@1": 0.0,
+        "hit@3": 0.0,
+        "recall@3": 0.0,
+        "precision@3": 0.0,
+        "ndcg@3": 0.0,
+        "hit@5": 0.0,
+        "recall@5": 0.0,
+        "precision@5": 0.0,
+        "ndcg@5": 0.0
+      },
+      {
+        "id": "fli-003",
+        "category": "flight_info",
+        "difficulty": "paraphrase",
+        "relevant": [
+          "airport_faq#flight-delays-and-cancellations"
+        ],
+        "retrieved": [
+          "airport_faq#lost-baggage",
+          "airport_faq#help-desk",
+          "airport_faq#flight-information",
+          "airport_faq#flight-delays-and-cancellations",
+          "airport_faq#wheelchair-service"
+        ],
+        "latency_ms": 0.4120999947190285,
+        "mrr": 0.25,
+        "hit@1": 0.0,
+        "recall@1": 0.0,
+        "precision@1": 0.0,
+        "ndcg@1": 0.0,
+        "hit@3": 0.0,
+        "recall@3": 0.0,
+        "precision@3": 0.0,
+        "ndcg@3": 0.0,
+        "hit@5": 1.0,
+        "recall@5": 1.0,
+        "precision@5": 0.2,
+        "ndcg@5": 0.43067655807339306
+      },
+      {
+        "id": "fli-004",
+        "category": "flight_info",
+        "difficulty": "lexical",
+        "relevant": [
+          "airport_faq#boarding-process"
+        ],
+        "retrieved": [
+          "airport_faq#rideshare",
+          "airport_faq#tsa-screening",
+          "airport_faq#check-in",
+          "airport_faq#boarding-process",
+          "airport_faq#carry-on-baggage"
+        ],
+        "latency_ms": 0.41019998025149107,
+        "mrr": 0.25,
+        "hit@1": 0.0,
+        "recall@1": 0.0,
+        "precision@1": 0.0,
+        "ndcg@1": 0.0,
+        "hit@3": 0.0,
+        "recall@3": 0.0,
+        "precision@3": 0.0,
+        "ndcg@3": 0.0,
+        "hit@5": 1.0,
+        "recall@5": 1.0,
+        "precision@5": 0.2,
+        "ndcg@5": 0.43067655807339306
+      },
+      {
+        "id": "fli-005",
+        "category": "flight_info",
+        "difficulty": "paraphrase",
+        "relevant": [
+          "airport_faq#gate-information"
+        ],
+        "retrieved": [
+          "airport_faq#gate-information",
+          "airport_faq#tsa-screening",
+          "airport_faq#boarding-process",
+          "airport_faq#traveling-with-children",
+          "airport_faq#precheck"
+        ],
+        "latency_ms": 0.5106999888084829,
+        "mrr": 1.0,
+        "hit@1": 1.0,
+        "recall@1": 1.0,
+        "precision@1": 1.0,
+        "ndcg@1": 1.0,
+        "hit@3": 1.0,
+        "recall@3": 1.0,
+        "precision@3": 0.3333333333333333,
+        "ndcg@3": 1.0,
+        "hit@5": 1.0,
+        "recall@5": 1.0,
+        "precision@5": 0.2,
+        "ndcg@5": 1.0
+      },
+      {
+        "id": "ast-001",
+        "category": "assistance",
+        "difficulty": "lexical",
+        "relevant": [
+          "airport_faq#wheelchair-service"
+        ],
+        "retrieved": [
+          "airport_faq#wheelchair-service",
+          "airport_faq#lost-baggage",
+          "airport_faq#flight-delays-and-cancellations",
+          "airport_faq#service-animals",
+          "airport_faq#parking"
+        ],
+        "latency_ms": 0.5038999952375889,
+        "mrr": 1.0,
+        "hit@1": 1.0,
+        "recall@1": 1.0,
+        "precision@1": 1.0,
+        "ndcg@1": 1.0,
+        "hit@3": 1.0,
+        "recall@3": 1.0,
+        "precision@3": 0.3333333333333333,
+        "ndcg@3": 1.0,
+        "hit@5": 1.0,
+        "recall@5": 1.0,
+        "precision@5": 0.2,
+        "ndcg@5": 1.0
+      },
+      {
+        "id": "ast-002",
+        "category": "assistance",
+        "difficulty": "paraphrase",
+        "relevant": [
+          "airport_faq#traveling-with-children"
+        ],
+        "retrieved": [
+          "airport_faq#traveling-with-children",
+          "airport_faq#lost-baggage",
+          "airport_faq#precheck",
+          "airport_faq#international-travel"
+        ],
+        "latency_ms": 0.4860999761149287,
+        "mrr": 1.0,
+        "hit@1": 1.0,
+        "recall@1": 1.0,
+        "precision@1": 1.0,
+        "ndcg@1": 1.0,
+        "hit@3": 1.0,
+        "recall@3": 1.0,
+        "precision@3": 0.3333333333333333,
+        "ndcg@3": 1.0,
+        "hit@5": 1.0,
+        "recall@5": 1.0,
+        "precision@5": 0.2,
+        "ndcg@5": 1.0
+      },
+      {
+        "id": "ast-003",
+        "category": "assistance",
+        "difficulty": "lexical",
+        "relevant": [
+          "airport_faq#language-assistance"
+        ],
+        "retrieved": [
+          "airport_faq#help-desk",
+          "airport_faq#language-assistance",
+          "airport_faq#lost-baggage",
+          "airport_faq#gate-information",
+          "airport_faq#carry-on-baggage"
+        ],
+        "latency_ms": 0.5647999932989478,
+        "mrr": 0.5,
+        "hit@1": 0.0,
+        "recall@1": 0.0,
+        "precision@1": 0.0,
+        "ndcg@1": 0.0,
+        "hit@3": 1.0,
+        "recall@3": 1.0,
+        "precision@3": 0.3333333333333333,
+        "ndcg@3": 0.6309297535714575,
+        "hit@5": 1.0,
+        "recall@5": 1.0,
+        "precision@5": 0.2,
+        "ndcg@5": 0.6309297535714575
+      },
+      {
+        "id": "ast-004",
+        "category": "assistance",
+        "difficulty": "paraphrase",
+        "relevant": [
+          "airport_faq#service-animals"
+        ],
+        "retrieved": [
+          "airport_faq#service-animals",
+          "airport_faq#help-desk",
+          "airport_faq#wheelchair-service",
+          "airport_faq#carry-on-baggage",
+          "airport_faq#lost-baggage"
+        ],
+        "latency_ms": 0.4984999541193247,
+        "mrr": 1.0,
+        "hit@1": 1.0,
+        "recall@1": 1.0,
+        "precision@1": 1.0,
+        "ndcg@1": 1.0,
+        "hit@3": 1.0,
+        "recall@3": 1.0,
+        "precision@3": 0.3333333333333333,
+        "ndcg@3": 1.0,
+        "hit@5": 1.0,
+        "recall@5": 1.0,
+        "precision@5": 0.2,
+        "ndcg@5": 1.0
+      },
+      {
+        "id": "trn-001",
+        "category": "transport",
+        "difficulty": "lexical",
+        "relevant": [
+          "airport_faq#parking"
+        ],
+        "retrieved": [
+          "airport_faq#parking",
+          "airport_faq#liquids-rule",
+          "airport_faq#lounges",
+          "airport_faq#parking-and-ground-transportation",
+          "README#how-to-add-documents"
+        ],
+        "latency_ms": 0.5036999937146902,
+        "mrr": 1.0,
+        "hit@1": 1.0,
+        "recall@1": 1.0,
+        "precision@1": 1.0,
+        "ndcg@1": 1.0,
+        "hit@3": 1.0,
+        "recall@3": 1.0,
+        "precision@3": 0.3333333333333333,
+        "ndcg@3": 1.0,
+        "hit@5": 1.0,
+        "recall@5": 1.0,
+        "precision@5": 0.2,
+        "ndcg@5": 1.0
+      },
+      {
+        "id": "trn-002",
+        "category": "transport",
+        "difficulty": "paraphrase",
+        "relevant": [
+          "airport_faq#rideshare"
+        ],
+        "retrieved": [
+          "airport_faq#precheck",
+          "airport_faq#rideshare"
+        ],
+        "latency_ms": 0.4734999965876341,
+        "mrr": 0.5,
+        "hit@1": 0.0,
+        "recall@1": 0.0,
+        "precision@1": 0.0,
+        "ndcg@1": 0.0,
+        "hit@3": 1.0,
+        "recall@3": 1.0,
+        "precision@3": 0.3333333333333333,
+        "ndcg@3": 0.6309297535714575,
+        "hit@5": 1.0,
+        "recall@5": 1.0,
+        "precision@5": 0.2,
+        "ndcg@5": 0.6309297535714575
+      },
+      {
+        "id": "trn-003",
+        "category": "transport",
+        "difficulty": "lexical",
+        "relevant": [
+          "airport_faq#taxis"
+        ],
+        "retrieved": [
+          "airport_faq#taxis",
+          "airport_faq#lost-baggage",
+          "airport_faq#wifi",
+          "airport_faq#parking",
+          "airport_faq#public-transit"
+        ],
+        "latency_ms": 0.49899995792657137,
+        "mrr": 1.0,
+        "hit@1": 1.0,
+        "recall@1": 1.0,
+        "precision@1": 1.0,
+        "ndcg@1": 1.0,
+        "hit@3": 1.0,
+        "recall@3": 1.0,
+        "precision@3": 0.3333333333333333,
+        "ndcg@3": 1.0,
+        "hit@5": 1.0,
+        "recall@5": 1.0,
+        "precision@5": 0.2,
+        "ndcg@5": 1.0
+      },
+      {
+        "id": "trn-004",
+        "category": "transport",
+        "difficulty": "paraphrase",
+        "relevant": [
+          "airport_faq#public-transit"
+        ],
+        "retrieved": [
+          "airport_faq#public-transit",
+          "airport_faq#precheck",
+          "airport_faq#wifi",
+          "airport_faq#lounges",
+          "airport_faq#charging-stations"
+        ],
+        "latency_ms": 0.5022999830543995,
+        "mrr": 1.0,
+        "hit@1": 1.0,
+        "recall@1": 1.0,
+        "precision@1": 1.0,
+        "ndcg@1": 1.0,
+        "hit@3": 1.0,
+        "recall@3": 1.0,
+        "precision@3": 0.3333333333333333,
+        "ndcg@3": 1.0,
+        "hit@5": 1.0,
+        "recall@5": 1.0,
+        "precision@5": 0.2,
+        "ndcg@5": 1.0
+      },
+      {
+        "id": "mh-001",
+        "category": "flight_info",
+        "difficulty": "multi_hop",
+        "relevant": [
+          "airport_faq#check-in",
+          "airport_faq#international-travel"
+        ],
+        "retrieved": [
+          "airport_faq#lost-baggage",
+          "airport_faq#lost-and-found",
+          "airport_faq#check-in",
+          "airport_faq#wheelchair-service",
+          "README-9"
+        ],
+        "latency_ms": 0.5075999652035534,
+        "mrr": 0.3333333333333333,
+        "hit@1": 0.0,
+        "recall@1": 0.0,
+        "precision@1": 0.0,
+        "ndcg@1": 0.0,
+        "hit@3": 1.0,
+        "recall@3": 0.5,
+        "precision@3": 0.3333333333333333,
+        "ndcg@3": 0.3065735963827292,
+        "hit@5": 1.0,
+        "recall@5": 0.5,
+        "precision@5": 0.2,
+        "ndcg@5": 0.3065735963827292
+      },
+      {
+        "id": "mh-002",
+        "category": "assistance",
+        "difficulty": "multi_hop",
+        "relevant": [
+          "airport_faq#help-desk",
+          "airport_faq#language-assistance"
+        ],
+        "retrieved": [
+          "airport_faq#precheck",
+          "airport_faq#help-desk",
+          "airport_faq#parking",
+          "airport_faq#checked-baggage",
+          "airport_faq#lost-baggage"
+        ],
+        "latency_ms": 0.4393999697640538,
+        "mrr": 0.5,
+        "hit@1": 0.0,
+        "recall@1": 0.0,
+        "precision@1": 0.0,
+        "ndcg@1": 0.0,
+        "hit@3": 1.0,
+        "recall@3": 0.5,
+        "precision@3": 0.3333333333333333,
+        "ndcg@3": 0.38685280723454163,
+        "hit@5": 1.0,
+        "recall@5": 0.5,
+        "precision@5": 0.2,
+        "ndcg@5": 0.38685280723454163
+      },
+      {
+        "id": "mh-003",
+        "category": "facilities",
+        "difficulty": "multi_hop",
+        "relevant": [
+          "airport_faq#lost-and-found",
+          "airport_faq#lost-baggage"
+        ],
+        "retrieved": [
+          "airport_faq#tsa-screening",
+          "airport_faq#help-desk",
+          "airport_faq#lost-and-found",
+          "airport_faq#carry-on-baggage",
+          "airport_faq#checked-baggage"
+        ],
+        "latency_ms": 0.4273999948054552,
+        "mrr": 0.3333333333333333,
+        "hit@1": 0.0,
+        "recall@1": 0.0,
+        "precision@1": 0.0,
+        "ndcg@1": 0.0,
+        "hit@3": 1.0,
+        "recall@3": 0.5,
+        "precision@3": 0.3333333333333333,
+        "ndcg@3": 0.3065735963827292,
+        "hit@5": 1.0,
+        "recall@5": 0.5,
+        "precision@5": 0.2,
+        "ndcg@5": 0.3065735963827292
+      },
+      {
+        "id": "mh-004",
+        "category": "transport",
+        "difficulty": "multi_hop",
+        "relevant": [
+          "airport_faq#rental-cars",
+          "airport_faq#public-transit"
+        ],
+        "retrieved": [
+          "airport_faq#lost-baggage",
+          "airport_faq#precheck",
+          "airport_faq#rental-cars",
+          "airport_faq#international-travel",
+          "airport_faq#dining-and-shopping"
+        ],
+        "latency_ms": 0.42799999937415123,
+        "mrr": 0.3333333333333333,
+        "hit@1": 0.0,
+        "recall@1": 0.0,
+        "precision@1": 0.0,
+        "ndcg@1": 0.0,
+        "hit@3": 1.0,
+        "recall@3": 0.5,
+        "precision@3": 0.3333333333333333,
+        "ndcg@3": 0.3065735963827292,
+        "hit@5": 1.0,
+        "recall@5": 0.5,
+        "precision@5": 0.2,
+        "ndcg@5": 0.3065735963827292
+      },
+      {
+        "id": "mh-005",
+        "category": "assistance",
+        "difficulty": "multi_hop",
+        "relevant": [
+          "airport_faq#service-animals",
+          "airport_faq#pet-relief-areas"
+        ],
+        "retrieved": [
+          "airport_faq#international-travel",
+          "airport_faq#service-animals",
+          "airport_faq#tsa-screening",
+          "airport_faq#precheck",
+          "airport_faq#help-desk"
+        ],
+        "latency_ms": 0.4146000137552619,
+        "mrr": 0.5,
+        "hit@1": 0.0,
+        "recall@1": 0.0,
+        "precision@1": 0.0,
+        "ndcg@1": 0.0,
+        "hit@3": 1.0,
+        "recall@3": 0.5,
+        "precision@3": 0.3333333333333333,
+        "ndcg@3": 0.38685280723454163,
+        "hit@5": 1.0,
+        "recall@5": 0.5,
+        "precision@5": 0.2,
+        "ndcg@5": 0.38685280723454163
+      }
+    ]
+  },
+  "answers": {
+    "rag": {
+      "summary": {
+        "n": 47,
+        "accuracy": 0.7872340425531915,
+        "answerable_accuracy": 0.7368421052631579,
+        "key_fact_recall": 0.7631578947368421,
+        "token_f1": 0.6066732372371697,
+        "exact_match": 0.15789473684210525,
+        "refusal_recall": 1.0,
+        "refusal_precision": 0.6,
+        "false_refusal_rate": 0.15789473684210525,
+        "refusal_accuracy": 0.8723404255319149,
+        "hallucination_rate": 0.0,
+        "groundedness": 0.8725534217555494,
+        "latency_ms": {
+          "generation_p50": 15109.081099973992,
+          "generation_p95": 32985.43664998143,
+          "retrieval_p50": 1.5424999874085188,
+          "retrieval_p95": 2.238450018921867,
+          "total_p50": 15111.381299968343,
+          "total_p95": 32986.499889980776
+        }
+      },
+      "by_category": {
+        "assistance": {
+          "n": 6,
+          "accuracy": 0.6666666666666666,
+          "answerable_accuracy": 0.6666666666666666,
+          "key_fact_recall": 0.6666666666666666,
+          "token_f1": 0.5921977579586275,
+          "exact_match": 0.0,
+          "refusal_recall": null,
+          "refusal_precision": 0.0,
+          "false_refusal_rate": 0.16666666666666666,
+          "refusal_accuracy": 0.8333333333333334,
+          "hallucination_rate": 0.0,
+          "groundedness": 0.9814814814814815,
+          "latency_ms": {
+            "generation_p50": 15190.494650014443,
+            "generation_p95": 30132.639499992365,
+            "retrieval_p50": 2.0954000065103173,
+            "retrieval_p95": 2.2203750268090516,
+            "total_p50": 15192.157000041334,
+            "total_p95": 30134.67447498988
+          }
+        },
+        "baggage": {
+          "n": 7,
+          "accuracy": 0.8571428571428571,
+          "answerable_accuracy": 0.8,
+          "key_fact_recall": 0.8,
+          "token_f1": 0.5439999999999999,
+          "exact_match": 0.2,
+          "refusal_recall": 1.0,
+          "refusal_precision": 0.6666666666666666,
+          "false_refusal_rate": 0.2,
+          "refusal_accuracy": 0.8571428571428571,
+          "hallucination_rate": 0.0,
+          "groundedness": 0.7755102040816327,
+          "latency_ms": {
+            "generation_p50": 9702.973100007512,
+            "generation_p95": 20460.88728000177,
+            "retrieval_p50": 1.1689999955706298,
+            "retrieval_p95": 2.0232100156135857,
+            "total_p50": 9704.235600016546,
+            "total_p95": 20462.202790006995
+          }
+        },
+        "facilities": {
+          "n": 8,
+          "accuracy": 0.75,
+          "answerable_accuracy": 0.6666666666666666,
+          "key_fact_recall": 0.75,
+          "token_f1": 0.6107986154425783,
+          "exact_match": 0.16666666666666666,
+          "refusal_recall": 1.0,
+          "refusal_precision": 1.0,
+          "false_refusal_rate": 0.0,
+          "refusal_accuracy": 1.0,
+          "hallucination_rate": 0.0,
+          "groundedness": 0.9638347763347763,
+          "latency_ms": {
+            "generation_p50": 17996.363100013696,
+            "generation_p95": 58208.87230998198,
+            "retrieval_p50": 1.7569499905221164,
+            "retrieval_p95": 2.396834988030605,
+            "total_p50": 17998.224200011464,
+            "total_p95": 58210.62176998241
+          }
+        },
+        "flight_info": {
+          "n": 7,
+          "accuracy": 0.7142857142857143,
+          "answerable_accuracy": 0.6666666666666666,
+          "key_fact_recall": 0.75,
+          "token_f1": 0.7243230625583567,
+          "exact_match": 0.3333333333333333,
+          "refusal_recall": 1.0,
+          "refusal_precision": 0.5,
+          "false_refusal_rate": 0.16666666666666666,
+          "refusal_accuracy": 0.8571428571428571,
+          "hallucination_rate": 0.0,
+          "groundedness": 0.9821428571428571,
+          "latency_ms": {
+            "generation_p50": 9369.38829999417,
+            "generation_p95": 30383.97662997595,
+            "retrieval_p50": 1.149499963503331,
+            "retrieval_p95": 1.8237199983559549,
+            "total_p50": 9370.458099991083,
+            "total_p95": 30385.06104996195
+          }
+        },
+        "out_of_scope": {
+          "n": 1,
+          "accuracy": 1.0,
+          "answerable_accuracy": null,
+          "key_fact_recall": null,
+          "token_f1": null,
+          "exact_match": null,
+          "refusal_recall": 1.0,
+          "refusal_precision": 1.0,
+          "false_refusal_rate": null,
+          "refusal_accuracy": 1.0,
+          "hallucination_rate": 0.0,
+          "groundedness": 1.0,
+          "latency_ms": {
+            "generation_p50": 17760.143399995286,
+            "generation_p95": 17760.143399995286,
+            "retrieval_p50": 1.2032000231556594,
+            "retrieval_p95": 1.2032000231556594,
+            "total_p50": 17761.34660001844,
+            "total_p95": 17761.34660001844
+          }
+        },
+        "security": {
+          "n": 5,
+          "accuracy": 1.0,
+          "answerable_accuracy": 1.0,
+          "key_fact_recall": 1.0,
+          "token_f1": 0.6660544919722275,
+          "exact_match": 0.0,
+          "refusal_recall": null,
+          "refusal_precision": null,
+          "false_refusal_rate": 0.0,
+          "refusal_accuracy": 1.0,
+          "hallucination_rate": 0.0,
+          "groundedness": 0.8988095238095237,
+          "latency_ms": {
+            "generation_p50": 16475.37379997084,
+            "generation_p95": 33675.65269997576,
+            "retrieval_p50": 1.6095000319182873,
+            "retrieval_p95": 1.969159988220781,
+            "total_p50": 16476.983300002757,
+            "total_p95": 33677.55039995536
+          }
+        },
+        "services": {
+          "n": 8,
+          "accuracy": 0.75,
+          "answerable_accuracy": 0.6,
+          "key_fact_recall": 0.6,
+          "token_f1": 0.4583333333333333,
+          "exact_match": 0.2,
+          "refusal_recall": 1.0,
+          "refusal_precision": 0.6,
+          "false_refusal_rate": 0.4,
+          "refusal_accuracy": 0.75,
+          "hallucination_rate": 0.0,
+          "groundedness": 0.6022727272727273,
+          "latency_ms": {
+            "generation_p50": 18489.712149981642,
+            "generation_p95": 31481.5040099842,
+            "retrieval_p50": 1.522599981399253,
+            "retrieval_p95": 2.1919099846854806,
+            "total_p50": 18491.817299975082,
+            "total_p95": 31482.663570003933
+          }
+        },
+        "transport": {
+          "n": 5,
+          "accuracy": 0.8,
+          "answerable_accuracy": 0.8,
+          "key_fact_recall": 0.8,
+          "token_f1": 0.6295454545454545,
+          "exact_match": 0.2,
+          "refusal_recall": null,
+          "refusal_precision": 0.0,
+          "false_refusal_rate": 0.2,
+          "refusal_accuracy": 0.8,
+          "hallucination_rate": 0.0,
+          "groundedness": 0.9589285714285714,
+          "latency_ms": {
+            "generation_p50": 13056.207699992228,
+            "generation_p95": 16414.954259980004,
+            "retrieval_p50": 1.8514000112190843,
+            "retrieval_p95": 2.1865799790248275,
+            "total_p50": 13057.42879997706,
+            "total_p95": 16416.49751998484
+          }
+        }
+      }
+    },
+    "base_only": {
+      "summary": {
+        "n": 47,
+        "accuracy": 0.46808510638297873,
+        "answerable_accuracy": 0.5,
+        "key_fact_recall": 0.5394736842105263,
+        "token_f1": 0.262544368163,
+        "exact_match": 0.0,
+        "refusal_recall": 0.3333333333333333,
+        "refusal_precision": 0.75,
+        "false_refusal_rate": 0.02631578947368421,
+        "refusal_accuracy": 0.851063829787234,
+        "hallucination_rate": 0.2553191489361702,
+        "groundedness": null,
+        "latency_ms": {
+          "generation_p50": 24292.174600006547,
+          "generation_p95": 42693.82949997672,
+          "retrieval_p50": null,
+          "retrieval_p95": null,
+          "total_p50": 24292.174600006547,
+          "total_p95": 42693.82949997672
+        }
+      },
+      "by_category": {
+        "assistance": {
+          "n": 6,
+          "accuracy": 0.6666666666666666,
+          "answerable_accuracy": 0.6666666666666666,
+          "key_fact_recall": 0.6666666666666666,
+          "token_f1": 0.21722787276265867,
+          "exact_match": 0.0,
+          "refusal_recall": null,
+          "refusal_precision": 0.0,
+          "false_refusal_rate": 0.16666666666666666,
+          "refusal_accuracy": 0.8333333333333334,
+          "hallucination_rate": 0.16666666666666666,
+          "groundedness": null,
+          "latency_ms": {
+            "generation_p50": 25617.658400005894,
+            "generation_p95": 46121.913025024696,
+            "retrieval_p50": null,
+            "retrieval_p95": null,
+            "total_p50": 25617.658400005894,
+            "total_p95": 46121.913025024696
+          }
+        },
+        "baggage": {
+          "n": 7,
+          "accuracy": 0.42857142857142855,
+          "answerable_accuracy": 0.6,
+          "key_fact_recall": 0.6,
+          "token_f1": 0.30686464418738496,
+          "exact_match": 0.0,
+          "refusal_recall": 0.0,
+          "refusal_precision": null,
+          "false_refusal_rate": 0.0,
+          "refusal_accuracy": 0.7142857142857143,
+          "hallucination_rate": 0.42857142857142855,
+          "groundedness": null,
+          "latency_ms": {
+            "generation_p50": 24232.82500001369,
+            "generation_p95": 27258.30134000862,
+            "retrieval_p50": null,
+            "retrieval_p95": null,
+            "total_p50": 24232.82500001369,
+            "total_p95": 27258.30134000862
+          }
+        },
+        "facilities": {
+          "n": 8,
+          "accuracy": 0.25,
+          "answerable_accuracy": 0.3333333333333333,
+          "key_fact_recall": 0.4166666666666667,
+          "token_f1": 0.1988257047551493,
+          "exact_match": 0.0,
+          "refusal_recall": 0.0,
+          "refusal_precision": null,
+          "false_refusal_rate": 0.0,
+          "refusal_accuracy": 0.75,
+          "hallucination_rate": 0.375,
+          "groundedness": null,
+          "latency_ms": {
+            "generation_p50": 31037.511250004172,
+            "generation_p95": 41374.3862349831,
+            "retrieval_p50": null,
+            "retrieval_p95": null,
+            "total_p50": 31037.511250004172,
+            "total_p95": 41374.3862349831
+          }
+        },
+        "flight_info": {
+          "n": 7,
+          "accuracy": 0.8571428571428571,
+          "answerable_accuracy": 0.8333333333333334,
+          "key_fact_recall": 0.9166666666666666,
+          "token_f1": 0.3435511060792881,
+          "exact_match": 0.0,
+          "refusal_recall": 1.0,
+          "refusal_precision": 1.0,
+          "false_refusal_rate": 0.0,
+          "refusal_accuracy": 1.0,
+          "hallucination_rate": 0.42857142857142855,
+          "groundedness": null,
+          "latency_ms": {
+            "generation_p50": 17155.0005999743,
+            "generation_p95": 28157.81331997132,
+            "retrieval_p50": null,
+            "retrieval_p95": null,
+            "total_p50": 17155.0005999743,
+            "total_p95": 28157.81331997132
+          }
+        },
+        "out_of_scope": {
+          "n": 1,
+          "accuracy": 1.0,
+          "answerable_accuracy": null,
+          "key_fact_recall": null,
+          "token_f1": null,
+          "exact_match": null,
+          "refusal_recall": 1.0,
+          "refusal_precision": 1.0,
+          "false_refusal_rate": null,
+          "refusal_accuracy": 1.0,
+          "hallucination_rate": 0.0,
+          "groundedness": null,
+          "latency_ms": {
+            "generation_p50": 26312.231299991254,
+            "generation_p95": 26312.231299991254,
+            "retrieval_p50": null,
+            "retrieval_p95": null,
+            "total_p50": 26312.231299991254,
+            "total_p95": 26312.231299991254
+          }
+        },
+        "security": {
+          "n": 5,
+          "accuracy": 0.8,
+          "answerable_accuracy": 0.8,
+          "key_fact_recall": 0.9,
+          "token_f1": 0.3983529411764706,
+          "exact_match": 0.0,
+          "refusal_recall": null,
+          "refusal_precision": null,
+          "false_refusal_rate": 0.0,
+          "refusal_accuracy": 1.0,
+          "hallucination_rate": 0.0,
+          "groundedness": null,
+          "latency_ms": {
+            "generation_p50": 24649.182899971493,
+            "generation_p95": 34618.768080021255,
+            "retrieval_p50": null,
+            "retrieval_p95": null,
+            "total_p50": 24649.182899971493,
+            "total_p95": 34618.768080021255
+          }
+        },
+        "services": {
+          "n": 8,
+          "accuracy": 0.25,
+          "answerable_accuracy": 0.2,
+          "key_fact_recall": 0.2,
+          "token_f1": 0.282577480490524,
+          "exact_match": 0.0,
+          "refusal_recall": 0.3333333333333333,
+          "refusal_precision": 1.0,
+          "false_refusal_rate": 0.0,
+          "refusal_accuracy": 0.75,
+          "hallucination_rate": 0.25,
+          "groundedness": null,
+          "latency_ms": {
+            "generation_p50": 32864.064100023825,
+            "generation_p95": 41463.61263000581,
+            "retrieval_p50": null,
+            "retrieval_p95": null,
+            "total_p50": 32864.064100023825,
+            "total_p95": 41463.61263000581
+          }
+        },
+        "transport": {
+          "n": 5,
+          "accuracy": 0.0,
+          "answerable_accuracy": 0.0,
+          "key_fact_recall": 0.0,
+          "token_f1": 0.09601651186790505,
+          "exact_match": 0.0,
+          "refusal_recall": null,
+          "refusal_precision": null,
+          "false_refusal_rate": 0.0,
+          "refusal_accuracy": 1.0,
+          "hallucination_rate": 0.0,
+          "groundedness": null,
+          "latency_ms": {
+            "generation_p50": 18450.097399996594,
+            "generation_p95": 39337.10185998352,
+            "retrieval_p50": null,
+            "retrieval_p95": null,
+            "total_p50": 18450.097399996594,
+            "total_p95": 39337.10185998352
+          }
+        }
+      }
+    }
+  }
+}

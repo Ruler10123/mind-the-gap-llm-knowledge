@@ -69,7 +69,7 @@ def main() -> int:
     if unknown:
         parser.error(f"unknown system(s): {', '.join(unknown)}")
 
-    run_dir = run_eval(args.dataset, args.out, systems, top_k=args.top_k, run_id=args.run_id)
+    run_dir = run_eval(args.dataset, args.out, systems, top_k=args.top_k, run_id=args.run_id, progress=True)
     meta = json.loads((run_dir / "run.json").read_text(encoding="utf-8"))
     metrics = json.loads((run_dir / "metrics.json").read_text(encoding="utf-8"))
 
