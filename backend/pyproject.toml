@@ -37,3 +37,15 @@ local = [
     "transformers>=4.40.0",
     "accelerate>=0.30.0",
 ]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+markers = [
+    "lmstudio: needs a live OpenAI-compatible server at LMSTUDIO_BASE_URL (skipped otherwise)",
+]

@@ -9,3 +9,6 @@ count.txt
 .nitro
 .tanstack
 .wrangler
+
+# Eval run outputs (committed reports live in docs/)
+results/
