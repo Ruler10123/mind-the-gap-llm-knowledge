@@ -14,6 +14,7 @@ import re
 from pathlib import Path
 
 from core.schemas import Citation
+from rag.corpus_files import is_knowledge_file
 
 DOCUMENTS_DIR = Path(__file__).resolve().parent.parent / "rag" / "documents"
 CORPUS_SUFFIXES = (".md", ".txt")
@@ -26,14 +27,21 @@ def slugify(text: str) -> str:
 
 
 def section_id(source: str, content: str) -> str | None:
-    """Stable id for a chunk whose first line is a markdown heading."""
-    lines = content.strip().splitlines()
-    if not lines:
+    """Stable id for a chunk that starts with markdown heading(s).
+
+    Uses the last heading before the body, i.e. the most specific one, so
+    `## Baggage Policies` + `### Carry-On Baggage` + text is
+    `<stem>#carry-on-baggage`.
+    """
+    heading = None
+    for line in content.strip().splitlines():
+        m = _HEADING_RE.match(line.strip())
+        if not m:
+            break
+        heading = m.group(1)
+    if heading is None:
         return None
-    m = _HEADING_RE.match(lines[0].strip())
-    if not m:
-        return None
-    return f"{Path(source).stem}#{slugify(m.group(1))}"
+    return f"{Path(source).stem}#{slugify(heading)}"
 
 
 def citation_source_id(citation: Citation) -> str:
@@ -60,7 +68,7 @@ def corpus_sha256(documents_dir: Path | None = None) -> str:
     root = documents_dir or DOCUMENTS_DIR
     h = hashlib.sha256()
     for path in sorted(root.glob("**/*")):
-        if path.suffix.lower() not in CORPUS_SUFFIXES or not path.is_file():
+        if path.suffix.lower() not in CORPUS_SUFFIXES or not is_knowledge_file(path):
             continue
         h.update(path.relative_to(root).as_posix().encode("utf-8"))
         h.update(b"\0")

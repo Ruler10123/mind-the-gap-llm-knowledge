@@ -1,6 +1,7 @@
 # RAG Documents Directory
 
 This directory contains documents that will be ingested into the RAG knowledge base.
+README files (like this one) are skipped by both the local retriever and Mongo ingestion.
 
 ## Supported File Formats
 

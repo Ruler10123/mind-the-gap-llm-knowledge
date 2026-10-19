@@ -13,6 +13,7 @@ from langchain_community.document_loaders import (
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 from config import settings
+from rag.corpus_files import is_knowledge_file
 from rag.schemas import DocumentChunk, IngestionResult
 from rag.embeddings import EmbeddingService
 from rag.database import RAGDatabaseService
@@ -174,7 +175,7 @@ class IngestionPipeline:
 
         files = [
             f for f in directory_path.glob(pattern)
-            if f.is_file() and f.suffix.lower() in supported_extensions
+            if is_knowledge_file(f) and f.suffix.lower() in supported_extensions
         ]
 
         if not files:
