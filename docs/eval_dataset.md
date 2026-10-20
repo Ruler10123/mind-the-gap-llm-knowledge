@@ -39,8 +39,9 @@ instead:
 airport_faq.md, "### Carry-On Baggage"  ->  airport_faq#carry-on-baggage
 ```
 
-`backend/eval/corpus.py::citation_source_id` maps retrieved citations to this
-form. The test `test_dev_set_sources_exist_in_corpus` fails if a document edit
+`backend/rag/citations.py::citation_source_id` (re-exported by
+`eval/corpus.py`) maps retrieved citations to this form; `EXPERIMENT_MODE=rag`
+shows the same ids to the model as citations. The test `test_dev_set_sources_exist_in_corpus` fails if a document edit
 renames or removes a section a case depends on.
 
 ## Key facts

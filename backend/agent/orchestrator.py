@@ -5,11 +5,13 @@ from collections.abc import AsyncIterator
 from langchain_core.messages import BaseMessage, HumanMessage, SystemMessage, AIMessage, ToolMessage
 
 from config import settings
-from core.events import BaseEvent, RetryEvent, ErrorEvent, UIActionEvent, ComponentEvent
+from core.events import BaseEvent, RetryEvent, ErrorEvent, UIActionEvent, ComponentEvent, RetrievalEvent
 from core.exceptions import LLMParseError, ToolExecutionError, AgentException
+from agent import rag_mode
 from agent.strategies import RetryStrategy
-from agent.graph import get_agent, get_base_llm, BASE_ONLY_SYSTEM_PROMPT
+from agent.graph import get_agent, get_base_llm, get_rag_service, BASE_ONLY_SYSTEM_PROMPT
 from observability.logger import logger
+from rag.citations import citation_source_id
 
 
 class AgentOrchestrator:
@@ -36,9 +38,32 @@ class AgentOrchestrator:
         """
         logger.info(f"[AgentOrchestrator] Starting query processing: '{input_text[:100]}{'...' if len(input_text) > 100 else ''}' (context: {len(session_context)} messages)")
 
+        mode = (settings.experiment_mode or "agent").lower()
+
+        # EXPERIMENT_MODE=rag: retrieve top-k, inject it with citation ids,
+        # one LLM call, no tools. Retrieved ids go out as a RetrievalEvent
+        # for the eval harness (the WebSocket handler drops it).
+        if mode == "rag":
+            try:
+                citations = await rag_mode.retrieve(get_rag_service(), input_text, settings.rag_top_k)
+                logger.info(f"[AgentOrchestrator] rag mode: {len(citations)} chunks retrieved")
+                yield RetrievalEvent(
+                    source_ids=[citation_source_id(c) for c in citations],
+                    scores=[c.score for c in citations],
+                )
+                llm = get_base_llm()
+                response = llm.invoke(rag_mode.build_messages(input_text, citations, session_context))
+                content = response.content if isinstance(response.content, str) else str(response.content)
+                logger.info(f"[AgentOrchestrator] rag response: {len(content)} chars")
+                yield content
+            except Exception as e:
+                logger.error(f"rag mode error: {e}")
+                yield ErrorEvent(message=f"Unexpected error: {str(e)}")
+            return
+
         # EXPERIMENT_MODE=base_only short-circuits LangGraph entirely:
         # one LLM call, no tools, no RAG, no UI components.
-        if (settings.experiment_mode or "agent").lower() == "base_only":
+        if mode == "base_only":
             logger.info("[AgentOrchestrator] base_only mode: bypassing LangGraph")
             try:
                 llm = get_base_llm()

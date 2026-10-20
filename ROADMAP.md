@@ -155,7 +155,7 @@ The runner installs dependencies first (`setup` in `autopilot.json`), then runs 
 
 ## P4 System 2: RAG
 
-- [ ] **P4.1** `auto` EXPERIMENT_MODE=rag
+- [x] **P4.1** `auto` EXPERIMENT_MODE=rag
   - done-when: retrieves top-k from the local RAG service, injects context with citation ids, makes one LLM call, and exposes retrieved ids to the eval runner; no tools
   - verify: `cd backend; uv run pytest tests/test_rag_mode.py -q`
   - depends: P0.2
