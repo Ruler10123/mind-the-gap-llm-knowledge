@@ -92,11 +92,22 @@ cd backend
 uv run main.py                              # FastAPI on port 8000 (reload)
 uv run python ../scripts/smoke_base_model.py  # Smoke-test the LLM provider, no FastAPI/WS
 uv sync --extra local                       # Install local-inference deps (torch/transformers)
+uv run pytest -q                            # Offline test suite (stub LLM); -m lmstudio for live tests
+uv run python ../scripts/eval_rag.py        # RAG eval -> results/<run>/ (see docs/rag_eval.md)
 ```
 
-Python >=3.13, package manager `uv`. There is no `tests/` suite yet
-(`backend/agent/test_map.py` is a standalone script). Config loads from `.env`
-via `config.py` (see `.env.example`).
+Python >=3.13, package manager `uv`. Tests live in `backend/tests/` (pytest,
+`dev` dependency group); `backend/agent/test_map.py` is a standalone script.
+Config loads from `.env` via `config.py` (see `.env.example`).
+
+### Evaluation (`backend/eval/`)
+
+`dataset.py` (JSONL loader), `corpus.py` (stable `<doc>#<heading-slug>`
+source ids), `retrieval_metrics.py`, `answer_metrics.py`, `pipeline.py`
+(`rag`/`base_only` systems), `runner.py`, `report.py`. Dev set:
+`eval/dev/rag_dev.jsonl`. `tests/test_rag_retrieval_regression.py` gates on
+`eval/baselines/retrieval_baseline.json`; after an intentional corpus/dataset/
+retriever change, run `eval_rag.py --update-baseline` and commit the JSON.
 
 ### Provider Selection — the central design idea
 
@@ -217,3 +228,5 @@ extra — install with `uv sync --extra local`.
 - `docs/phase_01_codebase_cleanup.md`, `docs/phase_02_local_model_inference.md` -
   phase-by-phase change logs (read before extending provider/experiment plumbing)
 - `docs/cleanup_notes.md` - what was made optional and why
+- `docs/rag_eval.md`, `docs/eval_dataset.md`, `docs/rag_eval_baseline.md` -
+  eval harness usage, dataset format, committed baseline results
