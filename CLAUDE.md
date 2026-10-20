@@ -224,6 +224,8 @@ extra — install with `uv sync --extra local`.
 
 ## Docs
 
+- `CHANGELOG.md` - one entry per merged change: what, why, how, timestamps,
+  run artifacts. Add an entry when a PR merges.
 - `docs/experiment_plan.md` - research question, compared systems, metrics
 - `docs/phase_01_codebase_cleanup.md`, `docs/phase_02_local_model_inference.md` -
   phase-by-phase change logs (read before extending provider/experiment plumbing)
