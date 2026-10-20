@@ -1,7 +1,7 @@
 """The systems under evaluation, as plain functions.
 
-`rag` retrieves top-k chunks from the RAG service, puts them in the prompt
-and makes one LLM call (no tools). `base_only` mirrors
+`rag` mirrors EXPERIMENT_MODE=rag: it builds its prompt with
+`agent/rag_mode.py`, so both send the same messages. `base_only` mirrors
 EXPERIMENT_MODE=base_only in agent/orchestrator.py. Both take the LLM as
 an argument so tests can pass a stub and runs can pass `_build_llm()`.
 """
@@ -16,17 +16,14 @@ from dataclasses import dataclass, field
 from langchain_core.messages import HumanMessage, SystemMessage
 
 from agent.graph import BASE_ONLY_SYSTEM_PROMPT
+from agent.rag_mode import RAG_REFUSAL, RAG_SYSTEM_PROMPT, build_context, build_messages
 from core.schemas import Citation
 from eval.corpus import citation_source_id
 
-RAG_REFUSAL = "I don't have that information."
-
-RAG_SYSTEM_PROMPT = (
-    "You are a helpful airport assistant. Answer the user's question using only "
-    "the context below. Be concise and do not use markdown formatting. If the "
-    f'context does not contain the answer, reply exactly: "{RAG_REFUSAL}"\n\n'
-    "Context:\n{context}"
-)
+__all__ = [
+    "RAG_REFUSAL", "RAG_SYSTEM_PROMPT", "SystemAnswer", "base_only_answer",
+    "build_context", "rag_answer", "retrieve", "strip_reasoning",
+]
 
 # Reasoning models (e.g. Qwen3) may emit <think>...</think> before the answer.
 _THINK_RE = re.compile(r"<think>.*?(?:</think>|$)", re.DOTALL | re.IGNORECASE)
@@ -53,10 +50,6 @@ def retrieve(rag, query: str, top_k: int) -> tuple[list[Citation], float]:
     return citations, (time.perf_counter() - t0) * 1000
 
 
-def build_context(citations: list[Citation]) -> str:
-    return "\n\n".join(f"[{citation_source_id(c)}]\n{c.content}" for c in citations)
-
-
 def _generate(llm, messages) -> tuple[str, float]:
     t0 = time.perf_counter()
     response = llm.invoke(messages)
@@ -68,11 +61,7 @@ def _generate(llm, messages) -> tuple[str, float]:
 def rag_answer(question: str, rag, llm, top_k: int) -> SystemAnswer:
     citations, retrieval_ms = retrieve(rag, question, top_k)
     context = build_context(citations)
-    messages = [
-        SystemMessage(content=RAG_SYSTEM_PROMPT.format(context=context or "(no results)")),
-        HumanMessage(content=question),
-    ]
-    raw, generation_ms = _generate(llm, messages)
+    raw, generation_ms = _generate(llm, build_messages(question, citations))
     return SystemAnswer(
         answer=strip_reasoning(raw),
         raw_answer=raw,

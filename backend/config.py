@@ -36,6 +36,8 @@ class Settings(BaseSettings):
     # Experiment mode. "agent" runs the full LangGraph tool-using loop.
     # "base_only" calls the LLM once with no tools and no RAG — the baseline
     # for the knowledge-strategy comparison in docs/experiment_plan.md.
+    # "rag" retrieves rag_top_k chunks, injects them with citation ids and
+    # calls the LLM once with no tools (agent/rag_mode.py).
     experiment_mode: str = "agent"
 
     # TTS provider selection. One of: "kokoro" | "elevenlabs" | "disabled".

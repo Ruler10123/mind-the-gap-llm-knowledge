@@ -4,7 +4,7 @@ import base64
 import json
 from fastapi import WebSocket, WebSocketDisconnect
 
-from core.events import BaseEvent
+from core.events import BaseEvent, RetrievalEvent
 from session.session_manager import SessionManager
 from tts.service import TTSService
 from tts.elevenlabs_client import _merge_alignment
@@ -46,6 +46,9 @@ class WebSocketHandler:
                 # Process message through session manager
                 try:
                     async for item in self.session_manager.process_message(session_id, user_message):
+                        # Internal eval data, not part of the client contract
+                        if isinstance(item, RetrievalEvent):
+                            continue
                         # Handle events
                         if isinstance(item, BaseEvent):
                             await send(event_to_json(item))
