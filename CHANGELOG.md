@@ -1,6 +1,8 @@
 # Changelog
 
-One entry per merged change, newest first. Each entry records what changed,
+Entries for substantial merged changes, newest first; small fixes are folded
+into periodic consolidated entries rather than getting their own changelog
+PR. Each entry records what changed,
 why, how, when, and what it produced (run outputs, baselines, lockfiles), so
 an experiment result can be traced back to the exact code and data behind it.
 
