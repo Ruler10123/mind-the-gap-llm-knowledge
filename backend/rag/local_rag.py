@@ -14,21 +14,51 @@ from typing import List
 
 from config import settings
 from core.schemas import Citation
+from rag.corpus_files import is_knowledge_file
 
 
 _WORD_RE = re.compile(r"[a-z0-9]+")
+_HEADING_RE = re.compile(r"^#{1,6}\s")
 
 
 def _tokenize(text: str) -> set[str]:
     return set(_WORD_RE.findall(text.lower()))
 
 
+def _is_heading_block(block: str) -> bool:
+    return all(_HEADING_RE.match(line) for line in block.splitlines())
+
+
+def _split_sections(text: str) -> list[str]:
+    """Split on blank lines, attaching heading-only blocks to the next block.
+
+    Without this, a line like `## Parking and Ground Transportation` becomes
+    a chunk of its own that matches queries but carries no answer. Level-1
+    `#` document titles are dropped rather than attached: they would land in
+    the first section only and make it match every query that mentions the
+    title's words (e.g. "airport").
+    """
+    chunks: list[str] = []
+    pending: list[str] = []
+    for raw in re.split(r"\n\s*\n", text):
+        block = raw.strip()
+        if not block:
+            continue
+        if _is_heading_block(block):
+            pending.extend(line for line in block.splitlines() if not line.startswith("# "))
+            continue
+        chunks.append("\n".join(pending + [block]))
+        pending = []
+    return chunks
+
+
 class LocalRAGService:
     """Naive in-memory keyword-overlap retriever.
 
-    Loads `*.md` and `*.txt` files from `documents_dir` at construction
-    time, chunks on blank-line boundaries, and scores by token overlap
-    with the query. Suitable as a placeholder while the experimental
+    Loads `*.md` and `*.txt` files (except READMEs) from `documents_dir`
+    at construction time, chunks on blank-line boundaries with headings
+    attached to the block below them, and scores by token overlap with
+    the query. Suitable as a placeholder while the experimental
     pipeline is being built.
     """
 
@@ -41,14 +71,13 @@ class LocalRAGService:
         if not self.documents_dir.exists():
             return
         for path in sorted(self.documents_dir.glob("**/*")):
-            if path.suffix.lower() not in (".md", ".txt"):
+            if path.suffix.lower() not in (".md", ".txt") or not is_knowledge_file(path):
                 continue
             try:
                 text = path.read_text(encoding="utf-8")
             except OSError:
                 continue
-            for idx, raw_chunk in enumerate(re.split(r"\n\s*\n", text)):
-                chunk = raw_chunk.strip()
+            for idx, chunk in enumerate(_split_sections(text)):
                 if len(chunk) < 20:
                     continue
                 self.chunks.append({

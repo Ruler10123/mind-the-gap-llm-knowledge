@@ -100,11 +100,46 @@ model without retrieval. How to reproduce it and what the metrics mean are in
   airport's policy. That's intended: the experiment measures domain
   knowledge, not general correctness.
 
-## Recommended next steps (not in this PR)
+## Follow-up: chunking fix (2026-10-19)
 
-1. Exclude `documents/README.md` from indexing and attach headings to their
-   sections (findings 3-4). Rerun with `--update-baseline`; retrieval should
-   only improve.
+Findings 3 and 4 are fixed. The README is excluded from both loaders,
+headings are attached to the block below them, and the `#` document title is
+dropped. Chunks went from 48 to 31. Same model, dataset and settings; rag
+system only, since base_only doesn't retrieve. Raw outputs are in
+`backend/eval/baselines/runs/chunking-fix-qwen3.8-27b/`.
+
+| rag | Baseline (`1ef4f17`) | After fix (`968d308`) |
+|---|---|---|
+| Accuracy | 0.787 | 0.809 |
+| Key-fact recall | 0.763 | 0.776 |
+| Refusal recall | 1.000 | 1.000 |
+| False refusals | 0.158 | 0.184 |
+| Hallucination proxy | 0.000 | 0.000 |
+| Prompts with README text in context | 5 | 0 |
+| Retrieval Recall@5 / MRR | 0.789 / 0.686 | 0.803 / 0.691 |
+| Retrieval Hit@1 / Hit@5 | 0.579 / 0.868 | 0.579 / 0.868 |
+| Total latency p50 / p95 | 15.1 s / 33.0 s | 14.7 s / 38.3 s |
+
+- The accuracy gain is one case (`mh-001` now gives both facts) and is within
+  run-to-run noise. The fix removes noise from prompts; it doesn't lift
+  retrieval. The 5 paraphrase misses are unchanged, so finding 2 remains the
+  main limit.
+- One more answerable case is refused (`fac-003` went from a vague answer to
+  a refusal; it was wrong both times).
+- **Lesson for the harness:** a first version attached the `#` title to the
+  first section. Retrieval metrics were identical, but that chunk then matched
+  every query containing "airport", filled a context slot, and flipped
+  `svc-005` to a refusal (3 of 3 correct once the title was dropped).
+  Retrieval metrics only see where the gold section ranks, not what fills the
+  rest of the context, so retrieval changes need an answer-level rerun too.
+- `svc-004`'s key fact was `day pass`, which missed the correct answer "day
+  passes" (token-boundary match). It is now `day pass|day passes`. The
+  baseline run's answer said "day pass", so its score is unaffected.
+
+## Recommended next steps
+
+1. ~~Exclude `documents/README.md` from indexing and attach headings to their
+   sections (findings 3-4).~~ Done; see the follow-up above.
 2. Embedding retrieval behind the same interface (P4.2), then compare
    paraphrase Hit@5 and the top-1 score separation (findings 2 and 5).
 3. Loosen the RAG prompt to allow partial answers from partial context and

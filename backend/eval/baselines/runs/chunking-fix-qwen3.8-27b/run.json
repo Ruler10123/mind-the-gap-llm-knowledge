@@ -1,0 +1,26 @@
+{
+  "created_at": "2026-10-19T18:57:04+00:00",
+  "git_sha": "968d30871e3ec757476a6aeed337f214fb0ef8be",
+  "git_dirty": false,
+  "dataset": "eval/dev/rag_dev.jsonl",
+  "dataset_sha256": "e0cb3c532d4691d79755b036da845055bbd49e24c4f0cd759b1c342b05ae5864",
+  "corpus_dir": "backend/rag/documents",
+  "corpus_sha256": "e8222479f39dbed2fdebd0061370758aa7ef40dbbe308883c3a0a62e6fe0fc1e",
+  "retriever": "local_keyword",
+  "rag_top_k": 5,
+  "retrieval_ks": [
+    1,
+    3,
+    5
+  ],
+  "systems": [
+    "rag"
+  ],
+  "llm": {
+    "provider": "openai",
+    "model": "qwen/qwen3.8-27b",
+    "base_url_host": "127.0.0.1:1234"
+  },
+  "temperature": 0,
+  "simulated": false
+}
