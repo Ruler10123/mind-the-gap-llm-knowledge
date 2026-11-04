@@ -1,57 +1,30 @@
-"""Stable source ids for corpus chunks.
+"""Corpus helpers for the eval harness.
 
-`LocalRAGService` names chunks by position (`airport_faq-7`), so any edit to
-a document renumbers every chunk after it. Gold labels in the eval dataset
-use `<file stem>#<slug of the chunk's first heading>` instead, e.g.
-`airport_faq#carry-on-baggage`, which survives reordering and edits to
-other sections.
+Stable source ids (`airport_faq#carry-on-baggage`) are defined in
+`rag/citations.py`, since EXPERIMENT_MODE=rag shows them to the LLM too;
+they are re-exported here for the eval code and tests.
 """
 
 from __future__ import annotations
 
 import hashlib
-import re
 from pathlib import Path
 
-from core.schemas import Citation
+from rag.citations import HEADING_RE, citation_source_id, section_id, slugify
 from rag.corpus_files import is_knowledge_file
+
+__all__ = [
+    "CORPUS_SUFFIXES", "DOCUMENTS_DIR", "chunk_index", "citation_source_id",
+    "corpus_sha256", "is_heading_only", "section_id", "slugify",
+]
 
 DOCUMENTS_DIR = Path(__file__).resolve().parent.parent / "rag" / "documents"
 CORPUS_SUFFIXES = (".md", ".txt")
 
-_HEADING_RE = re.compile(r"^#{1,6}\s+(.+?)\s*#*\s*$")
-
-
-def slugify(text: str) -> str:
-    return re.sub(r"[^a-z0-9]+", "-", text.lower()).strip("-")
-
-
-def section_id(source: str, content: str) -> str | None:
-    """Stable id for a chunk that starts with markdown heading(s).
-
-    Uses the last heading before the body, i.e. the most specific one, so
-    `## Baggage Policies` + `### Carry-On Baggage` + text is
-    `<stem>#carry-on-baggage`.
-    """
-    heading = None
-    for line in content.strip().splitlines():
-        m = _HEADING_RE.match(line.strip())
-        if not m:
-            break
-        heading = m.group(1)
-    if heading is None:
-        return None
-    return f"{Path(source).stem}#{slugify(heading)}"
-
-
-def citation_source_id(citation: Citation) -> str:
-    """Map a retrieved citation to its stable id (positional id as fallback)."""
-    return section_id(citation.source, citation.content) or citation.citation_id
-
 
 def is_heading_only(content: str) -> bool:
     lines = [ln for ln in content.strip().splitlines() if ln.strip()]
-    return len(lines) == 1 and bool(_HEADING_RE.match(lines[0].strip()))
+    return len(lines) == 1 and bool(HEADING_RE.match(lines[0].strip()))
 
 
 def chunk_index(rag) -> dict[str, dict]:

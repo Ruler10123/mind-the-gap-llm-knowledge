@@ -86,6 +86,17 @@ class UIActionEvent(BaseEvent):
     payload: dict[str, Any]
 
 
+class RetrievalEvent(BaseEvent):
+    """Chunks retrieved for this turn (EXPERIMENT_MODE=rag).
+
+    Internal: consumed by the eval harness, never sent over the WebSocket.
+    """
+
+    type: Literal["retrieval"] = "retrieval"
+    source_ids: list[str]
+    scores: list[float | None]
+
+
 class ComponentEvent(BaseEvent):
     """Component to be rendered inline in chat."""
 

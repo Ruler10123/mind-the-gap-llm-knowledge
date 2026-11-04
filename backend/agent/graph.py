@@ -357,6 +357,11 @@ def set_rag_service(rag_service):
     _rag_service = rag_service
 
 
+def get_rag_service():
+    """The RAG service set at startup (None if RAG failed to initialise)."""
+    return _rag_service
+
+
 @tool
 def show_destination_info(destination: str) -> dict:
     """Show detailed information about airport destinations, facilities, or services.

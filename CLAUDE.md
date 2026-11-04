@@ -118,7 +118,7 @@ the app boots with zero external dependencies.**
 | Dimension | Env var | Values (default) | Wiring point |
 |-----------|---------|------------------|--------------|
 | LLM provider | `llm_provider` | `stub` / `vultr` / `openai` / `local` (**stub**) | `agent/graph.py::_build_llm()` |
-| Experiment mode | `experiment_mode` | `agent` / `base_only` (**agent**) | `agent/orchestrator.py::process()` |
+| Experiment mode | `experiment_mode` | `agent` / `base_only` / `rag` (**agent**) | `agent/orchestrator.py::process()` |
 | TTS provider | `tts_provider` | `kokoro` / `elevenlabs` / `disabled` (**auto**) | `tts/service.py::_select_provider()` |
 | RAG backend | `rag_backend` | `local` / `mongo` (**local**) | `main.py::_init_rag()` |
 | Kiosk demo | `enable_kiosk_demo` | bool (**false**) | `main.py::_init_kiosk_demo()` |
@@ -132,6 +132,12 @@ the app boots with zero external dependencies.**
   `base_only` short-circuits to a single `llm.invoke()` with
   `BASE_ONLY_SYSTEM_PROMPT` — no tools, no RAG, no components. This is
   "System 1" in the experiment plan; pair with `local` for clean baselines.
+  `rag` ("System 2", `agent/rag_mode.py`) retrieves `rag_top_k` chunks from
+  the configured RAG service, injects them with stable citation ids
+  (`[airport_faq#parking]`, `rag/citations.py`) and makes one LLM call, no
+  tools. It yields a `RetrievalEvent` with the retrieved ids before the text;
+  the WebSocket handler drops it (eval-only). The eval harness's `rag` system
+  builds its prompt from the same module.
 - **TTS**: empty `tts_provider` auto-selects ElevenLabs if keys present, else
   disabled. `kokoro` is local (`uv pip install kokoro soundfile`). When TTS
   yields no audio, the backend emits a `text` event instead (see contract).

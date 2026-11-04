@@ -12,7 +12,7 @@ should. It is the measurement side of the systems in
 | System | What it does | Code |
 |---|---|---|
 | retrieval | `LocalRAGService` (the default `RAG_BACKEND=local`) top-5 for each question | `eval/runner.py::evaluate_retrieval` |
-| `rag` | top-`RAG_TOP_K` chunks put into the system prompt with their source ids, one LLM call, no tools. Told to answer only from the context or reply `I don't have that information.` | `eval/pipeline.py::rag_answer` |
+| `rag` | Same as `EXPERIMENT_MODE=rag`: top-`RAG_TOP_K` chunks put into the system prompt with their source ids, one LLM call, no tools. Told to answer only from the context or reply `I don't have that information.` Prompt built by `agent/rag_mode.py`, shared with the live mode | `eval/pipeline.py::rag_answer` |
 | `base_only` | Same as `EXPERIMENT_MODE=base_only`: `BASE_ONLY_SYSTEM_PROMPT`, one call, no retrieval | `eval/pipeline.py::base_only_answer` |
 
 Both systems use the app's own `_build_llm()`, so they get the same provider
